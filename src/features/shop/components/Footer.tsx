@@ -1,6 +1,6 @@
 import Link from 'next/link'
+import Image from 'next/image'
 import { shopConfig } from '../config'
-import { MountainIcon } from './MountainIcon'
 import type { ProductLineRow } from '../services/product-lines'
 
 interface FooterProps {
@@ -29,14 +29,14 @@ export function Footer({ productLines }: FooterProps) {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 lg:gap-12">
           {/* Columna 1: Marca */}
           <div className="lg:col-span-1">
-            <Link href="/" className="flex items-center gap-2.5 mb-5">
-              <MountainIcon className="w-6 h-6 text-terra-400" />
-              <div className="flex flex-col leading-none">
-                <span className="font-heading text-lg text-white">SEISMILES</span>
-                <span className="text-[9px] uppercase tracking-[0.2em] text-volcanic-400">
-                  Ruta Nacional 60
-                </span>
-              </div>
+            <Link href="/" className="inline-block mb-5">
+              <Image
+                src="/images/logo-seismiles.png"
+                alt="Seismiles Textil"
+                width={120}
+                height={52}
+                className="h-12 w-auto brightness-0 invert opacity-90 hover:opacity-100 transition-opacity duration-300"
+              />
             </Link>
             <p className="text-body-sm text-volcanic-400 leading-relaxed mb-5">
               {footer.tagline}

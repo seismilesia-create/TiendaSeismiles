@@ -69,8 +69,9 @@ BUSINESS_LOGIC.md
 # Playwright MCP
 .playwright-mcp/
 
-# Development screenshots
+# Development screenshots (keep public/ assets)
 *.png
+!public/**/*.png
 
 # Build cache
 tsconfig.tsbuildinfo

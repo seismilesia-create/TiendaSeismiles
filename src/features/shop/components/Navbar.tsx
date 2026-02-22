@@ -2,8 +2,8 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { useScrolled } from '../hooks/useScrolled'
-import { MountainIcon } from './MountainIcon'
 import { MobileMenu } from './MobileMenu'
 import type { ProductLineRow } from '../services/product-lines'
 
@@ -54,16 +54,15 @@ export function Navbar({ productLines }: NavbarProps) {
             </button>
 
             {/* Logo */}
-            <Link href="/" className="flex items-center gap-2.5 group">
-              <MountainIcon className="w-7 h-7 text-terra-500 group-hover:text-terra-600 transition-colors" />
-              <div className="flex flex-col leading-none">
-                <span className="font-heading text-lg lg:text-xl text-volcanic-900 tracking-tight">
-                  SEISMILES
-                </span>
-                <span className="text-[10px] uppercase tracking-[0.2em] text-volcanic-400 font-medium">
-                  Ruta Nacional 60
-                </span>
-              </div>
+            <Link href="/" className="flex items-center group">
+              <Image
+                src="/images/logo-seismiles.png"
+                alt="Seismiles Textil"
+                width={140}
+                height={60}
+                className="h-10 lg:h-12 w-auto brightness-[0.35] contrast-[1.1] group-hover:brightness-[0.25] transition-all duration-300"
+                priority
+              />
             </Link>
 
             {/* Desktop Navigation */}
