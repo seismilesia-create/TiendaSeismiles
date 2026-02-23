@@ -1,6 +1,6 @@
 import {
-  MarqueeBanner, Navbar, HeroSection, CategoriesGrid,
-  OriginSection, QualitySection, BenefitsBar,
+  MarqueeBanner, Navbar, HeroSection, AudienceSection,
+  CategoriesGrid, OriginSection, QualitySection, BenefitsBar,
   InstagramSection, NewsletterSection, Footer,
 } from '@/features/shop/components'
 import { getProductLines } from '@/features/shop/services/product-lines'
@@ -15,6 +15,7 @@ export default async function HomePage() {
 
       <main>
         <HeroSection />
+        <AudienceSection />
         <CategoriesGrid />
         <OriginSection />
         <QualitySection />
