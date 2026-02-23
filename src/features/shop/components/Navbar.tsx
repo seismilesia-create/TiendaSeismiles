@@ -74,48 +74,53 @@ export function Navbar({ productLines }: NavbarProps) {
                 Inicio
               </Link>
 
-              {/* Tienda dropdown - dinamico desde product_lines */}
+              {/* Remeras lisas dropdown */}
               <div className="relative group">
                 <Link
-                  href="/tienda"
+                  href="/tienda/remeras-lisas"
                   className="flex items-center gap-1 px-4 py-2 text-body-sm font-medium text-volcanic-700 hover:text-terra-500 transition-colors"
                 >
-                  Tienda
+                  Remeras lisas
                   <svg className="w-3.5 h-3.5 transition-transform group-hover:rotate-180" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}><path d="m6 9 6 6 6-6" /></svg>
                 </Link>
                 <div className="absolute top-full left-0 pt-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
-                  <div className="w-56 bg-white/95 backdrop-blur-xl rounded-xl shadow-elevated border border-sand-200/60 py-2">
-                    {productLines.map((line) => (
-                      <Link
-                        key={line.id}
-                        href={`/tienda/${line.slug}`}
-                        className="block px-4 py-2.5 text-body-sm text-volcanic-700 hover:bg-sand-100 hover:text-terra-500 transition-colors"
-                      >
-                        {line.name}
-                      </Link>
-                    ))}
-                    <div className="border-t border-sand-200 my-1" />
-                    <Link
-                      href="/tienda"
-                      className="block px-4 py-2.5 text-body-sm font-medium text-terra-500 hover:bg-sand-100 transition-colors"
-                    >
-                      Ver todo
-                    </Link>
+                  <div className="w-48 bg-white/95 backdrop-blur-xl rounded-xl shadow-elevated border border-sand-200/60 py-2">
+                    <Link href="/tienda/remeras-lisas/hombres" className="block px-4 py-2.5 text-body-sm text-volcanic-700 hover:bg-sand-100 hover:text-terra-500 transition-colors">Hombres</Link>
+                    <Link href="/tienda/remeras-lisas/mujeres" className="block px-4 py-2.5 text-body-sm text-volcanic-700 hover:bg-sand-100 hover:text-terra-500 transition-colors">Mujeres</Link>
+                    <Link href="/tienda/remeras-lisas/ninos" className="block px-4 py-2.5 text-body-sm text-volcanic-700 hover:bg-sand-100 hover:text-terra-500 transition-colors">Niños</Link>
+                  </div>
+                </div>
+              </div>
+
+              {/* Remeras personalizadas dropdown */}
+              <div className="relative group">
+                <Link
+                  href="/tienda/remeras-personalizadas"
+                  className="flex items-center gap-1 px-4 py-2 text-body-sm font-medium text-volcanic-700 hover:text-terra-500 transition-colors"
+                >
+                  Remeras personalizadas
+                  <svg className="w-3.5 h-3.5 transition-transform group-hover:rotate-180" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}><path d="m6 9 6 6 6-6" /></svg>
+                </Link>
+                <div className="absolute top-full left-0 pt-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
+                  <div className="w-48 bg-white/95 backdrop-blur-xl rounded-xl shadow-elevated border border-sand-200/60 py-2">
+                    <Link href="/tienda/remeras-personalizadas/hombres" className="block px-4 py-2.5 text-body-sm text-volcanic-700 hover:bg-sand-100 hover:text-terra-500 transition-colors">Hombres</Link>
+                    <Link href="/tienda/remeras-personalizadas/mujeres" className="block px-4 py-2.5 text-body-sm text-volcanic-700 hover:bg-sand-100 hover:text-terra-500 transition-colors">Mujeres</Link>
+                    <Link href="/tienda/remeras-personalizadas/ninos" className="block px-4 py-2.5 text-body-sm text-volcanic-700 hover:bg-sand-100 hover:text-terra-500 transition-colors">Niños</Link>
                   </div>
                 </div>
               </div>
 
               <Link
-                href="/empresas"
+                href="/contacto"
                 className="px-4 py-2 text-body-sm font-medium text-volcanic-700 hover:text-terra-500 transition-colors"
               >
-                Empresas
+                Contacto
               </Link>
               <Link
-                href="#origen"
+                href="/quienes-somos"
                 className="px-4 py-2 text-body-sm font-medium text-volcanic-700 hover:text-terra-500 transition-colors"
               >
-                Nuestro Origen
+                Quienes Somos
               </Link>
             </div>
 
