@@ -1,38 +1,21 @@
+import Image from 'next/image'
 import Link from 'next/link'
 
 const AUDIENCES = [
   {
     label: 'Hombres',
     href: '/tienda/hombres',
-    gradient: 'from-volcanic-700 to-volcanic-500',
-    icon: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.2} strokeLinecap="round" strokeLinejoin="round" className="w-10 h-10 text-white/80">
-        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-        <circle cx="12" cy="7" r="4" />
-      </svg>
-    ),
+    image: 'https://images.unsplash.com/photo-1552374196-c4e7ffc6e126?w=400&h=500&fit=crop&crop=top',
   },
   {
     label: 'Mujeres',
     href: '/tienda/mujeres',
-    gradient: 'from-terra-400 to-terra-500',
-    icon: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.2} strokeLinecap="round" strokeLinejoin="round" className="w-10 h-10 text-white/80">
-        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-        <circle cx="12" cy="7" r="4" />
-      </svg>
-    ),
+    image: 'https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?w=400&h=500&fit=crop&crop=top',
   },
   {
     label: 'Ninos',
     href: '/tienda/ninos',
-    gradient: 'from-volcanic-400 to-volcanic-300',
-    icon: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.2} strokeLinecap="round" strokeLinejoin="round" className="w-10 h-10 text-white/80">
-        <circle cx="12" cy="8" r="3.5" />
-        <path d="M18 21v-1.5a3.5 3.5 0 0 0-3.5-3.5h-5A3.5 3.5 0 0 0 6 19.5V21" />
-      </svg>
-    ),
+    image: 'https://images.unsplash.com/photo-1503454537195-1dcabb73ffb9?w=400&h=500&fit=crop&crop=top',
   },
 ]
 
@@ -44,17 +27,23 @@ export function AudienceSection() {
           Para quien estas comprando?
         </h2>
 
-        <div className="flex items-center justify-center gap-10 sm:gap-16 lg:gap-24">
+        <div className="flex items-center justify-center gap-10 sm:gap-14 lg:gap-24">
           {AUDIENCES.map((audience) => (
             <Link
               key={audience.label}
               href={audience.href}
-              className="flex flex-col items-center gap-3 group"
+              className="flex flex-col items-center gap-4 group"
             >
-              <div className={`w-24 h-24 sm:w-28 sm:h-28 lg:w-32 lg:h-32 rounded-full bg-gradient-to-br ${audience.gradient} flex items-center justify-center ring-4 ring-transparent group-hover:ring-terra-300 transition-all duration-300 group-hover:scale-105`}>
-                {audience.icon}
+              <div className="relative w-28 h-28 sm:w-36 sm:h-36 lg:w-44 lg:h-44 rounded-full overflow-hidden ring-4 ring-sand-200 group-hover:ring-terra-400 transition-all duration-300 group-hover:scale-105 shadow-lg">
+                <Image
+                  src={audience.image}
+                  alt={audience.label}
+                  fill
+                  className="object-cover"
+                  sizes="(max-width: 640px) 112px, (max-width: 1024px) 144px, 176px"
+                />
               </div>
-              <span className="text-body-sm sm:text-body-md font-medium text-volcanic-700 group-hover:text-terra-500 transition-colors">
+              <span className="text-body-sm sm:text-body-md font-semibold text-volcanic-800 group-hover:text-terra-500 transition-colors uppercase tracking-wide">
                 {audience.label}
               </span>
             </Link>

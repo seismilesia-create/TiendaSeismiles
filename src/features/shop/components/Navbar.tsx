@@ -11,6 +11,22 @@ interface NavbarProps {
   productLines: ProductLineRow[]
 }
 
+const AUDIENCES = [
+  { label: 'Hombres', slug: 'hombres' },
+  { label: 'Mujeres', slug: 'mujeres' },
+  { label: 'Ninos', slug: 'ninos' },
+]
+
+const REMERA_TYPES = [
+  { label: 'Lisas', slug: 'lisas' },
+  { label: 'Personalizadas', slug: 'personalizadas' },
+]
+
+const SIMPLE_CATEGORIES = [
+  { label: 'Buzos', slug: 'buzos' },
+  { label: 'Camperas', slug: 'camperas' },
+]
+
 function SearchIcon({ className }: { className?: string }) {
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" className={className}><circle cx="11" cy="11" r="8" /><path d="m21 21-4.35-4.35" /></svg>
@@ -67,60 +83,61 @@ export function Navbar({ productLines }: NavbarProps) {
 
             {/* Desktop Navigation */}
             <div className="hidden lg:flex items-center gap-1">
-              <Link
-                href="/"
-                className="px-4 py-2 text-body-sm font-medium text-volcanic-700 hover:text-terra-500 transition-colors"
-              >
-                Inicio
-              </Link>
-
-              {/* Remeras lisas dropdown */}
+              {/* Remeras flyout dropdown */}
               <div className="relative group">
                 <Link
-                  href="/tienda/remeras-lisas"
+                  href="/remeras"
                   className="flex items-center gap-1 px-4 py-2 text-body-sm font-medium text-volcanic-700 hover:text-terra-500 transition-colors"
                 >
-                  Remeras lisas
+                  Remeras
                   <svg className="w-3.5 h-3.5 transition-transform group-hover:rotate-180" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}><path d="m6 9 6 6 6-6" /></svg>
                 </Link>
                 <div className="absolute top-full left-0 pt-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
                   <div className="w-48 bg-white/95 backdrop-blur-xl rounded-xl shadow-elevated border border-sand-200/60 py-2">
-                    <Link href="/tienda/remeras-lisas/hombres" className="block px-4 py-2.5 text-body-sm text-volcanic-700 hover:bg-sand-100 hover:text-terra-500 transition-colors">Hombres</Link>
-                    <Link href="/tienda/remeras-lisas/mujeres" className="block px-4 py-2.5 text-body-sm text-volcanic-700 hover:bg-sand-100 hover:text-terra-500 transition-colors">Mujeres</Link>
-                    <Link href="/tienda/remeras-lisas/ninos" className="block px-4 py-2.5 text-body-sm text-volcanic-700 hover:bg-sand-100 hover:text-terra-500 transition-colors">Niños</Link>
+                    {REMERA_TYPES.map((type) => (
+                      <div key={type.slug} className="relative group/sub">
+                        <span className="flex items-center justify-between px-4 py-2.5 text-body-sm text-volcanic-700 hover:bg-sand-100 hover:text-terra-500 transition-colors cursor-pointer">
+                          {type.label}
+                          <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}><path d="m9 6 6 6-6 6" /></svg>
+                        </span>
+                        <div className="absolute left-full top-0 pl-2 opacity-0 invisible group-hover/sub:opacity-100 group-hover/sub:visible transition-all duration-200">
+                          <div className="w-44 bg-white/95 backdrop-blur-xl rounded-xl shadow-elevated border border-sand-200/60 py-2">
+                            {AUDIENCES.map((aud) => (
+                              <Link key={aud.slug} href={`/remeras/${type.slug}/${aud.slug}`} className="block px-4 py-2.5 text-body-sm text-volcanic-700 hover:bg-sand-100 hover:text-terra-500 transition-colors">{aud.label}</Link>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 </div>
               </div>
 
-              {/* Remeras personalizadas dropdown */}
-              <div className="relative group">
-                <Link
-                  href="/tienda/remeras-personalizadas"
-                  className="flex items-center gap-1 px-4 py-2 text-body-sm font-medium text-volcanic-700 hover:text-terra-500 transition-colors"
-                >
-                  Remeras personalizadas
-                  <svg className="w-3.5 h-3.5 transition-transform group-hover:rotate-180" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}><path d="m6 9 6 6 6-6" /></svg>
-                </Link>
-                <div className="absolute top-full left-0 pt-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
-                  <div className="w-48 bg-white/95 backdrop-blur-xl rounded-xl shadow-elevated border border-sand-200/60 py-2">
-                    <Link href="/tienda/remeras-personalizadas/hombres" className="block px-4 py-2.5 text-body-sm text-volcanic-700 hover:bg-sand-100 hover:text-terra-500 transition-colors">Hombres</Link>
-                    <Link href="/tienda/remeras-personalizadas/mujeres" className="block px-4 py-2.5 text-body-sm text-volcanic-700 hover:bg-sand-100 hover:text-terra-500 transition-colors">Mujeres</Link>
-                    <Link href="/tienda/remeras-personalizadas/ninos" className="block px-4 py-2.5 text-body-sm text-volcanic-700 hover:bg-sand-100 hover:text-terra-500 transition-colors">Niños</Link>
+              {/* Buzos & Camperas simple dropdowns */}
+              {SIMPLE_CATEGORIES.map((cat) => (
+                <div key={cat.slug} className="relative group">
+                  <Link
+                    href={`/${cat.slug}`}
+                    className="flex items-center gap-1 px-4 py-2 text-body-sm font-medium text-volcanic-700 hover:text-terra-500 transition-colors"
+                  >
+                    {cat.label}
+                    <svg className="w-3.5 h-3.5 transition-transform group-hover:rotate-180" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}><path d="m6 9 6 6 6-6" /></svg>
+                  </Link>
+                  <div className="absolute top-full left-0 pt-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
+                    <div className="w-48 bg-white/95 backdrop-blur-xl rounded-xl shadow-elevated border border-sand-200/60 py-2">
+                      {AUDIENCES.map((aud) => (
+                        <Link key={aud.slug} href={`/${cat.slug}/${aud.slug}`} className="block px-4 py-2.5 text-body-sm text-volcanic-700 hover:bg-sand-100 hover:text-terra-500 transition-colors">{aud.label}</Link>
+                      ))}
+                    </div>
                   </div>
                 </div>
-              </div>
+              ))}
 
               <Link
-                href="/contacto"
+                href="/tienda"
                 className="px-4 py-2 text-body-sm font-medium text-volcanic-700 hover:text-terra-500 transition-colors"
               >
-                Contacto
-              </Link>
-              <Link
-                href="/quienes-somos"
-                className="px-4 py-2 text-body-sm font-medium text-volcanic-700 hover:text-terra-500 transition-colors"
-              >
-                Quienes Somos
+                Tienda
               </Link>
             </div>
 

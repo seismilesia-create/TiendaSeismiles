@@ -23,14 +23,25 @@ function ChevronDownIcon({ className }: { className?: string }) {
   )
 }
 
-const SUBCATEGORIES = [
+const AUDIENCES = [
   { label: 'Hombres', slug: 'hombres' },
   { label: 'Mujeres', slug: 'mujeres' },
-  { label: 'Niños', slug: 'ninos' },
+  { label: 'Ninos', slug: 'ninos' },
+]
+
+const REMERA_TYPES = [
+  { label: 'Lisas', slug: 'lisas' },
+  { label: 'Personalizadas', slug: 'personalizadas' },
+]
+
+const SIMPLE_CATEGORIES = [
+  { label: 'Buzos', slug: 'buzos' },
+  { label: 'Camperas', slug: 'camperas' },
 ]
 
 export function MobileMenu({ open, onClose }: MobileMenuProps) {
   const [openDropdown, setOpenDropdown] = useState<string | null>(null)
+  const [openSub, setOpenSub] = useState<string | null>(null)
 
   useEffect(() => {
     if (open) {
@@ -38,6 +49,7 @@ export function MobileMenu({ open, onClose }: MobileMenuProps) {
     } else {
       document.body.style.overflow = ''
       setOpenDropdown(null)
+      setOpenSub(null)
     }
     return () => { document.body.style.overflow = '' }
   }, [open])
@@ -46,6 +58,11 @@ export function MobileMenu({ open, onClose }: MobileMenuProps) {
 
   function toggleDropdown(key: string) {
     setOpenDropdown((prev) => (prev === key ? null : key))
+    setOpenSub(null)
+  }
+
+  function toggleSub(key: string) {
+    setOpenSub((prev) => (prev === key ? null : key))
   }
 
   return (
@@ -78,78 +95,80 @@ export function MobileMenu({ open, onClose }: MobileMenuProps) {
 
         {/* Navigation */}
         <div className="px-6 py-6 space-y-1 overflow-y-auto max-h-[calc(100vh-80px)]">
-          <Link
-            href="/"
-            onClick={onClose}
-            className="block py-3 text-body-md font-medium text-volcanic-900 hover:text-terra-500 transition-colors"
-          >
-            Inicio
-          </Link>
-
-          {/* Remeras lisas */}
+          {/* Remeras - nested accordion */}
           <div>
             <button
-              onClick={() => toggleDropdown('lisas')}
+              onClick={() => toggleDropdown('remeras')}
               className="flex items-center justify-between w-full py-3 text-body-md font-medium text-volcanic-900 hover:text-terra-500 transition-colors"
             >
-              Remeras lisas
-              <ChevronDownIcon className={`w-4 h-4 transition-transform ${openDropdown === 'lisas' ? 'rotate-180 text-terra-500' : ''}`} />
+              Remeras
+              <ChevronDownIcon className={`w-4 h-4 transition-transform ${openDropdown === 'remeras' ? 'rotate-180 text-terra-500' : ''}`} />
             </button>
-            {openDropdown === 'lisas' && (
+            {openDropdown === 'remeras' && (
               <div className="pl-4 pb-2 space-y-0.5">
-                {SUBCATEGORIES.map((sub) => (
-                  <Link
-                    key={sub.slug}
-                    href={`/tienda/remeras-lisas/${sub.slug}`}
-                    onClick={onClose}
-                    className="block py-2.5 px-3 rounded-lg text-body-sm text-volcanic-600 hover:bg-sand-100 hover:text-terra-500 transition-colors"
-                  >
-                    {sub.label}
-                  </Link>
+                {REMERA_TYPES.map((type) => (
+                  <div key={type.slug}>
+                    <button
+                      onClick={() => toggleSub(type.slug)}
+                      className="flex items-center justify-between w-full py-2.5 px-3 rounded-lg text-body-sm text-volcanic-700 hover:text-terra-500 transition-colors"
+                    >
+                      {type.label}
+                      <ChevronDownIcon className={`w-3.5 h-3.5 transition-transform ${openSub === type.slug ? 'rotate-180 text-terra-500' : ''}`} />
+                    </button>
+                    {openSub === type.slug && (
+                      <div className="pl-4 pb-1 space-y-0.5">
+                        {AUDIENCES.map((aud) => (
+                          <Link
+                            key={aud.slug}
+                            href={`/remeras/${type.slug}/${aud.slug}`}
+                            onClick={onClose}
+                            className="block py-2 px-3 rounded-lg text-body-sm text-volcanic-500 hover:bg-sand-100 hover:text-terra-500 transition-colors"
+                          >
+                            {aud.label}
+                          </Link>
+                        ))}
+                      </div>
+                    )}
+                  </div>
                 ))}
               </div>
             )}
           </div>
 
-          {/* Remeras personalizadas */}
-          <div>
-            <button
-              onClick={() => toggleDropdown('personalizadas')}
-              className="flex items-center justify-between w-full py-3 text-body-md font-medium text-volcanic-900 hover:text-terra-500 transition-colors"
-            >
-              Remeras personalizadas
-              <ChevronDownIcon className={`w-4 h-4 transition-transform ${openDropdown === 'personalizadas' ? 'rotate-180 text-terra-500' : ''}`} />
-            </button>
-            {openDropdown === 'personalizadas' && (
-              <div className="pl-4 pb-2 space-y-0.5">
-                {SUBCATEGORIES.map((sub) => (
-                  <Link
-                    key={sub.slug}
-                    href={`/tienda/remeras-personalizadas/${sub.slug}`}
-                    onClick={onClose}
-                    className="block py-2.5 px-3 rounded-lg text-body-sm text-volcanic-600 hover:bg-sand-100 hover:text-terra-500 transition-colors"
-                  >
-                    {sub.label}
-                  </Link>
-                ))}
-              </div>
-            )}
-          </div>
+          {/* Buzos & Camperas - simple accordions */}
+          {SIMPLE_CATEGORIES.map((cat) => (
+            <div key={cat.slug}>
+              <button
+                onClick={() => toggleDropdown(cat.slug)}
+                className="flex items-center justify-between w-full py-3 text-body-md font-medium text-volcanic-900 hover:text-terra-500 transition-colors"
+              >
+                {cat.label}
+                <ChevronDownIcon className={`w-4 h-4 transition-transform ${openDropdown === cat.slug ? 'rotate-180 text-terra-500' : ''}`} />
+              </button>
+              {openDropdown === cat.slug && (
+                <div className="pl-4 pb-2 space-y-0.5">
+                  {AUDIENCES.map((aud) => (
+                    <Link
+                      key={aud.slug}
+                      href={`/${cat.slug}/${aud.slug}`}
+                      onClick={onClose}
+                      className="block py-2.5 px-3 rounded-lg text-body-sm text-volcanic-600 hover:bg-sand-100 hover:text-terra-500 transition-colors"
+                    >
+                      {aud.label}
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </div>
+          ))}
 
           <div className="border-t border-sand-200 pt-3">
             <Link
-              href="/contacto"
+              href="/tienda"
               onClick={onClose}
               className="block py-3 text-body-md font-medium text-volcanic-900 hover:text-terra-500 transition-colors"
             >
-              Contacto
-            </Link>
-            <Link
-              href="/quienes-somos"
-              onClick={onClose}
-              className="block py-3 text-body-md font-medium text-volcanic-900 hover:text-terra-500 transition-colors"
-            >
-              Quienes Somos
+              Tienda
             </Link>
           </div>
         </div>

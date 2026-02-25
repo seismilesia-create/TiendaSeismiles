@@ -24,6 +24,13 @@ export interface CategoryCard {
   gradientTo: string
 }
 
+/** Tab de tipo de producto con sus lineas */
+export interface ProductTypeTab {
+  id: string
+  label: string
+  categories: CategoryCard[]
+}
+
 /** Feature de calidad numerado */
 export interface QualityFeature {
   number: string
@@ -94,7 +101,7 @@ export interface ShopConfig {
 
   navigation: ShopNavItem[]
 
-  categories: CategoryCard[]
+  productTypeTabs: ProductTypeTab[]
 
   origin: {
     coordinates: string
