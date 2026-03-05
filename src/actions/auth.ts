@@ -2,12 +2,12 @@
 
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
-import { createClient } from '@/lib/supabase/server'
+import { createClient, createServiceClient } from '@/lib/supabase/server'
 
 export async function login(formData: FormData) {
   const supabase = await createClient()
 
-  const { error } = await supabase.auth.signInWithPassword({
+  const { data, error } = await supabase.auth.signInWithPassword({
     email: formData.get('email') as string,
     password: formData.get('password') as string,
   })
@@ -16,8 +16,22 @@ export async function login(formData: FormData) {
     return { error: error.message }
   }
 
+  // Check role to decide redirect
+  let dest = '/'
+  if (data.user) {
+    const service = createServiceClient()
+    const { data: profile } = await service
+      .from('profiles')
+      .select('role')
+      .eq('id', data.user.id)
+      .single()
+    if (profile?.role === 'admin') {
+      dest = '/admin/productos'
+    }
+  }
+
   revalidatePath('/', 'layout')
-  redirect('/dashboard')
+  redirect(dest)
 }
 
 export async function signup(formData: FormData) {
@@ -33,7 +47,7 @@ export async function signup(formData: FormData) {
   }
 
   revalidatePath('/', 'layout')
-  redirect('/check-email')
+  redirect('/')
 }
 
 export async function signout() {

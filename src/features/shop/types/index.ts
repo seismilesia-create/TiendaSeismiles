@@ -77,6 +77,33 @@ export interface PaymentMethod {
   slug: string
 }
 
+/** Gift card para la seccion de tarjetas regalo */
+export interface GiftCard {
+  id: string
+  title: string
+  price: string
+  description: string
+  gradientFrom: string
+  gradientTo: string
+}
+
+/** Pregunta frecuente */
+export interface FaqItem {
+  question: string
+  answer: string
+}
+
+/** Producto destacado para la landing */
+export interface FeaturedProduct {
+  name: string
+  slug: string
+  href: string
+  line: string
+  price: string
+  imageUrl: string
+  tag?: string
+}
+
 /** Configuracion de la tienda Seismiles */
 export interface ShopConfig {
   brand: {
@@ -101,6 +128,14 @@ export interface ShopConfig {
 
   navigation: ShopNavItem[]
 
+  featuredProducts: {
+    label: string
+    heading: string
+    subtitle: string
+    products: FeaturedProduct[]
+    cta: { text: string; href: string }
+  }
+
   productTypeTabs: ProductTypeTab[]
 
   origin: {
@@ -116,7 +151,14 @@ export interface ShopConfig {
     label: string
     heading: string
     subtitle: string
+    imageUrl: string
     features: QualityFeature[]
+  }
+
+  giftCards: {
+    heading: string
+    subtitle: string
+    cards: GiftCard[]
   }
 
   benefits: BenefitItem[]
@@ -127,6 +169,13 @@ export interface ShopConfig {
     subtitle: string
     photos: InstagramPhoto[]
     cta: { text: string; href: string }
+  }
+
+  faq: {
+    heading: string
+    subtitle: string
+    items: FaqItem[]
+    contactPrompt: string
   }
 
   newsletter: {

@@ -5,10 +5,16 @@ import Link from 'next/link'
 import Image from 'next/image'
 import type { ProductLineRow } from '../services/product-lines'
 
+interface MobileMenuUser {
+  email: string
+  role: string
+}
+
 interface MobileMenuProps {
   open: boolean
   onClose: () => void
   productLines: ProductLineRow[]
+  user: MobileMenuUser | null
 }
 
 function CloseIcon({ className }: { className?: string }) {
@@ -30,16 +36,16 @@ const AUDIENCES = [
 ]
 
 const REMERA_TYPES = [
-  { label: 'Lisas', slug: 'lisas' },
-  { label: 'Personalizadas', slug: 'personalizadas' },
+  { label: 'Lisas', slug: 'lisas', catalogType: 'remeras-lisas' },
+  { label: 'Personalizadas', slug: 'personalizadas', catalogType: 'personalizadas' },
 ]
 
 const SIMPLE_CATEGORIES = [
-  { label: 'Buzos', slug: 'buzos' },
-  { label: 'Camperas', slug: 'camperas' },
+  { label: 'Buzos', slug: 'buzos', catalogType: 'buzos-camperas' },
+  { label: 'Camperas', slug: 'camperas', catalogType: 'buzos-camperas' },
 ]
 
-export function MobileMenu({ open, onClose }: MobileMenuProps) {
+export function MobileMenu({ open, onClose, user }: MobileMenuProps) {
   const [openDropdown, setOpenDropdown] = useState<string | null>(null)
   const [openSub, setOpenSub] = useState<string | null>(null)
 
@@ -120,7 +126,7 @@ export function MobileMenu({ open, onClose }: MobileMenuProps) {
                         {AUDIENCES.map((aud) => (
                           <Link
                             key={aud.slug}
-                            href={`/remeras/${type.slug}/${aud.slug}`}
+                            href={`/catalogo?type=${type.catalogType}&genero=${aud.slug}`}
                             onClick={onClose}
                             className="block py-2 px-3 rounded-lg text-body-sm text-volcanic-500 hover:bg-sand-100 hover:text-terra-500 transition-colors"
                           >
@@ -150,7 +156,7 @@ export function MobileMenu({ open, onClose }: MobileMenuProps) {
                   {AUDIENCES.map((aud) => (
                     <Link
                       key={aud.slug}
-                      href={`/${cat.slug}/${aud.slug}`}
+                      href={`/catalogo?type=${cat.catalogType}&genero=${aud.slug}`}
                       onClick={onClose}
                       className="block py-2.5 px-3 rounded-lg text-body-sm text-volcanic-600 hover:bg-sand-100 hover:text-terra-500 transition-colors"
                     >
@@ -162,14 +168,59 @@ export function MobileMenu({ open, onClose }: MobileMenuProps) {
             </div>
           ))}
 
-          <div className="border-t border-sand-200 pt-3">
+          <div className="border-t border-sand-200 pt-3 space-y-1">
             <Link
-              href="/tienda"
+              href="/giftcards"
               onClick={onClose}
               className="block py-3 text-body-md font-medium text-volcanic-900 hover:text-terra-500 transition-colors"
             >
-              Tienda
+              Gift Cards
             </Link>
+            <Link
+              href="/faq"
+              onClick={onClose}
+              className="block py-3 text-body-md font-medium text-volcanic-900 hover:text-terra-500 transition-colors"
+            >
+              Preguntas Frecuentes
+            </Link>
+          </div>
+
+          {/* Auth links */}
+          <div className="border-t border-sand-200 pt-4 mt-2 space-y-3">
+            {user ? (
+              <div className="flex items-center gap-3 py-3 px-3 bg-sand-50 rounded-xl">
+                <div className="w-9 h-9 rounded-full bg-volcanic-900 text-white flex items-center justify-center text-body-sm font-semibold">
+                  {user.email.charAt(0).toUpperCase()}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-body-sm font-medium text-volcanic-900 truncate">{user.email}</p>
+                  <Link
+                    href={user.role === 'admin' ? '/admin/productos' : '/'}
+                    onClick={onClose}
+                    className="text-body-xs text-terra-500 hover:text-terra-600 transition-colors"
+                  >
+                    {user.role === 'admin' ? 'Panel Admin' : 'Mi cuenta'}
+                  </Link>
+                </div>
+              </div>
+            ) : (
+              <>
+                <Link
+                  href="/login"
+                  onClick={onClose}
+                  className="block w-full py-3 text-center text-body-md font-medium text-volcanic-700 hover:text-terra-500 border border-sand-200 rounded-xl transition-colors"
+                >
+                  Ingresar
+                </Link>
+                <Link
+                  href="/registro"
+                  onClick={onClose}
+                  className="block w-full py-3 text-center text-body-md font-semibold text-white bg-volcanic-900 hover:bg-volcanic-800 rounded-xl transition-colors"
+                >
+                  Registrarse
+                </Link>
+              </>
+            )}
           </div>
         </div>
       </div>

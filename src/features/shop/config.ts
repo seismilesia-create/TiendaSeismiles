@@ -19,9 +19,9 @@ export const shopConfig: ShopConfig = {
 
   hero: {
     badge: 'Catamarca, Argentina',
-    headline: 'Nacidas a 6000 metros de altura',
+    headline: 'Calidad de Altura',
     subheadline:
-      'Donde el altiplano toca el cielo y los volcanes cuentan historias milenarias. Desde la Ruta de los Seismiles, vestimos confianza.',
+      'Desde el corazón de Catamarca, diseñamos y confeccionamos ropa de alta gama. Inspirados en la solidez de nuestros Seismiles, creamos prendas que honran nuestra tierra y están hechas para durar.',
     ctaPrimary: { text: 'Ver coleccion', href: '/tienda' },
     ctaSecondary: { text: 'Nuestro origen', href: '#origen' },
   },
@@ -49,6 +49,49 @@ export const shopConfig: ShopConfig = {
     { label: 'Nuestro Origen', href: '#origen' },
     { label: 'Contacto', href: '/contacto' },
   ],
+
+  featuredProducts: {
+    label: 'Destacados',
+    heading: 'Lo mas elegido',
+    subtitle: 'Las prendas que definen nuestro estandar. Calidad premium, confeccion catamarquena.',
+    products: [
+      {
+        name: 'Remera Arista',
+        slug: 'remera-arista',
+        href: '/tienda/linea-arista',
+        line: 'Linea Arista',
+        price: '$18.500',
+        imageUrl: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=600&h=800&fit=crop&crop=center',
+        tag: 'Mas vendida',
+      },
+      {
+        name: 'Buzo Tres Cruces',
+        slug: 'buzo-tres-cruces',
+        href: '/tienda/linea-tres-cruces',
+        line: 'Linea Tres Cruces',
+        price: '$32.900',
+        imageUrl: 'https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=600&h=800&fit=crop&crop=center',
+        tag: 'Nuevo',
+      },
+      {
+        name: 'Remera Pissis',
+        slug: 'remera-pissis',
+        href: '/tienda/linea-pissis',
+        line: 'Linea Pissis',
+        price: '$19.900',
+        imageUrl: 'https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?w=600&h=800&fit=crop&crop=center',
+      },
+      {
+        name: 'Buzo Veladero',
+        slug: 'buzo-veladero',
+        href: '/tienda/linea-veladero',
+        line: 'Linea Veladero',
+        price: '$34.500',
+        imageUrl: 'https://images.unsplash.com/photo-1542327897-d73f4005b533?w=600&h=800&fit=crop&crop=center',
+      },
+    ],
+    cta: { text: 'Ver todos los productos', href: '/tienda' },
+  },
 
   productTypeTabs: [
     {
@@ -163,6 +206,7 @@ export const shopConfig: ShopConfig = {
     heading: 'Calidad forjada en la altura',
     subtitle:
       'Entendemos la urgencia de tus tiempos y la importancia de los detalles. Cada prenda pasa por un estricto control de calidad.',
+    imageUrl: 'https://images.unsplash.com/photo-1562157873-818bc0726f68?w=600&h=800&fit=crop&crop=center',
     features: [
       {
         number: '01',
@@ -181,6 +225,45 @@ export const shopConfig: ShopConfig = {
         title: 'Confeccion Super Premium',
         description:
           'Costuras reforzadas, tinturas de alta fijacion, terminaciones impecables. Nuestros Buzos Canguro son la insignia de este estandar.',
+      },
+    ],
+  },
+
+  giftCards: {
+    heading: 'Gift Cards Seismiles',
+    subtitle: 'Regala calidad. Que elijan lo que mas les guste con una tarjeta de regalo Seismiles.',
+    cards: [
+      {
+        id: 'gc-5000',
+        title: 'Gift Card Clasica',
+        price: '$5.000',
+        description: 'Ideal para un detalle. Perfecta para accesorios o como aporte a una prenda favorita.',
+        gradientFrom: '#8B7355',
+        gradientTo: '#6B5B45',
+      },
+      {
+        id: 'gc-15000',
+        title: 'Gift Card Premium',
+        price: '$15.000',
+        description: 'La eleccion mas popular. Alcanza para una remera de cualquiera de nuestras lineas.',
+        gradientFrom: '#C75B39',
+        gradientTo: '#A04830',
+      },
+      {
+        id: 'gc-30000',
+        title: 'Gift Card Cumbre',
+        price: '$30.000',
+        description: 'Para quienes van por todo. Cubre buzos, camperas o varias prendas a eleccion.',
+        gradientFrom: '#2C2420',
+        gradientTo: '#4A3D35',
+      },
+      {
+        id: 'gc-50000',
+        title: 'Gift Card Seismiles',
+        price: '$50.000',
+        description: 'El regalo definitivo. Libertad total para armar el guardarropa completo.',
+        gradientFrom: '#5C5347',
+        gradientTo: '#1A1614',
       },
     ],
   },
@@ -207,6 +290,46 @@ export const shopConfig: ShopConfig = {
       description: 'Proceso simple y rapido',
     },
   ],
+
+  faq: {
+    heading: 'Preguntas Frecuentes',
+    subtitle: 'Todo lo que necesitas saber sobre Seismiles. Si no encontras tu respuesta, escribinos y te ayudamos.',
+    contactPrompt: 'No encontraste lo que buscabas? Escribinos tu consulta y te respondemos a la brevedad.',
+    items: [
+      {
+        question: 'Hacen envios a todo el pais?',
+        answer: 'Si, realizamos envios a todo el territorio argentino a traves de correo y servicios de mensajeria. Los tiempos de entrega varian segun la localidad, pero generalmente son de 3 a 7 dias habiles.',
+      },
+      {
+        question: 'Cuales son los medios de pago disponibles?',
+        answer: 'Aceptamos tarjetas de credito y debito (Visa, Mastercard, American Express), transferencia bancaria, Mercado Pago y efectivo a traves de Rapipago y Pago Facil. Ofrecemos hasta 3 cuotas sin interes con tarjeta.',
+      },
+      {
+        question: 'Como se la guia de talles?',
+        answer: 'En cada producto encontras una tabla de talles detallada con medidas en centimetros. Si tenes dudas, escribinos por WhatsApp con tu altura y peso, y te asesoramos para que elijas el talle perfecto.',
+      },
+      {
+        question: 'Puedo cambiar o devolver un producto?',
+        answer: 'Si, tenes 30 dias desde la recepcion para solicitar un cambio o devolucion. El producto debe estar sin uso, con etiquetas y en su empaque original. Los cambios por talle no tienen costo adicional.',
+      },
+      {
+        question: 'Las gift cards tienen vencimiento?',
+        answer: 'No, nuestras gift cards no tienen fecha de vencimiento. Pueden ser canjeadas en cualquier momento y son validas para todos los productos de la tienda online.',
+      },
+      {
+        question: 'Hacen personalizacion para empresas?',
+        answer: 'Si, ofrecemos servicio de personalizacion con tecnologia DTF (Direct to Film) para empresas, eventos y equipos. Podes consultar precios y minimos escribiendonos por la seccion de contacto.',
+      },
+      {
+        question: 'De donde son las prendas?',
+        answer: 'Todas nuestras prendas son disenadas y confeccionadas en Catamarca, Argentina. Usamos materiales premium seleccionados: algodon de fibra larga, pique superior y frisas peinadas de primera calidad.',
+      },
+      {
+        question: 'Cuanto tarda en llegar mi pedido?',
+        answer: 'Los pedidos dentro de Catamarca capital llegan en 24-48 horas. Para el resto del pais, el plazo es de 3 a 7 dias habiles dependiendo de la localidad. Recibiras un codigo de seguimiento por email.',
+      },
+    ],
+  },
 
   instagram: {
     handle: '@seismiles_textil',

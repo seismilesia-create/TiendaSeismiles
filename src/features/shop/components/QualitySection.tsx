@@ -1,6 +1,7 @@
+import Image from 'next/image'
 import { shopConfig } from '../config'
 
-/** Icono de fibras de algodon - suavidad, naturaleza */
+/** Icono de fibras de algodon */
 function CottonIcon({ className }: { className?: string }) {
   return (
     <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" strokeWidth={1.2} strokeLinecap="round" strokeLinejoin="round" className={className}>
@@ -15,7 +16,7 @@ function CottonIcon({ className }: { className?: string }) {
   )
 }
 
-/** Icono de tejido pique - trama, estructura, textura */
+/** Icono de tejido pique */
 function WeaveIcon({ className }: { className?: string }) {
   return (
     <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" strokeWidth={1.2} strokeLinecap="round" strokeLinejoin="round" className={className}>
@@ -33,7 +34,7 @@ function WeaveIcon({ className }: { className?: string }) {
   )
 }
 
-/** Icono de costura premium - precision, artesania */
+/** Icono de costura premium */
 function StitchIcon({ className }: { className?: string }) {
   return (
     <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" strokeWidth={1.2} strokeLinecap="round" strokeLinejoin="round" className={className}>
@@ -51,13 +52,6 @@ function StitchIcon({ className }: { className?: string }) {
 
 const featureIcons = [CottonIcon, WeaveIcon, StitchIcon]
 
-/** Copy sensorial extendido para cada feature */
-const sensorialCopy = [
-  'Pasas la mano y sentis la diferencia. Fibras largas seleccionadas que respiran con vos, que se suavizan con cada lavado. No es algodon comun: es el punto de partida de algo superior.',
-  'Cerrá los ojos y tocá un piqué nuestro. Esa trama elevada, esa estructura que no cede, ese peso justo que dice "esto es otra cosa". El 80% del mercado no conoce esta textura. Vos sí.',
-  'Cada costura doble reforzada, cada tintura de alta fijación, cada terminación invisible. Nuestros Buzos Canguro no son solo abrigo: son la declaración de que lo premium se siente en cada detalle.',
-]
-
 export function QualitySection() {
   const { quality } = shopConfig
 
@@ -69,12 +63,12 @@ export function QualitySection() {
         backgroundSize: '24px 24px',
       }} />
 
-      {/* Warm glow from top */}
+      {/* Warm glow */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[300px] bg-terra-500/8 blur-[120px] rounded-full pointer-events-none" />
 
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section header */}
-        <div className="max-w-2xl mb-20 lg:mb-28">
+        <div className="max-w-2xl mb-16 lg:mb-20">
           <div className="flex items-center gap-3 mb-6">
             <div className="w-8 h-px bg-terra-500" />
             <span className="text-body-xs uppercase tracking-widest text-terra-400 font-semibold">
@@ -91,43 +85,65 @@ export function QualitySection() {
           </p>
         </div>
 
-        {/* Features grid - 3 columns with generous spacing */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-12">
-          {quality.features.map((feature, index) => {
-            const Icon = featureIcons[index]
-            return (
-              <div
-                key={feature.number}
-                className="group relative"
-              >
-                {/* Card */}
-                <div className="relative p-8 lg:p-10 rounded-2xl bg-white/[0.03] border border-white/[0.06] hover:bg-white/[0.06] hover:border-white/[0.1] transition-all duration-500">
-                  {/* Number + Icon row */}
-                  <div className="flex items-start justify-between mb-8">
-                    <span className="text-display-sm font-heading text-terra-500/60">
-                      {feature.number}
-                    </span>
-                    <div className="w-14 h-14 rounded-2xl bg-terra-500/10 flex items-center justify-center group-hover:bg-terra-500/15 transition-colors duration-500">
-                      <Icon className="w-7 h-7 text-terra-400" />
+        {/* Two-column layout: image + features */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+          {/* Left - Product image */}
+          <div className="relative">
+            <div className="relative aspect-[3/4] rounded-2xl overflow-hidden">
+              <Image
+                src={quality.imageUrl}
+                alt="Detalle de calidad Seismiles"
+                fill
+                className="object-cover"
+                sizes="(max-width: 1024px) 100vw, 50vw"
+              />
+              {/* Subtle gradient overlay at bottom */}
+              <div className="absolute inset-0 bg-gradient-to-t from-volcanic-900/40 via-transparent to-transparent" />
+            </div>
+
+            {/* Floating badge */}
+            <div className="absolute bottom-6 left-6 right-6 flex items-center gap-3 px-5 py-3.5 rounded-xl bg-white/10 backdrop-blur-md border border-white/10">
+              <div className="w-2 h-2 rounded-full bg-terra-500" />
+              <span className="text-body-xs text-white/80 uppercase tracking-widest font-semibold">
+                Control de calidad en cada prenda
+              </span>
+            </div>
+          </div>
+
+          {/* Right - Features stacked */}
+          <div className="flex flex-col gap-6">
+            {quality.features.map((feature, index) => {
+              const Icon = featureIcons[index]
+              return (
+                <div
+                  key={feature.number}
+                  className="group relative p-6 lg:p-8 rounded-2xl bg-white/[0.03] border border-white/[0.06] hover:bg-white/[0.06] hover:border-white/[0.1] transition-all duration-500"
+                >
+                  <div className="flex gap-5">
+                    {/* Icon */}
+                    <div className="shrink-0 w-12 h-12 rounded-xl bg-terra-500/10 flex items-center justify-center group-hover:bg-terra-500/15 transition-colors duration-500">
+                      <Icon className="w-6 h-6 text-terra-400" />
+                    </div>
+
+                    {/* Content */}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-baseline gap-3 mb-2">
+                        <span className="text-body-xs text-terra-500/60 font-mono">
+                          {feature.number}
+                        </span>
+                        <h3 className="font-heading text-lg text-white">
+                          {feature.title}
+                        </h3>
+                      </div>
+                      <p className="text-body-sm text-white/40 leading-relaxed">
+                        {feature.description}
+                      </p>
                     </div>
                   </div>
-
-                  {/* Title */}
-                  <h3 className="font-heading text-display-sm text-white mb-4">
-                    {feature.title}
-                  </h3>
-
-                  {/* Sensorial description */}
-                  <p className="text-body-md text-white/50 leading-relaxed mb-6">
-                    {sensorialCopy[index]}
-                  </p>
-
-                  {/* Subtle divider */}
-                  <div className="w-12 h-px bg-terra-500/20 group-hover:w-20 transition-all duration-500" />
                 </div>
-              </div>
-            )
-          })}
+              )
+            })}
+          </div>
         </div>
 
         {/* Bottom accent line */}

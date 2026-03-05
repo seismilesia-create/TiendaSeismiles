@@ -1,3 +1,4 @@
+import Image from 'next/image'
 import Link from 'next/link'
 import { shopConfig } from '../config'
 import { MountainIcon } from './MountainIcon'
@@ -13,27 +14,19 @@ export function HeroSection() {
 
   return (
     <section className="relative min-h-[90vh] lg:min-h-screen flex items-center overflow-hidden">
-      {/* Background - Andean landscape gradient (placeholder until real photo) */}
+      {/* Background - Andean landscape photo */}
       <div className="absolute inset-0">
-        {/* Multi-layer gradient simulating an Andean volcanic landscape */}
-        <div className="absolute inset-0 bg-gradient-to-b from-[#D4A574]/30 via-[#C9956B]/20 to-sand-100" />
-        <div className="absolute inset-0 bg-gradient-to-r from-volcanic-900/10 via-transparent to-volcanic-900/5" />
-
-        {/* Subtle mountain silhouette using CSS shapes */}
-        <div className="absolute bottom-0 left-0 right-0 h-[40%]">
-          <svg viewBox="0 0 1440 400" fill="none" preserveAspectRatio="none" className="absolute inset-0 w-full h-full">
-            <path d="M0 400V280L180 180L320 240L480 120L600 200L720 80L840 160L960 60L1080 140L1200 100L1320 180L1440 120V400H0Z" fill="url(#mountain-gradient)" opacity="0.08" />
-            <path d="M0 400V320L200 260L400 300L560 200L700 280L860 160L1000 240L1140 180L1300 220L1440 200V400H0Z" fill="url(#mountain-gradient)" opacity="0.05" />
-            <defs>
-              <linearGradient id="mountain-gradient" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#2C2420" />
-                <stop offset="100%" stopColor="#5C5347" />
-              </linearGradient>
-            </defs>
-          </svg>
-        </div>
-
-        {/* Bottom fade into sand background */}
+        <Image
+          src="/images/Hero section.png"
+          alt="Paisaje andino con volcanes y salares"
+          fill
+          priority
+          className="object-cover"
+        />
+        {/* Overlay for text readability */}
+        <div className="absolute inset-0 bg-gradient-to-r from-white/75 via-white/50 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-b from-white/30 via-transparent to-white/20" />
+        {/* Bottom fade into page background */}
         <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-[#FAFAF8] to-transparent" />
       </div>
 
@@ -78,10 +71,6 @@ export function HeroSection() {
         </div>
       </div>
 
-      {/* Decorative element - large mountain icon */}
-      <div className="absolute right-0 top-1/2 -translate-y-1/2 opacity-[0.03] hidden lg:block pointer-events-none">
-        <MountainIcon className="w-[500px] h-[500px]" />
-      </div>
     </section>
   )
 }
