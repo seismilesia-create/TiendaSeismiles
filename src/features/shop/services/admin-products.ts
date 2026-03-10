@@ -149,7 +149,7 @@ export async function duplicateProduct(sourceId: string): Promise<string> {
 
   if (prodError) throw prodError
 
-  // 3. Duplicate colors and map old color IDs to new ones
+  // 3. Duplicate colors (with imagen_url), images, and map old color IDs to new ones
   const colorMap = new Map<string, string>() // oldId → newId
   for (const color of source.colores) {
     const { data: newColor, error: colorError } = await supabase
@@ -158,6 +158,7 @@ export async function duplicateProduct(sourceId: string): Promise<string> {
         producto_id: newProduct.id,
         nombre: color.nombre,
         hex: color.hex,
+        imagen_url: color.imagen_url,
         orden: color.orden,
       })
       .select()
@@ -165,6 +166,19 @@ export async function duplicateProduct(sourceId: string): Promise<string> {
 
     if (colorError) throw colorError
     colorMap.set(color.id, newColor.id)
+
+    // Duplicate images for this color
+    if (color.imagenes && color.imagenes.length > 0) {
+      const imageRows = color.imagenes.map((img: { url: string; orden: number }) => ({
+        color_id: newColor.id,
+        url: img.url,
+        orden: img.orden,
+      }))
+      const { error: imgError } = await supabase
+        .from('imagenes')
+        .insert(imageRows)
+      if (imgError) throw imgError
+    }
   }
 
   // 4. Duplicate variants with mapped color IDs
@@ -408,6 +422,51 @@ export async function deleteProductImage(imageId: string) {
       .from('colores')
       .update({ imagen_url: remaining?.[0]?.url ?? null })
       .eq('id', img.color_id)
+  }
+}
+
+export async function setImageAsCover(imageId: string, colorId: string) {
+  const supabase = createServiceClient()
+
+  // Get all images for this color
+  const { data: images, error: fetchError } = await supabase
+    .from('imagenes')
+    .select('id, orden')
+    .eq('color_id', colorId)
+    .order('orden', { ascending: true })
+
+  if (fetchError) throw fetchError
+
+  // Reorder: chosen image gets 0, others shift
+  const reordered = (images ?? []).map((img) => {
+    if (img.id === imageId) return { id: img.id, orden: 0 }
+    const currentOrden = img.orden >= 0 ? img.orden : 0
+    return { id: img.id, orden: img.id === imageId ? 0 : currentOrden >= 0 ? currentOrden + 1 : currentOrden }
+  })
+  // Sort so cover is 0, rest are 1, 2, 3...
+  reordered.sort((a, b) => a.orden - b.orden)
+  let nextOrden = 0
+  for (const item of reordered) {
+    if (item.id === imageId) {
+      item.orden = 0
+    } else {
+      nextOrden++
+      item.orden = nextOrden
+    }
+  }
+
+  // Update each image's orden
+  for (const item of reordered) {
+    await supabase.from('imagenes').update({ orden: item.orden }).eq('id', item.id)
+  }
+
+  // Update colores.imagen_url to the new cover image
+  const coverImage = images?.find((img) => img.id === imageId)
+  if (coverImage) {
+    const { data: fullImg } = await supabase.from('imagenes').select('url').eq('id', imageId).single()
+    if (fullImg) {
+      await supabase.from('colores').update({ imagen_url: fullImg.url }).eq('id', colorId)
+    }
   }
 }
 

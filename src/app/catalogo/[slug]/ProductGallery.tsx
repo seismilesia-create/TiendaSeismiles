@@ -17,6 +17,180 @@ interface ProductGalleryProps {
   onImageClick: (index: number) => void
 }
 
+// ── Zoomable Image (desktop hover zoom) ──
+
+const DESKTOP_ZOOM = 1.8
+
+function ZoomableImage({
+  src, alt, sizes, priority, onClick, children, className,
+}: {
+  src: string; alt: string; sizes: string; priority?: boolean
+  onClick: () => void; children?: React.ReactNode; className?: string
+}) {
+  const containerRef = useRef<HTMLButtonElement>(null)
+  const [zooming, setZooming] = useState(false)
+  const [origin, setOrigin] = useState('center center')
+
+  function handleMouseMove(e: React.MouseEvent) {
+    if (!containerRef.current) return
+    const rect = containerRef.current.getBoundingClientRect()
+    const x = ((e.clientX - rect.left) / rect.width) * 100
+    const y = ((e.clientY - rect.top) / rect.height) * 100
+    setOrigin(`${x}% ${y}%`)
+  }
+
+  return (
+    <button
+      ref={containerRef}
+      onClick={onClick}
+      onMouseEnter={() => setZooming(true)}
+      onMouseLeave={() => setZooming(false)}
+      onMouseMove={handleMouseMove}
+      className={`relative overflow-hidden bg-sand-100 group cursor-zoom-in ${className ?? ''}`}
+    >
+      <Image
+        src={src}
+        alt={alt}
+        fill
+        className="object-cover transition-transform duration-300 ease-out"
+        style={{
+          transformOrigin: origin,
+          transform: zooming ? `scale(${DESKTOP_ZOOM})` : 'scale(1)',
+        }}
+        sizes={sizes}
+        priority={priority}
+      />
+      {children}
+    </button>
+  )
+}
+
+// ── Pinch-to-zoom Image (mobile) ──
+
+const MOBILE_MAX_ZOOM = 3
+const MOBILE_MIN_ZOOM = 1
+
+function getTouchDistance(t1: React.Touch, t2: React.Touch) {
+  return Math.hypot(t2.clientX - t1.clientX, t2.clientY - t1.clientY)
+}
+
+function PinchZoomImage({
+  src, alt, sizes, priority, destacado, onClick,
+}: {
+  src: string; alt: string; sizes: string; priority?: boolean
+  destacado?: boolean; onClick: () => void
+}) {
+  const containerRef = useRef<HTMLDivElement>(null)
+  const [scale, setScale] = useState(1)
+  const [origin, setOrigin] = useState('center center')
+  const [translate, setTranslate] = useState({ x: 0, y: 0 })
+
+  // Refs for gesture tracking (avoid re-renders during gestures)
+  const pinching = useRef(false)
+  const startDist = useRef(0)
+  const startScale = useRef(1)
+  const lastTouchCenter = useRef({ x: 0, y: 0 })
+  const startTranslate = useRef({ x: 0, y: 0 })
+  const panning = useRef(false)
+  const panStart = useRef({ x: 0, y: 0 })
+
+  function handleTouchStart(e: React.TouchEvent) {
+    if (e.touches.length === 2) {
+      e.preventDefault()
+      pinching.current = true
+      panning.current = false
+      startDist.current = getTouchDistance(e.touches[0], e.touches[1])
+      startScale.current = scale
+      // Set transform-origin to midpoint between fingers
+      if (containerRef.current) {
+        const rect = containerRef.current.getBoundingClientRect()
+        const cx = ((e.touches[0].clientX + e.touches[1].clientX) / 2 - rect.left) / rect.width * 100
+        const cy = ((e.touches[0].clientY + e.touches[1].clientY) / 2 - rect.top) / rect.height * 100
+        setOrigin(`${cx}% ${cy}%`)
+      }
+      lastTouchCenter.current = {
+        x: (e.touches[0].clientX + e.touches[1].clientX) / 2,
+        y: (e.touches[0].clientY + e.touches[1].clientY) / 2,
+      }
+      startTranslate.current = { ...translate }
+    } else if (e.touches.length === 1 && scale > 1) {
+      // Single finger pan when zoomed
+      panning.current = true
+      panStart.current = { x: e.touches[0].clientX, y: e.touches[0].clientY }
+      startTranslate.current = { ...translate }
+    }
+  }
+
+  function handleTouchMove(e: React.TouchEvent) {
+    if (pinching.current && e.touches.length === 2) {
+      e.preventDefault()
+      const dist = getTouchDistance(e.touches[0], e.touches[1])
+      const newScale = Math.min(MOBILE_MAX_ZOOM, Math.max(MOBILE_MIN_ZOOM, startScale.current * (dist / startDist.current)))
+      setScale(newScale)
+
+      // Pan while pinching
+      const cx = (e.touches[0].clientX + e.touches[1].clientX) / 2
+      const cy = (e.touches[0].clientY + e.touches[1].clientY) / 2
+      setTranslate({
+        x: startTranslate.current.x + (cx - lastTouchCenter.current.x),
+        y: startTranslate.current.y + (cy - lastTouchCenter.current.y),
+      })
+    } else if (panning.current && e.touches.length === 1 && scale > 1) {
+      e.preventDefault()
+      setTranslate({
+        x: startTranslate.current.x + (e.touches[0].clientX - panStart.current.x),
+        y: startTranslate.current.y + (e.touches[0].clientY - panStart.current.y),
+      })
+    }
+  }
+
+  function handleTouchEnd(e: React.TouchEvent) {
+    if (e.touches.length < 2) {
+      pinching.current = false
+    }
+    if (e.touches.length === 0) {
+      panning.current = false
+      // Snap back to 1x if close enough
+      if (scale < 1.15) {
+        setScale(1)
+        setTranslate({ x: 0, y: 0 })
+      }
+    }
+  }
+
+  const isZoomed = scale > 1
+
+  return (
+    <div
+      ref={containerRef}
+      onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleTouchEnd}
+      onClick={isZoomed ? () => { setScale(1); setTranslate({ x: 0, y: 0 }) } : onClick}
+      className="relative aspect-[3/4] overflow-hidden bg-sand-100 touch-none"
+    >
+      <Image
+        src={src}
+        alt={alt}
+        fill
+        className={`object-cover ${isZoomed ? '' : 'transition-transform duration-200'}`}
+        style={{
+          transformOrigin: origin,
+          transform: `translate(${translate.x}px, ${translate.y}px) scale(${scale})`,
+        }}
+        sizes={sizes}
+        priority={priority}
+        draggable={false}
+      />
+      {destacado && (
+        <span className="absolute top-4 left-4 z-10 bg-terra-500 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.15em] text-white rounded-lg pointer-events-none">
+          Destacado
+        </span>
+      )}
+    </div>
+  )
+}
+
 // ── Placeholder for empty gallery ──
 
 function EmptyPlaceholder() {
@@ -39,28 +213,26 @@ function DesktopGrid({ images, productName, colorName, destacado, onImageClick }
 
   if (images.length === 0) return <EmptyPlaceholder />
 
+  // Badge overlay (rendered inside ZoomableImage)
+  const destacadoBadge = destacado ? (
+    <span className="absolute top-4 left-4 z-10 bg-terra-500 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.15em] text-white rounded-lg pointer-events-none">
+      Destacado
+    </span>
+  ) : null
+
   // Single image: full width
   if (images.length === 1) {
     return (
-      <button
+      <ZoomableImage
+        src={images[0].url}
+        alt={`${productName} - ${colorName}`}
+        sizes="(max-width: 1024px) 100vw, 55vw"
+        priority
         onClick={() => onImageClick(0)}
-        className="relative aspect-[3/4] overflow-hidden bg-sand-100 group cursor-pointer"
+        className="w-full aspect-[3/4]"
       >
-        <Image
-          src={images[0].url}
-          alt={`${productName} - ${colorName}`}
-          fill
-          className="object-cover transition-transform duration-500 group-hover:scale-105"
-          sizes="(max-width: 1024px) 100vw, 55vw"
-          priority
-        />
-        <div className="absolute inset-0 bg-volcanic-900/0 group-hover:bg-volcanic-900/10 transition-colors duration-300" />
-        {destacado && (
-          <span className="absolute top-4 left-4 bg-terra-500 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.15em] text-white rounded-lg">
-            Destacado
-          </span>
-        )}
-      </button>
+        {destacadoBadge}
+      </ZoomableImage>
     )
   }
 
@@ -69,28 +241,17 @@ function DesktopGrid({ images, productName, colorName, destacado, onImageClick }
     return (
       <div className="grid grid-cols-2 grid-rows-2 gap-1">
         {displayImages.map((img, index) => (
-          <button
+          <ZoomableImage
             key={img.id}
+            src={img.url}
+            alt={`${productName} - ${colorName} ${index + 1}`}
+            sizes="28vw"
+            priority={index === 0}
             onClick={() => onImageClick(index)}
-            className={`relative aspect-[3/4] overflow-hidden bg-sand-100 group cursor-pointer ${
-              index === 0 ? 'row-span-2 aspect-auto' : ''
-            }`}
+            className={`aspect-[3/4] ${index === 0 ? 'row-span-2 aspect-auto' : ''}`}
           >
-            <Image
-              src={img.url}
-              alt={`${productName} - ${colorName} ${index + 1}`}
-              fill
-              className="object-cover transition-transform duration-500 group-hover:scale-105"
-              sizes={index === 0 ? '28vw' : '28vw'}
-              priority={index === 0}
-            />
-            <div className="absolute inset-0 bg-volcanic-900/0 group-hover:bg-volcanic-900/10 transition-colors duration-300" />
-            {index === 0 && destacado && (
-              <span className="absolute top-4 left-4 bg-terra-500 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.15em] text-white rounded-lg">
-                Destacado
-              </span>
-            )}
-          </button>
+            {index === 0 && destacadoBadge}
+          </ZoomableImage>
         ))}
       </div>
     )
@@ -100,32 +261,23 @@ function DesktopGrid({ images, productName, colorName, destacado, onImageClick }
   return (
     <div className="grid grid-cols-2 gap-1">
       {displayImages.map((img, index) => (
-        <button
+        <ZoomableImage
           key={img.id}
+          src={img.url}
+          alt={`${productName} - ${colorName} ${index + 1}`}
+          sizes="28vw"
+          priority={index === 0}
           onClick={() => onImageClick(index)}
-          className="relative aspect-[3/4] overflow-hidden bg-sand-100 group cursor-pointer"
+          className="aspect-[3/4]"
         >
-          <Image
-            src={img.url}
-            alt={`${productName} - ${colorName} ${index + 1}`}
-            fill
-            className="object-cover transition-transform duration-500 group-hover:scale-105"
-            sizes="28vw"
-            priority={index === 0}
-          />
-          <div className="absolute inset-0 bg-volcanic-900/0 group-hover:bg-volcanic-900/10 transition-colors duration-300" />
-          {index === 0 && destacado && (
-            <span className="absolute top-4 left-4 bg-terra-500 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.15em] text-white rounded-lg">
-              Destacado
-            </span>
-          )}
+          {index === 0 && destacadoBadge}
           {/* "+N" overlay on the 4th image */}
           {extraCount > 0 && index === 3 && (
-            <div className="absolute inset-0 bg-volcanic-900/40 flex items-center justify-center transition-opacity group-hover:bg-volcanic-900/50">
+            <div className="absolute inset-0 z-10 bg-volcanic-900/40 flex items-center justify-center pointer-events-none">
               <span className="text-white text-display-xs font-semibold">+{extraCount}</span>
             </div>
           )}
-        </button>
+        </ZoomableImage>
       ))}
     </div>
   )
@@ -163,27 +315,16 @@ function MobileCarousel({ images, productName, colorName, destacado, onImageClic
         style={{ scrollBehavior: 'smooth' }}
       >
         {images.map((img, index) => (
-          <button
-            key={img.id}
-            onClick={() => onImageClick(index)}
-            className="flex-shrink-0 w-full snap-center"
-          >
-            <div className="relative aspect-[3/4] overflow-hidden bg-sand-100">
-              <Image
-                src={img.url}
-                alt={`${productName} - ${colorName} ${index + 1}`}
-                fill
-                className="object-cover"
-                sizes="100vw"
-                priority={index === 0}
-              />
-              {index === 0 && destacado && (
-                <span className="absolute top-4 left-4 bg-terra-500 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.15em] text-white rounded-lg">
-                  Destacado
-                </span>
-              )}
-            </div>
-          </button>
+          <div key={img.id} className="flex-shrink-0 w-full snap-center">
+            <PinchZoomImage
+              src={img.url}
+              alt={`${productName} - ${colorName} ${index + 1}`}
+              sizes="100vw"
+              priority={index === 0}
+              destacado={index === 0 && destacado}
+              onClick={() => onImageClick(index)}
+            />
+          </div>
         ))}
       </div>
 

@@ -1,10 +1,10 @@
 import type { Metadata } from 'next'
-import Link from 'next/link'
-import Image from 'next/image'
 import { shopConfig } from '@/features/shop/config'
 import { MarqueeBanner, Navbar, Footer } from '@/features/shop/components'
 import { getProductLines } from '@/features/shop/services/product-lines'
+import { getActiveGiftCardDefinitions } from '@/features/shop/services/admin-gift-cards'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
+import { GiftCardGrid } from './GiftCardGrid'
 
 export const metadata: Metadata = {
   title: 'Gift Cards',
@@ -31,8 +31,12 @@ function CheckIcon({ className }: { className?: string }) {
 }
 
 export default async function GiftCardsPage() {
-  const { giftCards, brand } = shopConfig
-  const [productLines, supabase] = await Promise.all([getProductLines(), createClient()])
+  const { giftCards } = shopConfig
+  const [productLines, supabase, cardDefs] = await Promise.all([
+    getProductLines(),
+    createClient(),
+    getActiveGiftCardDefinitions(),
+  ])
   const { data: { user } } = await supabase.auth.getUser()
   let navUser: { email: string; role: string } | null = null
   if (user) {
@@ -72,55 +76,7 @@ export default async function GiftCardsPage() {
         {/* Gift Cards Grid */}
         <section className="py-16 lg:py-24 bg-[#FAFAF8]">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8">
-              {giftCards.cards.map((card) => (
-                <div key={card.id} className="group flex flex-col rounded-2xl overflow-hidden bg-white border border-sand-200/60 hover:shadow-warm-lg transition-all duration-500">
-                  {/* Card visual */}
-                  <div
-                    className="relative aspect-[4/3] p-6 flex flex-col justify-between"
-                    style={{
-                      background: `linear-gradient(135deg, ${card.gradientFrom}, ${card.gradientTo})`,
-                    }}
-                  >
-                    {/* Logo watermark */}
-                    <div className="flex items-start justify-between">
-                      <Image
-                        src="/images/logo-seismiles.png"
-                        alt=""
-                        width={80}
-                        height={35}
-                        className="h-6 w-auto brightness-0 invert opacity-40"
-                        aria-hidden
-                      />
-                      <GiftIcon className="w-5 h-5 text-white/30" />
-                    </div>
-
-                    {/* Price */}
-                    <div>
-                      <p className="text-body-xs text-white/50 uppercase tracking-widest mb-1">
-                        Valor
-                      </p>
-                      <p className="font-heading text-display-md text-white leading-none">
-                        {card.price}
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Card info */}
-                  <div className="flex flex-col flex-1 p-6">
-                    <h3 className="font-heading text-lg text-volcanic-900 mb-2">
-                      {card.title}
-                    </h3>
-                    <p className="text-body-sm text-volcanic-500 leading-relaxed mb-6 flex-1">
-                      {card.description}
-                    </p>
-                    <button className="w-full py-3 px-4 bg-volcanic-900 hover:bg-volcanic-800 text-white text-body-sm font-semibold rounded-xl transition-all duration-300 hover:shadow-warm">
-                      Comprar
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
+            <GiftCardGrid cards={cardDefs} userId={navUser ? user!.id : null} />
 
             {/* Info section */}
             <div className="mt-16 lg:mt-20 max-w-3xl mx-auto">

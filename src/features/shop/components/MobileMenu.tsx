@@ -3,6 +3,8 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
+import { useCartStore } from '../stores/cart-store'
+import { useCartHydrated } from '../hooks/useCartHydrated'
 import type { ProductLineRow } from '../services/product-lines'
 
 interface MobileMenuUser {
@@ -23,6 +25,12 @@ function CloseIcon({ className }: { className?: string }) {
   )
 }
 
+function ShoppingBagIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z" /><path d="M3 6h18" /><path d="M16 10a4 4 0 0 1-8 0" /></svg>
+  )
+}
+
 function ChevronDownIcon({ className }: { className?: string }) {
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className={className}><path d="m6 9 6 6 6-6" /></svg>
@@ -37,7 +45,7 @@ const AUDIENCES = [
 
 const REMERA_TYPES = [
   { label: 'Lisas', slug: 'lisas', catalogType: 'remeras-lisas' },
-  { label: 'Personalizadas', slug: 'personalizadas', catalogType: 'personalizadas' },
+  { label: 'Estampadas', slug: 'estampadas', catalogType: 'estampadas' },
 ]
 
 const SIMPLE_CATEGORIES = [
@@ -48,6 +56,9 @@ const SIMPLE_CATEGORIES = [
 export function MobileMenu({ open, onClose, user }: MobileMenuProps) {
   const [openDropdown, setOpenDropdown] = useState<string | null>(null)
   const [openSub, setOpenSub] = useState<string | null>(null)
+  const totalItems = useCartStore((s) => s.getTotalItems())
+  const hydrated = useCartHydrated()
+  const cartCount = hydrated ? totalItems : 0
 
   useEffect(() => {
     if (open) {
@@ -170,6 +181,21 @@ export function MobileMenu({ open, onClose, user }: MobileMenuProps) {
 
           <div className="border-t border-sand-200 pt-3 space-y-1">
             <Link
+              href="/carrito"
+              onClick={onClose}
+              className="flex items-center justify-between py-3 text-body-md font-medium text-volcanic-900 hover:text-terra-500 transition-colors"
+            >
+              <span className="flex items-center gap-2">
+                <ShoppingBagIcon className="w-5 h-5" />
+                Mi carrito
+              </span>
+              {cartCount > 0 && (
+                <span className="bg-terra-500 text-white text-body-xs font-bold px-2 py-0.5 rounded-full">
+                  {cartCount}
+                </span>
+              )}
+            </Link>
+            <Link
               href="/giftcards"
               onClick={onClose}
               className="block py-3 text-body-md font-medium text-volcanic-900 hover:text-terra-500 transition-colors"
@@ -177,11 +203,25 @@ export function MobileMenu({ open, onClose, user }: MobileMenuProps) {
               Gift Cards
             </Link>
             <Link
+              href="/nosotros"
+              onClick={onClose}
+              className="block py-3 text-body-md font-medium text-volcanic-900 hover:text-terra-500 transition-colors"
+            >
+              Nosotros
+            </Link>
+            <Link
               href="/faq"
               onClick={onClose}
               className="block py-3 text-body-md font-medium text-volcanic-900 hover:text-terra-500 transition-colors"
             >
               Preguntas Frecuentes
+            </Link>
+            <Link
+              href="/contacto"
+              onClick={onClose}
+              className="block py-3 text-body-md font-medium text-volcanic-900 hover:text-terra-500 transition-colors"
+            >
+              Contacto
             </Link>
           </div>
 
@@ -195,11 +235,11 @@ export function MobileMenu({ open, onClose, user }: MobileMenuProps) {
                 <div className="flex-1 min-w-0">
                   <p className="text-body-sm font-medium text-volcanic-900 truncate">{user.email}</p>
                   <Link
-                    href={user.role === 'admin' ? '/admin/productos' : '/'}
+                    href={user.role === 'admin' ? '/admin/dashboard' : '/perfil'}
                     onClick={onClose}
                     className="text-body-xs text-terra-500 hover:text-terra-600 transition-colors"
                   >
-                    {user.role === 'admin' ? 'Panel Admin' : 'Mi cuenta'}
+                    {user.role === 'admin' ? 'Panel Admin' : 'Mi perfil'}
                   </Link>
                 </div>
               </div>

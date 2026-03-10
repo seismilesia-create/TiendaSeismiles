@@ -7,7 +7,7 @@ import { useState } from 'react'
 const PRODUCT_TYPES = [
   { value: 'todos', label: 'Todos' },
   { value: 'remeras-lisas', label: 'Remeras Lisas' },
-  { value: 'personalizadas', label: 'Personalizadas' },
+  { value: 'estampadas', label: 'Estampadas' },
   { value: 'buzos-camperas', label: 'Buzos y Camperas' },
 ]
 
@@ -16,7 +16,7 @@ const PRODUCT_LINES = [
   { value: 'pissis', label: 'Linea Pissis', type: 'remeras-lisas' },
   { value: 'origen', label: 'Linea Origen', type: 'remeras-lisas' },
   { value: 'terreno', label: 'Linea Terreno', type: 'remeras-lisas' },
-  { value: 'veta', label: 'Linea Veta', type: 'personalizadas' },
+  { value: 'veta', label: 'Linea Veta', type: 'estampadas' },
   { value: 'tres-cruces', label: 'Linea Tres Cruces', type: 'buzos-camperas' },
   { value: 'nacimiento', label: 'Linea Nacimiento', type: 'buzos-camperas' },
   { value: 'veladero', label: 'Linea Veladero', type: 'buzos-camperas' },
@@ -316,11 +316,10 @@ function TypeFilter({ activeType, onChange }: { activeType: string; onChange: (v
           <button
             key={type.value}
             onClick={() => onChange(type.value)}
-            className={`flex items-center justify-between w-full px-3 py-2.5 rounded-lg text-body-sm transition-colors ${
-              activeType === type.value
-                ? 'bg-terra-500/10 text-terra-600 font-medium'
-                : 'text-volcanic-600 hover:bg-sand-50 hover:text-volcanic-900'
-            }`}
+            className={`flex items-center justify-between w-full px-3 py-2.5 rounded-lg text-body-sm transition-colors ${activeType === type.value
+              ? 'bg-terra-500/10 text-terra-600 font-medium'
+              : 'text-volcanic-600 hover:bg-sand-50 hover:text-volcanic-900'
+              }`}
           >
             {type.label}
             {activeType === type.value && (
@@ -345,11 +344,10 @@ function LineFilter({ activeType, activeLine, onChange }: { activeType: string; 
       <div className="space-y-0.5">
         <button
           onClick={() => onChange('todos')}
-          className={`flex items-center justify-between w-full px-3 py-2.5 rounded-lg text-body-sm transition-colors ${
-            activeLine === 'todos'
-              ? 'bg-terra-500/10 text-terra-600 font-medium'
-              : 'text-volcanic-600 hover:bg-sand-50 hover:text-volcanic-900'
-          }`}
+          className={`flex items-center justify-between w-full px-3 py-2.5 rounded-lg text-body-sm transition-colors ${activeLine === 'todos'
+            ? 'bg-terra-500/10 text-terra-600 font-medium'
+            : 'text-volcanic-600 hover:bg-sand-50 hover:text-volcanic-900'
+            }`}
         >
           Todas las lineas
           {activeLine === 'todos' && <span className="w-1.5 h-1.5 rounded-full bg-terra-500" />}
@@ -358,11 +356,10 @@ function LineFilter({ activeType, activeLine, onChange }: { activeType: string; 
           <button
             key={line.value}
             onClick={() => onChange(line.value)}
-            className={`flex items-center justify-between w-full px-3 py-2.5 rounded-lg text-body-sm transition-colors ${
-              activeLine === line.value
-                ? 'bg-terra-500/10 text-terra-600 font-medium'
-                : 'text-volcanic-600 hover:bg-sand-50 hover:text-volcanic-900'
-            }`}
+            className={`flex items-center justify-between w-full px-3 py-2.5 rounded-lg text-body-sm transition-colors ${activeLine === line.value
+              ? 'bg-terra-500/10 text-terra-600 font-medium'
+              : 'text-volcanic-600 hover:bg-sand-50 hover:text-volcanic-900'
+              }`}
           >
             {line.label}
             {activeLine === line.value && <span className="w-1.5 h-1.5 rounded-full bg-terra-500" />}
@@ -381,11 +378,10 @@ function AudienceFilter({ activeAudience, onChange }: { activeAudience: string; 
           <button
             key={aud.value}
             onClick={() => onChange(aud.value)}
-            className={`px-4 py-2 rounded-lg text-body-sm font-medium transition-colors ${
-              activeAudience === aud.value
-                ? 'bg-volcanic-900 text-white'
-                : 'bg-sand-100 text-volcanic-600 hover:bg-sand-200'
-            }`}
+            className={`px-4 py-2 rounded-lg text-body-sm font-medium transition-colors ${activeAudience === aud.value
+              ? 'bg-volcanic-900 text-white'
+              : 'bg-sand-100 text-volcanic-600 hover:bg-sand-200'
+              }`}
           >
             {aud.label}
           </button>
@@ -412,13 +408,12 @@ function ColorFilter({ activeColors, onToggle, colors }: { activeColors: string[
               title={c.label}
             >
               <span
-                className={`w-8 h-8 rounded-full border-2 transition-all ${
-                  isActive
-                    ? 'border-terra-500 ring-2 ring-terra-500/20 scale-110'
-                    : isLight
-                      ? 'border-sand-300 group-hover:border-volcanic-400'
-                      : 'border-transparent group-hover:border-volcanic-400'
-                }`}
+                className={`w-8 h-8 rounded-full border-2 transition-all ${isActive
+                  ? 'border-terra-500 ring-2 ring-terra-500/20 scale-110'
+                  : isLight
+                    ? 'border-sand-300 group-hover:border-volcanic-400'
+                    : 'border-transparent group-hover:border-volcanic-400'
+                  }`}
                 style={{ backgroundColor: c.hex }}
               />
               <span className={`text-[10px] transition-colors ${isActive ? 'text-terra-600 font-medium' : 'text-volcanic-500'}`}>
@@ -442,11 +437,10 @@ function SizeFilter({ activeSizes, onToggle, sizes }: { activeSizes: string[]; o
           <button
             key={size}
             onClick={() => onToggle(size)}
-            className={`w-12 h-10 rounded-lg text-body-xs font-semibold transition-colors ${
-              activeSizes.includes(size)
-                ? 'bg-volcanic-900 text-white'
-                : 'bg-sand-100 text-volcanic-600 hover:bg-sand-200 hover:text-volcanic-900'
-            }`}
+            className={`w-12 h-10 rounded-lg text-body-xs font-semibold transition-colors ${activeSizes.includes(size)
+              ? 'bg-volcanic-900 text-white'
+              : 'bg-sand-100 text-volcanic-600 hover:bg-sand-200 hover:text-volcanic-900'
+              }`}
           >
             {size}
           </button>

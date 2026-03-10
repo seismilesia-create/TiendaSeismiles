@@ -14,10 +14,34 @@ function DashboardIcon({ className }: { className?: string }) {
   )
 }
 
+function OrdersIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" className={className}>
+      <path d="M16 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V8Z" /><path d="M15 3v4a2 2 0 0 0 2 2h4" /><path d="M8 13h8" /><path d="M8 17h8" /><path d="M8 9h2" />
+    </svg>
+  )
+}
+
 function ProductIcon({ className }: { className?: string }) {
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" className={className}>
       <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z" /><path d="M3 6h18" /><path d="M16 10a4 4 0 0 1-8 0" />
+    </svg>
+  )
+}
+
+function InventoryIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" className={className}>
+      <path d="m7.5 4.27 9 5.15" /><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z" /><path d="m3.3 7 8.7 5 8.7-5" /><path d="M12 22V12" />
+    </svg>
+  )
+}
+
+function GiftCardIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" className={className}>
+      <rect x="3" y="8" width="18" height="4" rx="1" /><path d="M12 8v13" /><path d="M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7" /><path d="M7.5 8a2.5 2.5 0 0 1 0-5A4.8 8 0 0 1 12 8a4.8 8 0 0 1 4.5-5 2.5 2.5 0 0 1 0 5" />
     </svg>
   )
 }
@@ -64,7 +88,10 @@ function CloseIcon({ className }: { className?: string }) {
 
 const NAV_ITEMS = [
   { href: '/admin/dashboard', label: 'Dashboard', icon: DashboardIcon },
+  { href: '/admin/pedidos', label: 'Pedidos', icon: OrdersIcon },
   { href: '/admin/productos', label: 'Productos', icon: ProductIcon },
+  { href: '/admin/inventario', label: 'Inventario', icon: InventoryIcon },
+  { href: '/admin/gift-cards', label: 'Gift Cards', icon: GiftCardIcon },
   { href: '/admin/faq', label: 'FAQ', icon: FaqIcon },
 ]
 

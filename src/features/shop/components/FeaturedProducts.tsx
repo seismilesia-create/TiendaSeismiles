@@ -1,7 +1,7 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import { shopConfig } from '../config'
-import type { FeaturedProductFromDB } from '../services/product-lines'
+import type { CatalogProductFromDB } from '../services/product-lines'
 
 function ArrowRightIcon({ className }: { className?: string }) {
   return (
@@ -19,12 +19,12 @@ interface DisplayProduct {
   tag?: string
 }
 
-function mapDBProducts(dbProducts: FeaturedProductFromDB[]): DisplayProduct[] {
+function mapDBProducts(dbProducts: CatalogProductFromDB[]): DisplayProduct[] {
   return dbProducts.map((p) => {
     const firstImage = p.colores?.[0]?.imagen_url
     return {
       slug: p.slug,
-      href: `/catalogo?linea=${p.linea}`,
+      href: `/catalogo/${p.slug}`,
       imageUrl: firstImage ?? '',
       name: p.nombre,
       line: p.linea,
@@ -34,7 +34,7 @@ function mapDBProducts(dbProducts: FeaturedProductFromDB[]): DisplayProduct[] {
 }
 
 interface FeaturedProductsProps {
-  dbProducts?: FeaturedProductFromDB[]
+  dbProducts?: CatalogProductFromDB[]
 }
 
 export function FeaturedProducts({ dbProducts }: FeaturedProductsProps) {

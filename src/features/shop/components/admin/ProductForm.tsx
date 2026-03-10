@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef } from 'react'
+import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 import {
@@ -10,15 +10,15 @@ import {
   updateColorAction,
   uploadProductImageAction,
   deleteProductImageAction,
+  setImageAsCoverAction,
   saveVariantsAction,
 } from '@/actions/admin-products'
-import type { VarianteInput } from '@/features/shop/services/admin-products'
 
 // ── Taxonomy data ──
 
 const CATEGORIAS = [
   { value: 'remeras-lisas', label: 'Remeras Lisas' },
-  { value: 'personalizadas', label: 'Personalizadas' },
+  { value: 'estampadas', label: 'Estampadas' },
   { value: 'buzos-camperas', label: 'Buzos y Camperas' },
 ]
 
@@ -29,7 +29,7 @@ const LINEAS: Record<string, { value: string; label: string }[]> = {
     { value: 'origen', label: 'Linea Origen' },
     { value: 'terreno', label: 'Linea Terreno' },
   ],
-  personalizadas: [
+  estampadas: [
     { value: 'veta', label: 'Linea Veta' },
   ],
   'buzos-camperas': [
@@ -115,6 +115,10 @@ function ImageIcon({ className }: { className?: string }) {
   return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" className={className}><rect width="18" height="18" x="3" y="3" rx="2" ry="2" /><circle cx="9" cy="9" r="2" /><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21" /></svg>
 }
 
+function StarIcon({ className, filled }: { className?: string; filled?: boolean }) {
+  return <svg viewBox="0 0 24 24" fill={filled ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" /></svg>
+}
+
 // ── Main Component ──
 
 export function ProductForm({ product }: ProductFormProps) {
@@ -145,16 +149,13 @@ export function ProductForm({ product }: ProductFormProps) {
     product?.variantes.forEach((v) => { map[v.talle] = v.stock })
     return map
   })
-  const variantsRef = useRef<VarianteInput[]>(
-    product?.variantes.map((v) => ({ color_id: v.color_id, talle: v.talle, stock: v.stock })) ?? []
-  )
 
   const canUploadImages = !!productId && !!colorId
 
   // ── Handlers ──
 
   function handleNameChange(value: string) {
-    if (!product) setSlug(slugify(value))
+    setSlug(slugify(value))
   }
 
   function handleCategoriaChange(value: string) {
@@ -164,12 +165,6 @@ export function ProductForm({ product }: ProductFormProps) {
 
   function updateVariant(talle: string, stock: number) {
     setVariantState((prev) => ({ ...prev, [talle]: stock }))
-    const existing = variantsRef.current.find((v) => v.talle === talle)
-    if (existing) {
-      existing.stock = stock
-    } else {
-      variantsRef.current.push({ color_id: colorId ?? '', talle, stock })
-    }
   }
 
   async function handleUploadImages(files: FileList) {
@@ -203,6 +198,21 @@ export function ProductForm({ product }: ProductFormProps) {
     } else {
       setImagenes((prev) => prev.filter((img) => img.id !== imageId))
     }
+  }
+
+  async function handleSetCover(imageId: string) {
+    if (!colorId) return
+    setError(null)
+    // Optimistic reorder
+    setImagenes((prev) => {
+      let nextOrden = 1
+      return prev.map((img) => {
+        if (img.id === imageId) return { ...img, orden: 0 }
+        return { ...img, orden: nextOrden++ }
+      })
+    })
+    const result = await setImageAsCoverAction(imageId, colorId)
+    if (result.error) setError(result.error)
   }
 
   // ── Submit ──
@@ -260,15 +270,15 @@ export function ProductForm({ product }: ProductFormProps) {
         }
       }
 
-      // Save variants
+      // Save variants (all sizes, including stock=0)
       if (currentProductId && currentColorId) {
-        const filtered = variantsRef.current
-          .map((v) => ({ ...v, color_id: currentColorId! }))
-          .filter((v) => v.stock > 0)
-        if (filtered.length > 0) {
-          const varResult = await saveVariantsAction(currentProductId, filtered)
-          if (varResult.error) { setError(varResult.error); setSaving(false); return }
-        }
+        const allVariants = TALLES.map((talle) => ({
+          color_id: currentColorId!,
+          talle,
+          stock: variantState[talle] ?? 0,
+        }))
+        const varResult = await saveVariantsAction(currentProductId, allVariants)
+        if (varResult.error) { setError(varResult.error); setSaving(false); return }
       }
 
       setSaving(false)
@@ -317,10 +327,15 @@ export function ProductForm({ product }: ProductFormProps) {
           </div>
 
           <div>
-            <label className="block text-body-sm font-medium text-volcanic-700 mb-1.5">Slug (URL)</label>
-            <div className="w-full px-4 py-3 rounded-xl bg-sand-50 border border-sand-200 text-volcanic-500 text-body-sm font-mono min-h-[48px]">
-              {slug || <span className="text-volcanic-300">se-genera-del-nombre</span>}
-            </div>
+            <label htmlFor="slug" className="block text-body-sm font-medium text-volcanic-700 mb-1.5">Slug (URL)</label>
+            <input
+              id="slug"
+              type="text"
+              value={slug}
+              onChange={(e) => setSlug(slugify(e.target.value))}
+              placeholder="se-genera-del-nombre"
+              className="w-full px-4 py-3 rounded-xl bg-sand-50 border border-sand-200 text-volcanic-700 text-body-sm font-mono focus:outline-none focus:border-terra-500 transition-all"
+            />
           </div>
 
           <div>
@@ -445,25 +460,43 @@ export function ProductForm({ product }: ProductFormProps) {
         ) : (
           <>
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-              {imagenes
+              {[...imagenes]
                 .sort((a, b) => a.orden - b.orden)
-                .map((img) => (
-                  <div key={img.id} className="relative group aspect-square rounded-xl overflow-hidden bg-sand-100">
-                    <Image src={img.url} alt="" fill className="object-cover" sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, 25vw" />
-                    {img.orden === 0 && (
-                      <span className="absolute top-2 left-2 px-2 py-0.5 bg-terra-500 text-white text-[10px] font-bold rounded-md uppercase tracking-wide">
-                        Portada
-                      </span>
-                    )}
-                    <button
-                      type="button"
-                      onClick={() => handleDeleteImage(img.id)}
-                      className="absolute top-2 right-2 p-1.5 bg-white/90 backdrop-blur-sm rounded-lg text-red-500 hover:bg-red-50 opacity-0 group-hover:opacity-100 transition-opacity"
-                    >
-                      <TrashIcon className="w-4 h-4" />
-                    </button>
-                  </div>
-                ))}
+                .map((img) => {
+                  const isCover = img.orden === 0
+                  return (
+                    <div key={img.id} className="relative group aspect-square rounded-xl overflow-hidden bg-sand-100">
+                      <Image src={img.url} alt="" fill className="object-cover" sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, 25vw" />
+                      {isCover && (
+                        <span className="absolute top-2 left-2 px-2 py-0.5 bg-terra-500 text-white text-[10px] font-bold rounded-md uppercase tracking-wide flex items-center gap-1">
+                          <StarIcon className="w-3 h-3" filled />
+                          Portada
+                        </span>
+                      )}
+                      {/* Actions overlay */}
+                      <div className="absolute top-2 right-2 flex gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                        {!isCover && (
+                          <button
+                            type="button"
+                            onClick={() => handleSetCover(img.id)}
+                            title="Usar como portada"
+                            className="p-1.5 bg-white/90 backdrop-blur-sm rounded-lg text-terra-500 hover:bg-terra-50 transition-colors"
+                          >
+                            <StarIcon className="w-4 h-4" />
+                          </button>
+                        )}
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteImage(img.id)}
+                          title="Eliminar imagen"
+                          className="p-1.5 bg-white/90 backdrop-blur-sm rounded-lg text-red-500 hover:bg-red-50 transition-colors"
+                        >
+                          <TrashIcon className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </div>
+                  )
+                })}
 
               {/* Upload card */}
               <label className={`aspect-square rounded-xl border-2 border-dashed border-sand-300 flex flex-col items-center justify-center cursor-pointer hover:border-terra-400 hover:bg-sand-50 transition-all ${uploading ? 'pointer-events-none opacity-50' : ''}`}>

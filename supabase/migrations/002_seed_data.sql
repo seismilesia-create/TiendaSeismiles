@@ -6,8 +6,7 @@
 INSERT INTO product_lines (name, slug, description, display_order, is_active) VALUES
   ('Remeras Algodon', 'remeras-algodon', 'De basico a premium. Fibras seleccionadas para textura suave y duradera.', 1, true),
   ('Remeras Pique', 'remeras-pique', 'El tejido que marca la diferencia. Tacto superior, estructura que no pierde forma.', 2, true),
-  ('Buzos Canguro', 'buzos-canguro', 'Super Premium. Confeccion superior con amplia gama de colores.', 3, true),
-  ('Empresas & DTF', 'empresas-dtf', 'Venta mayorista y personalizacion DTF para empresas y creativos.', 4, true);
+  ('Buzos Canguro', 'buzos-canguro', 'Super Premium. Confeccion superior con amplia gama de colores.', 3, true);
 
 -- Colores base (ampliable - especialmente para Buzos Canguro)
 INSERT INTO colors (name, slug, hex_code, display_order) VALUES

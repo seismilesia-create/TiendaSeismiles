@@ -70,7 +70,7 @@ export function Footer({ productLines }: FooterProps) {
               {productLines.map((line) => (
                 <li key={line.id}>
                   <Link
-                    href={`/tienda/${line.slug}`}
+                    href={`/catalogo?line=${line.slug}`}
                     className="text-body-sm text-volcanic-400 hover:text-terra-400 transition-colors"
                   >
                     {line.name}
@@ -79,29 +79,12 @@ export function Footer({ productLines }: FooterProps) {
               ))}
               <li>
                 <Link
-                  href="/tienda"
+                  href="/catalogo"
                   className="text-body-sm text-volcanic-400 hover:text-terra-400 transition-colors"
                 >
                   Todos los productos
                 </Link>
               </li>
-            </ul>
-          </div>
-
-          {/* Columna 3: Empresas */}
-          <div>
-            <h3 className="font-heading text-white text-body-md mb-4">Empresas</h3>
-            <ul className="space-y-2.5">
-              {footer.columns[1].links.map((link) => (
-                <li key={link.href}>
-                  <Link
-                    href={link.href}
-                    className="text-body-sm text-volcanic-400 hover:text-terra-400 transition-colors"
-                  >
-                    {link.label}
-                  </Link>
-                </li>
-              ))}
             </ul>
           </div>
 

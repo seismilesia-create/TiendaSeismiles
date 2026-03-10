@@ -1,5 +1,5 @@
 import { notFound } from 'next/navigation'
-import { getProductBySlug, getCatalogProducts, getProductReviews } from '@/features/shop/services/product-lines'
+import { getProductBySlug, getMostViewedProducts, getProductReviews } from '@/features/shop/services/product-lines'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
 import { ProductDetail } from './ProductDetail'
 
@@ -9,16 +9,12 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
 
   if (!product) notFound()
 
-  // Fetch related products, reviews, and current user in parallel
-  const [allProducts, reviewData, supabase] = await Promise.all([
-    getCatalogProducts(),
+  // Fetch most viewed products, reviews, and current user in parallel
+  const [mostViewed, reviewData, supabase] = await Promise.all([
+    getMostViewedProducts(product.id, 4),
     getProductReviews(product.id),
     createClient(),
   ])
-
-  const related = allProducts
-    .filter((p) => p.linea === product.linea && p.id !== product.id)
-    .slice(0, 4)
 
   const { data: { user } } = await supabase.auth.getUser()
 
@@ -48,7 +44,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
   return (
     <ProductDetail
       product={product}
-      relatedProducts={related}
+      mostViewedProducts={mostViewed}
       reviews={reviewData.reviews}
       reviewSummary={reviewData.summary}
       currentUserId={user?.id ?? null}

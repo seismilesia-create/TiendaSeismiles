@@ -68,6 +68,33 @@ export interface CatalogProductFromDB {
   variantes: { talle: string }[]
 }
 
+/** Fetch most viewed products (excludes a given product) */
+export async function getMostViewedProducts(excludeId?: string, limit = 4): Promise<CatalogProductFromDB[]> {
+  try {
+    const supabase = createAnonClient()
+    let query = supabase
+      .from('productos')
+      .select(`
+        id, nombre, slug, precio, categoria, linea, genero, destacado, created_at,
+        colores(nombre, hex, imagen_url),
+        variantes(talle)
+      `)
+      .eq('activo', true)
+      .order('visualizaciones', { ascending: false })
+      .limit(limit + 1)
+
+    if (excludeId) {
+      query = query.neq('id', excludeId)
+    }
+
+    const { data, error } = await query
+    if (error) throw error
+    return (data ?? []).slice(0, limit) as CatalogProductFromDB[]
+  } catch {
+    return []
+  }
+}
+
 /** Fetch all active products for the catalog page */
 export async function getCatalogProducts(): Promise<CatalogProductFromDB[]> {
   try {

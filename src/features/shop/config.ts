@@ -22,7 +22,7 @@ export const shopConfig: ShopConfig = {
     headline: 'Calidad de Altura',
     subheadline:
       'Desde el corazón de Catamarca, diseñamos y confeccionamos ropa de alta gama. Inspirados en la solidez de nuestros Seismiles, creamos prendas que honran nuestra tierra y están hechas para durar.',
-    ctaPrimary: { text: 'Ver coleccion', href: '/tienda' },
+    ctaPrimary: { text: 'Ver coleccion', href: '/catalogo' },
     ctaSecondary: { text: 'Nuestro origen', href: '#origen' },
   },
 
@@ -36,18 +36,17 @@ export const shopConfig: ShopConfig = {
   navigation: [
     { label: 'Inicio', href: '/' },
     {
-      label: 'Tienda',
-      href: '/tienda',
+      label: 'Catalogo',
+      href: '/catalogo',
       children: [
-        { label: 'Remeras Algodon', href: '/tienda/remeras-algodon' },
-        { label: 'Remeras Pique', href: '/tienda/remeras-pique' },
-        { label: 'Buzos Canguro', href: '/tienda/buzos-canguro' },
-        { label: 'Todos los productos', href: '/tienda' },
+        { label: 'Remeras Algodon', href: '/catalogo?type=remeras-lisas' },
+        { label: 'Remeras Pique', href: '/catalogo?type=estampadas' },
+        { label: 'Buzos y Camperas', href: '/catalogo?type=buzos-camperas' },
+        { label: 'Todos los productos', href: '/catalogo' },
       ],
     },
-    { label: 'Empresas', href: '/empresas' },
     { label: 'Nuestro Origen', href: '#origen' },
-    { label: 'Contacto', href: '/contacto' },
+    { label: 'FAQ', href: '/faq' },
   ],
 
   featuredProducts: {
@@ -58,7 +57,7 @@ export const shopConfig: ShopConfig = {
       {
         name: 'Remera Arista',
         slug: 'remera-arista',
-        href: '/tienda/linea-arista',
+        href: '/catalogo?line=linea-arista',
         line: 'Linea Arista',
         price: '$18.500',
         imageUrl: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=600&h=800&fit=crop&crop=center',
@@ -67,7 +66,7 @@ export const shopConfig: ShopConfig = {
       {
         name: 'Buzo Tres Cruces',
         slug: 'buzo-tres-cruces',
-        href: '/tienda/linea-tres-cruces',
+        href: '/catalogo?line=linea-tres-cruces',
         line: 'Linea Tres Cruces',
         price: '$32.900',
         imageUrl: 'https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=600&h=800&fit=crop&crop=center',
@@ -76,7 +75,7 @@ export const shopConfig: ShopConfig = {
       {
         name: 'Remera Pissis',
         slug: 'remera-pissis',
-        href: '/tienda/linea-pissis',
+        href: '/catalogo?line=linea-pissis',
         line: 'Linea Pissis',
         price: '$19.900',
         imageUrl: 'https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?w=600&h=800&fit=crop&crop=center',
@@ -84,13 +83,13 @@ export const shopConfig: ShopConfig = {
       {
         name: 'Buzo Veladero',
         slug: 'buzo-veladero',
-        href: '/tienda/linea-veladero',
+        href: '/catalogo?line=linea-veladero',
         line: 'Linea Veladero',
         price: '$34.500',
         imageUrl: 'https://images.unsplash.com/photo-1542327897-d73f4005b533?w=600&h=800&fit=crop&crop=center',
       },
     ],
-    cta: { text: 'Ver todos los productos', href: '/tienda' },
+    cta: { text: 'Ver todos los productos', href: '/catalogo' },
   },
 
   productTypeTabs: [
@@ -133,8 +132,8 @@ export const shopConfig: ShopConfig = {
       ],
     },
     {
-      id: 'remeras-personalizadas',
-      label: 'Personalizadas',
+      id: 'remeras-estampadas',
+      label: 'Estampadas',
       categories: [
         {
           title: 'Linea Veta',
@@ -232,40 +231,6 @@ export const shopConfig: ShopConfig = {
   giftCards: {
     heading: 'Gift Cards Seismiles',
     subtitle: 'Regala calidad. Que elijan lo que mas les guste con una tarjeta de regalo Seismiles.',
-    cards: [
-      {
-        id: 'gc-5000',
-        title: 'Gift Card Clasica',
-        price: '$5.000',
-        description: 'Ideal para un detalle. Perfecta para accesorios o como aporte a una prenda favorita.',
-        gradientFrom: '#8B7355',
-        gradientTo: '#6B5B45',
-      },
-      {
-        id: 'gc-15000',
-        title: 'Gift Card Premium',
-        price: '$15.000',
-        description: 'La eleccion mas popular. Alcanza para una remera de cualquiera de nuestras lineas.',
-        gradientFrom: '#C75B39',
-        gradientTo: '#A04830',
-      },
-      {
-        id: 'gc-30000',
-        title: 'Gift Card Cumbre',
-        price: '$30.000',
-        description: 'Para quienes van por todo. Cubre buzos, camperas o varias prendas a eleccion.',
-        gradientFrom: '#2C2420',
-        gradientTo: '#4A3D35',
-      },
-      {
-        id: 'gc-50000',
-        title: 'Gift Card Seismiles',
-        price: '$50.000',
-        description: 'El regalo definitivo. Libertad total para armar el guardarropa completo.',
-        gradientFrom: '#5C5347',
-        gradientTo: '#1A1614',
-      },
-    ],
   },
 
   benefits: [
@@ -376,27 +341,24 @@ export const shopConfig: ShopConfig = {
       {
         title: 'Tienda',
         links: [
-          { label: 'Remeras Algodon', href: '/tienda/remeras-algodon' },
-          { label: 'Remeras Pique', href: '/tienda/remeras-pique' },
-          { label: 'Buzos Canguro', href: '/tienda/buzos-canguro' },
-          { label: 'Todos los productos', href: '/tienda' },
+          { label: 'Remeras Lisas', href: '/catalogo?type=remeras-lisas' },
+          { label: 'Estampadas', href: '/catalogo?type=estampadas' },
+          { label: 'Buzos y Camperas', href: '/catalogo?type=buzos-camperas' },
+          { label: 'Todos los productos', href: '/catalogo' },
         ],
       },
       {
-        title: 'Empresas',
+        title: 'Informacion',
         links: [
-          { label: 'Venta Mayorista', href: '/empresas' },
-          { label: 'Personalizacion DTF', href: '/empresas#dtf' },
-          { label: 'Consultar precios', href: '/contacto' },
+          { label: 'Nosotros', href: '/nosotros' },
+          { label: 'Gift Cards', href: '/giftcards' },
         ],
       },
       {
         title: 'Ayuda',
         links: [
-          { label: 'Contacto', href: '/contacto' },
           { label: 'Preguntas frecuentes', href: '/faq' },
-          { label: 'Envios y seguimiento', href: '/envios' },
-          { label: 'Cambios y devoluciones', href: '/cambios' },
+          { label: 'Contacto', href: '/contacto' },
         ],
       },
     ],

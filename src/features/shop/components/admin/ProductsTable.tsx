@@ -4,7 +4,7 @@ import { useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { deleteProductAction, duplicateProductAction } from '@/actions/admin-products'
+import { deleteProductAction, duplicateProductAction, toggleProductActiveAction } from '@/actions/admin-products'
 
 interface Producto {
   id: string
@@ -32,6 +32,19 @@ const LINEA_LABELS: Record<string, string> = {
   'san-francisco': 'Linea San Francisco',
 }
 
+const GENERO_LABELS: Record<string, string> = {
+  hombre: 'Hombre',
+  mujer: 'Mujer',
+  unisex: 'Unisex',
+  nino: 'Niño',
+}
+
+function FilterIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" className={className}><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" /></svg>
+  )
+}
+
 function EditIcon({ className }: { className?: string }) {
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" /><path d="m15 5 4 4" /></svg>
@@ -54,12 +67,33 @@ export function ProductsTable({ products }: { products: Producto[] }) {
   const router = useRouter()
   const [deleting, setDeleting] = useState<string | null>(null)
   const [duplicating, setDuplicating] = useState<string | null>(null)
+  const [toggling, setToggling] = useState<string | null>(null)
+  const [filterLinea, setFilterLinea] = useState<string>('')
+  const [filterGenero, setFilterGenero] = useState<string>('')
+
+  // Derive unique values from actual products
+  const lineas = [...new Set(products.map((p) => p.linea))].sort()
+  const generos = [...new Set(products.map((p) => p.genero))].sort()
+
+  const filtered = products.filter((p) => {
+    if (filterLinea && p.linea !== filterLinea) return false
+    if (filterGenero && p.genero !== filterGenero) return false
+    return true
+  })
+
+  const hasFilters = filterLinea || filterGenero
 
   async function handleDelete(id: string, nombre: string) {
     if (!confirm(`Eliminar "${nombre}"? Esta accion no se puede deshacer.`)) return
     setDeleting(id)
     await deleteProductAction(id)
     setDeleting(null)
+  }
+
+  async function handleToggleActive(id: string, currentActive: boolean) {
+    setToggling(id)
+    await toggleProductActiveAction(id, !currentActive)
+    setToggling(null)
   }
 
   async function handleDuplicate(id: string) {
@@ -72,8 +106,45 @@ export function ProductsTable({ products }: { products: Producto[] }) {
   }
 
   return (
+    <div>
+      {/* Filters */}
+      <div className="flex flex-wrap items-center gap-3 mb-5">
+        <FilterIcon className="w-4 h-4 text-volcanic-400" />
+        <select
+          value={filterLinea}
+          onChange={(e) => setFilterLinea(e.target.value)}
+          className="px-3 py-1.5 text-body-sm bg-white border border-sand-200 rounded-lg text-volcanic-700 focus:outline-none focus:ring-2 focus:ring-terra-500/30 focus:border-terra-500"
+        >
+          <option value="">Todas las lineas</option>
+          {lineas.map((l) => (
+            <option key={l} value={l}>{LINEA_LABELS[l] ?? l}</option>
+          ))}
+        </select>
+        <select
+          value={filterGenero}
+          onChange={(e) => setFilterGenero(e.target.value)}
+          className="px-3 py-1.5 text-body-sm bg-white border border-sand-200 rounded-lg text-volcanic-700 focus:outline-none focus:ring-2 focus:ring-terra-500/30 focus:border-terra-500"
+        >
+          <option value="">Todos los generos</option>
+          {generos.map((g) => (
+            <option key={g} value={g}>{GENERO_LABELS[g] ?? g}</option>
+          ))}
+        </select>
+        {hasFilters && (
+          <button
+            onClick={() => { setFilterLinea(''); setFilterGenero('') }}
+            className="px-3 py-1.5 text-body-xs font-medium text-terra-600 hover:text-terra-700 hover:bg-terra-50 rounded-lg transition-colors"
+          >
+            Limpiar filtros
+          </button>
+        )}
+        <span className="text-body-xs text-volcanic-400 ml-auto">
+          {filtered.length} de {products.length}
+        </span>
+      </div>
+
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-      {products.map((product) => {
+      {filtered.map((product) => {
         const firstColor = product.colores[0]
         return (
           <div
@@ -101,11 +172,16 @@ export function ProductsTable({ products }: { products: Producto[] }) {
               )}
               {/* Badges */}
               <div className="absolute top-2 left-2 flex gap-1.5">
-                <span className={`px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider rounded-full ${
-                  product.activo ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
-                }`}>
-                  {product.activo ? 'Activo' : 'Inactivo'}
-                </span>
+                <button
+                  onClick={() => handleToggleActive(product.id, product.activo)}
+                  disabled={toggling === product.id}
+                  title={product.activo ? 'Click para desactivar' : 'Click para activar'}
+                  className={`px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider rounded-full cursor-pointer transition-colors disabled:opacity-50 ${
+                    product.activo ? 'bg-green-100 text-green-700 hover:bg-green-200' : 'bg-red-100 text-red-700 hover:bg-red-200'
+                  }`}
+                >
+                  {toggling === product.id ? '...' : product.activo ? 'Activo' : 'Inactivo'}
+                </button>
                 {product.destacado && (
                   <span className="px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider rounded-full bg-terra-100 text-terra-700">
                     Destacado
@@ -176,6 +252,7 @@ export function ProductsTable({ products }: { products: Producto[] }) {
           </div>
         )
       })}
+    </div>
     </div>
   )
 }

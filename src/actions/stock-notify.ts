@@ -1,7 +1,7 @@
 'use server'
 
 import { createClient, createServiceClient } from '@/lib/supabase/server'
-import { stockNotificationConfirmEmail, adminStockRequestEmail } from '@/lib/email/seismiles-templates'
+import { stockNotificationConfirmEmail } from '@/lib/email/seismiles-templates'
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
@@ -84,38 +84,7 @@ export async function subscribeToStock(formData: FormData) {
       console.error('Error sending stock notification email:', emailError)
     }
 
-    // 2. Alert to admin
-    const adminEmail = process.env.ADMIN_NOTIFICATION_EMAIL
-    if (adminEmail) {
-      try {
-        // Fetch product slug for the admin email link
-        const service = createServiceClient()
-        const { data: prod } = await service
-          .from('productos')
-          .select('slug')
-          .eq('id', productoId)
-          .single()
-
-        const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://seismiles.com'
-
-        await resend.emails.send({
-          from: fromEmail,
-          to: adminEmail,
-          subject: `Solicitud de stock — ${productName} (${talle})`,
-          html: adminStockRequestEmail({
-            customerEmail: email,
-            productName,
-            talle,
-            colorName,
-            colorHex,
-            productSlug: prod?.slug ?? '',
-            siteUrl,
-          }),
-        })
-      } catch (adminEmailError) {
-        console.error('Error sending admin stock request email:', adminEmailError)
-      }
-    }
+    // Admin stock requests are managed from the admin dashboard
   }
 
   return { success: true }

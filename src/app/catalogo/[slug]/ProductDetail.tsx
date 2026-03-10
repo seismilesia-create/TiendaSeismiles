@@ -1,8 +1,11 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { useAuth } from '@/hooks/useAuth'
+import { useCartStore } from '@/features/shop/stores/cart-store'
+import { trackProductView } from '@/actions/track-view'
 import { ProductCard } from '@/features/shop/components/ProductCard'
 import { ReviewSection } from '@/features/shop/components/ReviewSection'
 import { SizeGuideDrawer } from '@/features/shop/components/SizeGuideDrawer'
@@ -99,14 +102,14 @@ function Accordion({ title, children }: { title: string; children: React.ReactNo
 
 interface ProductDetailProps {
   product: ProductDetailFromDB
-  relatedProducts: CatalogProductFromDB[]
+  mostViewedProducts: CatalogProductFromDB[]
   reviews: ReviewFromDB[]
   reviewSummary: ReviewSummary
   currentUserId: string | null
   canReview: boolean
 }
 
-export function ProductDetail({ product, relatedProducts, reviews, reviewSummary, currentUserId, canReview }: ProductDetailProps) {
+export function ProductDetail({ product, mostViewedProducts, reviews, reviewSummary, currentUserId, canReview }: ProductDetailProps) {
   const { user } = useAuth()
   const [selectedColorId, setSelectedColorId] = useState(product.colores[0]?.id ?? null)
   const [selectedSize, setSelectedSize] = useState<string | null>(null)
@@ -114,6 +117,18 @@ export function ProductDetail({ product, relatedProducts, reviews, reviewSummary
   const [lightboxOpen, setLightboxOpen] = useState(false)
   const [lightboxIndex, setLightboxIndex] = useState(0)
   const [notifyTalle, setNotifyTalle] = useState<string | null>(null)
+  const [showAddedToast, setShowAddedToast] = useState(false)
+
+  const addItem = useCartStore((s) => s.addItem)
+
+  // Track product view (once per mount)
+  const tracked = useRef(false)
+  useEffect(() => {
+    if (!tracked.current) {
+      tracked.current = true
+      trackProductView(product.id)
+    }
+  }, [product.id])
 
   const selectedColor = product.colores.find((c) => c.id === selectedColorId)
   const lineLabel = LINEA_LABELS[product.linea] ?? product.linea
@@ -145,6 +160,36 @@ export function ProductDetail({ product, relatedProducts, reviews, reviewSummary
   }
 
   const canAddToCart = selectedColorId && selectedSize && getStock(selectedColorId, selectedSize) > 0
+
+  function handleAddToCart() {
+    if (!selectedColorId || !selectedSize || !selectedColor) return
+
+    const variant = product.variantes.find(
+      (v) => v.color_id === selectedColorId && v.talle === selectedSize
+    )
+    if (!variant || variant.stock <= 0) return
+
+    const firstImage = selectedColor.imagenes?.[0]?.url
+      ?? selectedColor.imagen_url
+      ?? null
+
+    addItem({
+      variantId: variant.id,
+      productId: product.id,
+      productName: product.nombre,
+      productSlug: product.slug,
+      colorId: selectedColorId,
+      colorName: selectedColor.nombre,
+      colorHex: selectedColor.hex,
+      talle: selectedSize,
+      precio: product.precio,
+      imagenUrl: firstImage,
+      maxStock: variant.stock,
+    })
+
+    setShowAddedToast(true)
+    setTimeout(() => setShowAddedToast(false), 3500)
+  }
 
   return (
     <>
@@ -299,6 +344,7 @@ export function ProductDetail({ product, relatedProducts, reviews, reviewSummary
             <div className="hidden lg:block mb-8">
               <button
                 disabled={!canAddToCart}
+                onClick={handleAddToCart}
                 className="w-full flex items-center justify-center gap-3 py-4 bg-volcanic-900 hover:bg-volcanic-800 disabled:bg-volcanic-400 disabled:cursor-not-allowed text-white text-body-md font-semibold rounded-xl transition-all duration-300"
               >
                 <ShoppingBagIcon className="w-5 h-5" />
@@ -353,14 +399,14 @@ export function ProductDetail({ product, relatedProducts, reviews, reviewSummary
           canReview={canReview}
         />
 
-        {/* ── Related Products ── */}
-        {relatedProducts.length > 0 && (
+        {/* ── Most Viewed Products ── */}
+        {mostViewedProducts.length > 0 && (
           <section className="mt-16 lg:mt-24">
             <h2 className="font-heading text-display-xs text-volcanic-900 mb-8">
-              Tambien te puede gustar
+              Tambien te podria interesar
             </h2>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
-              {relatedProducts.map((p) => (
+              {mostViewedProducts.map((p) => (
                 <ProductCard key={p.id} product={p} />
               ))}
             </div>
@@ -380,6 +426,7 @@ export function ProductDetail({ product, relatedProducts, reviews, reviewSummary
         </div>
         <button
           disabled={!canAddToCart}
+          onClick={handleAddToCart}
           className="flex items-center gap-2 px-6 py-3 bg-volcanic-900 hover:bg-volcanic-800 disabled:bg-volcanic-400 disabled:cursor-not-allowed text-white text-body-sm font-semibold rounded-xl transition-all flex-shrink-0"
         >
           <ShoppingBagIcon className="w-4 h-4" />
@@ -419,6 +466,40 @@ export function ProductDetail({ product, relatedProducts, reviews, reviewSummary
         talle={notifyTalle ?? ''}
         userEmail={user?.email ?? null}
       />
+
+      {/* Added to cart toast */}
+      {showAddedToast && (
+        <div className="fixed top-24 right-4 z-50 animate-fade-in">
+          <div className="flex items-center gap-3 bg-white rounded-xl shadow-elevated border border-sand-200 px-4 py-3.5 max-w-sm">
+            <div className="w-12 h-14 rounded-lg overflow-hidden bg-sand-100 shrink-0">
+              {(() => {
+                const toastImg = selectedColor?.imagenes?.[0]?.url ?? selectedColor?.imagen_url ?? null
+                return toastImg ? (
+                  <Image src={toastImg} alt="" width={48} height={56} className="w-full h-full object-cover" />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center text-volcanic-300">
+                    <ShoppingBagIcon className="w-5 h-5" />
+                  </div>
+                )
+              })()}
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-body-sm font-semibold text-volcanic-900 truncate">
+                Agregado al carrito
+              </p>
+              <p className="text-body-xs text-volcanic-500 truncate">
+                {product.nombre} · {selectedColor?.nombre} · {selectedSize}
+              </p>
+            </div>
+            <Link
+              href="/carrito"
+              className="text-body-xs font-semibold text-terra-500 hover:text-terra-600 whitespace-nowrap transition-colors"
+            >
+              Ver carrito
+            </Link>
+          </div>
+        </div>
+      )}
     </>
   )
 }

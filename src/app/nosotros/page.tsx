@@ -1,0 +1,262 @@
+import type { Metadata } from 'next'
+import Image from 'next/image'
+import Link from 'next/link'
+import { MarqueeBanner, Navbar, Footer } from '@/features/shop/components'
+import { getProductLines } from '@/features/shop/services/product-lines'
+import { createClient, createServiceClient } from '@/lib/supabase/server'
+
+export const metadata: Metadata = {
+  title: 'Nosotros | Seismiles Textil',
+  description: 'Nacidos en la inmensidad del altiplano catamarqueño. Conoce la historia de Seismiles Textil, nuestra esencia y la ruta que nos inspira.',
+}
+
+function MountainIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" className={className}>
+      <path d="m8 3 4 8 5-5 5 15H2L8 3z" />
+    </svg>
+  )
+}
+
+function ArrowRightIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M5 12h14" /><path d="m12 5 7 7-7 7" /></svg>
+  )
+}
+
+export default async function NosotrosPage() {
+  const [productLines, supabase] = await Promise.all([getProductLines(), createClient()])
+  const { data: { user } } = await supabase.auth.getUser()
+  let navUser: { email: string; role: string } | null = null
+  if (user) {
+    const service = createServiceClient()
+    const { data: profile } = await service.from('profiles').select('role').eq('id', user.id).single()
+    navUser = { email: user.email ?? '', role: profile?.role ?? 'customer' }
+  }
+
+  return (
+    <>
+      <MarqueeBanner />
+      <Navbar productLines={productLines} user={navUser} />
+
+      <main>
+        {/* Hero - Full width image with overlay */}
+        <section className="relative h-[70vh] lg:h-[80vh] flex items-end overflow-hidden">
+          <Image
+            src="/images/paso de san francisco - quebrada de las angosturas.jpg"
+            alt="Paso de San Francisco, Ruta Nacional 60, Catamarca"
+            fill
+            priority
+            className="object-cover"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-volcanic-900/90 via-volcanic-900/40 to-transparent" />
+
+          <div className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12 lg:pb-20">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-sm border border-white/10 mb-6">
+              <MountainIcon className="w-4 h-4 text-terra-400" />
+              <span className="text-body-xs uppercase tracking-widest text-white/80 font-semibold">
+                Nuestra historia
+              </span>
+            </div>
+            <h1 className="font-heading text-display-lg sm:text-display-xl lg:text-[4.5rem] leading-[1.05] text-white mb-4 max-w-3xl">
+              Nacidos a 6000 metros de altura
+            </h1>
+            <p className="text-body-lg text-white/60 max-w-2xl leading-relaxed">
+              Desde el corazon de Catamarca, donde los volcanes tocan el cielo,
+              creamos prendas que honran nuestra tierra.
+            </p>
+          </div>
+        </section>
+
+        {/* Origin story */}
+        <section className="py-20 lg:py-28 bg-[#FAFAF8]">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center">
+              {/* Text */}
+              <div>
+                <span className="text-body-xs uppercase tracking-widest text-terra-500 font-semibold mb-4 block">
+                  Quienes somos
+                </span>
+                <h2 className="font-heading text-display-sm sm:text-display-md text-volcanic-900 mb-6">
+                  La ruta que nos inspira
+                </h2>
+                <div className="space-y-5 text-body-md text-volcanic-500 leading-relaxed">
+                  <p>
+                    La Ruta de los Seismiles recorre la Ruta Nacional 60 entre Tinogasta y el
+                    Paso de San Francisco, en Catamarca. Un camino rodeado de volcanes de mas
+                    de 6.000 metros, paisajes aridos y la majestuosidad del altiplano andino.
+                  </p>
+                  <p>
+                    Esa grandeza nos inspira. Cada prenda lleva la fuerza de la tierra, la
+                    resistencia de la roca volcanica y la calidez del desierto que nos vio nacer.
+                    Somos de la montana, para la ciudad.
+                  </p>
+                  <p>
+                    Seismiles Textil nace de la conviccion de que la calidad no es un lujo,
+                    sino un estandar. Disenamos y confeccionamos en Catamarca, con materiales
+                    premium seleccionados y procesos que respetan el tiempo que cada prenda merece.
+                  </p>
+                </div>
+
+                {/* Stats */}
+                <div className="flex items-center gap-10 mt-10 pt-10 border-t border-sand-200">
+                  <div>
+                    <p className="font-heading text-display-sm text-volcanic-900">6.000</p>
+                    <p className="text-body-xs text-volcanic-400 uppercase tracking-wider mt-1">Metros de altura</p>
+                  </div>
+                  <div className="w-px h-12 bg-sand-200" />
+                  <div>
+                    <p className="font-heading text-display-sm text-volcanic-900">600</p>
+                    <p className="text-body-xs text-volcanic-400 uppercase tracking-wider mt-1">km de recorrido</p>
+                  </div>
+                  <div className="w-px h-12 bg-sand-200" />
+                  <div>
+                    <p className="font-heading text-display-sm text-terra-500">RN 60</p>
+                    <p className="text-body-xs text-volcanic-400 uppercase tracking-wider mt-1">Ruta Nacional</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Image */}
+              <div className="relative aspect-[4/5] rounded-2xl overflow-hidden">
+                <Image
+                  src="/images/balcon pissis.jpg"
+                  alt="Balcon del Pissis, lagunas y salares del altiplano catamarqueno"
+                  fill
+                  className="object-cover"
+                  sizes="(max-width: 1024px) 100vw, 50vw"
+                />
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Values */}
+        <section className="py-20 lg:py-28 bg-volcanic-900 relative overflow-hidden">
+          {/* Decorative blurs */}
+          <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-terra-500/5 blur-[150px] rounded-full pointer-events-none" />
+          <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-terra-500/5 blur-[120px] rounded-full pointer-events-none" />
+
+          <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center mb-16">
+              <span className="text-body-xs uppercase tracking-widest text-terra-400 font-semibold mb-4 block">
+                Nuestros valores
+              </span>
+              <h2 className="font-heading text-display-sm sm:text-display-md text-white mb-4">
+                Lo que nos define
+              </h2>
+              <p className="text-body-md text-white/40 max-w-2xl mx-auto">
+                Cada decision que tomamos esta guiada por estos principios. Son nuestra brujula,
+                como la cordillera lo es para el viajero.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {[
+                {
+                  number: '01',
+                  title: 'Calidad sin concesiones',
+                  description: 'Elegimos los mejores materiales: algodon de fibra larga, pique superior y frisas peinadas de primera calidad. No hay atajos cuando el objetivo es la excelencia.',
+                },
+                {
+                  number: '02',
+                  title: 'Raices catamarquenas',
+                  description: 'Disenamos y confeccionamos en Catamarca. Nuestra identidad nace de la tierra, de sus colores, de su fuerza. Cada prenda lleva el ADN del altiplano.',
+                },
+                {
+                  number: '03',
+                  title: 'Hecho para durar',
+                  description: 'Costuras reforzadas, tinturas de alta fijacion, terminaciones impecables. Nuestras prendas estan hechas para acompanarte, no para descartarse.',
+                },
+                {
+                  number: '04',
+                  title: 'Diseno con proposito',
+                  description: 'Cada linea tiene nombre de volcan, cada detalle tiene razon de ser. Creamos ropa urbana con alma de montana: versatil, resistente y con caracter.',
+                },
+                {
+                  number: '05',
+                  title: 'Confianza genuina',
+                  description: 'Vestir Seismiles es vestir confianza. Sabemos que cuando te sentis bien con lo que llevas puesto, todo cambia. Ese es nuestro compromiso.',
+                },
+                {
+                  number: '06',
+                  title: 'Comunidad',
+                  description: 'No somos solo una marca, somos una comunidad de personas que valoran lo autentico. Crecemos juntos, paso a paso, cumbre a cumbre.',
+                },
+              ].map((value) => (
+                <div
+                  key={value.number}
+                  className="rounded-2xl bg-white/[0.04] border border-white/[0.06] p-6 lg:p-8 hover:bg-white/[0.06] transition-colors duration-300"
+                >
+                  <span className="text-body-xs font-mono text-terra-400 mb-4 block">
+                    {value.number}
+                  </span>
+                  <h3 className="font-heading text-lg text-white mb-3">
+                    {value.title}
+                  </h3>
+                  <p className="text-body-sm text-white/40 leading-relaxed">
+                    {value.description}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Full width landscape image */}
+        <section className="relative h-[50vh] lg:h-[60vh] overflow-hidden">
+          <Image
+            src="/images/Siesmiles_Secretaría de Turismo de Catamarca_03.jpg"
+            alt="Volcanes nevados de la Ruta de los Seismiles, Catamarca"
+            fill
+            className="object-cover"
+            sizes="100vw"
+          />
+          <div className="absolute inset-0 bg-gradient-to-b from-volcanic-900/20 via-transparent to-[#FAFAF8]" />
+
+          {/* Floating quote */}
+          <div className="absolute inset-0 flex items-center justify-center">
+            <div className="text-center px-4 max-w-3xl">
+              <blockquote className="font-heading text-display-sm sm:text-display-md text-white drop-shadow-lg">
+                &ldquo;Donde los volcanes tocan el cielo, vestimos confianza&rdquo;
+              </blockquote>
+            </div>
+          </div>
+        </section>
+
+        {/* CTA */}
+        <section className="py-20 lg:py-28 bg-[#FAFAF8]">
+          <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <span className="text-body-xs uppercase tracking-widest text-terra-500 font-semibold mb-4 block">
+              Unite a Seismiles
+            </span>
+            <h2 className="font-heading text-display-sm sm:text-display-md text-volcanic-900 mb-6">
+              Conoce nuestra coleccion
+            </h2>
+            <p className="text-body-md text-volcanic-500 leading-relaxed mb-10 max-w-xl mx-auto">
+              Cada prenda es una declaracion de lo que somos: resistencia, calidez y autenticidad.
+              Explora las lineas que nacen de la montana.
+            </p>
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+              <Link
+                href="/catalogo"
+                className="group flex items-center gap-2 px-8 py-4 bg-volcanic-900 hover:bg-volcanic-800 text-white text-body-md font-semibold rounded-xl transition-all duration-300 hover:shadow-warm-lg"
+              >
+                Ver coleccion
+                <ArrowRightIcon className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-300" />
+              </Link>
+              <Link
+                href="/faq"
+                className="group flex items-center gap-2 px-8 py-4 bg-white hover:bg-sand-100 text-volcanic-900 text-body-md font-semibold rounded-xl border border-volcanic-900/10 transition-all duration-300"
+              >
+                Preguntas frecuentes
+              </Link>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <Footer productLines={productLines} />
+    </>
+  )
+}

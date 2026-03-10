@@ -77,16 +77,6 @@ export interface PaymentMethod {
   slug: string
 }
 
-/** Gift card para la seccion de tarjetas regalo */
-export interface GiftCard {
-  id: string
-  title: string
-  price: string
-  description: string
-  gradientFrom: string
-  gradientTo: string
-}
-
 /** Pregunta frecuente */
 export interface FaqItem {
   question: string
@@ -158,7 +148,6 @@ export interface ShopConfig {
   giftCards: {
     heading: string
     subtitle: string
-    cards: GiftCard[]
   }
 
   benefits: BenefitItem[]

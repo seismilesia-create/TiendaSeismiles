@@ -81,7 +81,7 @@ interface CatalogClientProps {
 }
 
 /* Valid type param values that map to catalog filter */
-const VALID_TYPES = ['remeras-lisas', 'personalizadas', 'buzos-camperas']
+const VALID_TYPES = ['remeras-lisas', 'estampadas', 'buzos-camperas']
 const VALID_AUDIENCES = ['hombres', 'mujeres', 'ninos']
 
 function CatalogInner({ products }: CatalogClientProps) {

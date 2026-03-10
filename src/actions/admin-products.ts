@@ -15,6 +15,7 @@ import {
   uploadColorImage,
   uploadProductImage,
   deleteProductImage,
+  setImageAsCover,
   saveVariants,
   type VarianteInput,
 } from '@/features/shop/services/admin-products'
@@ -93,6 +94,19 @@ export async function duplicateProductAction(productoId: string) {
     const newProductId = await duplicateProduct(productoId)
     revalidatePath('/admin/productos')
     return { success: true, productoId: newProductId }
+  } catch (err) {
+    return { error: (err as Error).message }
+  }
+}
+
+export async function toggleProductActiveAction(productoId: string, activo: boolean) {
+  const admin = await requireAdmin()
+  if (!admin) return { error: 'No autorizado' }
+
+  try {
+    await updateProduct(productoId, { activo })
+    revalidatePath('/admin/productos')
+    return { success: true }
   } catch (err) {
     return { error: (err as Error).message }
   }
@@ -317,6 +331,19 @@ export async function deleteProductImageAction(imageId: string) {
 
   try {
     await deleteProductImage(imageId)
+    revalidatePath('/admin/productos')
+    return { success: true }
+  } catch (err) {
+    return { error: (err as Error).message }
+  }
+}
+
+export async function setImageAsCoverAction(imageId: string, colorId: string) {
+  const admin = await requireAdmin()
+  if (!admin) return { error: 'No autorizado' }
+
+  try {
+    await setImageAsCover(imageId, colorId)
     revalidatePath('/admin/productos')
     return { success: true }
   } catch (err) {

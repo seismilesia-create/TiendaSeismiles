@@ -4,6 +4,8 @@ import { useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { useScrolled } from '../hooks/useScrolled'
+import { useCartStore } from '../stores/cart-store'
+import { useCartHydrated } from '../hooks/useCartHydrated'
 import { MobileMenu } from './MobileMenu'
 import type { ProductLineRow } from '../services/product-lines'
 
@@ -25,7 +27,7 @@ const AUDIENCES = [
 
 const REMERA_TYPES = [
   { label: 'Lisas', slug: 'lisas', catalogType: 'remeras-lisas' },
-  { label: 'Personalizadas', slug: 'personalizadas', catalogType: 'personalizadas' },
+  { label: 'Estampadas', slug: 'estampadas', catalogType: 'estampadas' },
 ]
 
 const SIMPLE_CATEGORIES = [
@@ -60,15 +62,17 @@ function UserIcon({ className }: { className?: string }) {
 export function Navbar({ productLines, user }: NavbarProps) {
   const scrolled = useScrolled(10)
   const [mobileOpen, setMobileOpen] = useState(false)
+  const totalItems = useCartStore((s) => s.getTotalItems())
+  const hydrated = useCartHydrated()
+  const cartCount = hydrated ? totalItems : 0
 
   return (
     <>
       <nav
-        className={`sticky top-0 z-40 transition-all duration-300 ${
-          scrolled
+        className={`sticky top-0 z-40 transition-all duration-300 ${scrolled
             ? 'bg-white/80 backdrop-blur-xl shadow-elevated border-b border-sand-200/50'
             : 'bg-transparent'
-        }`}
+          }`}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16 lg:h-20">
@@ -152,10 +156,22 @@ export function Navbar({ productLines, user }: NavbarProps) {
                 Gift Cards
               </Link>
               <Link
+                href="/nosotros"
+                className="px-4 py-2 text-body-sm font-medium text-volcanic-700 hover:text-terra-500 transition-colors"
+              >
+                Nosotros
+              </Link>
+              <Link
                 href="/faq"
                 className="px-4 py-2 text-body-sm font-medium text-volcanic-700 hover:text-terra-500 transition-colors"
               >
                 FAQ
+              </Link>
+              <Link
+                href="/contacto"
+                className="px-4 py-2 text-body-sm font-medium text-volcanic-700 hover:text-terra-500 transition-colors"
+              >
+                Contacto
               </Link>
             </div>
 
@@ -167,19 +183,22 @@ export function Navbar({ productLines, user }: NavbarProps) {
               >
                 <SearchIcon className="w-5 h-5" />
               </button>
-              <button
+              <Link
+                href="/carrito"
                 className="relative p-2 text-volcanic-700 hover:text-terra-500 transition-colors"
                 aria-label="Carrito"
               >
                 <ShoppingBagIcon className="w-5 h-5" />
-                <span className="absolute -top-0.5 -right-0.5 w-4.5 h-4.5 bg-terra-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center leading-none">
-                  0
-                </span>
-              </button>
+                {cartCount > 0 && (
+                  <span className="absolute -top-1 -right-1 min-w-5 h-5 px-1 bg-terra-500 text-white text-[11px] font-bold rounded-full flex items-center justify-center leading-none shadow-sm">
+                    {cartCount > 99 ? '99+' : cartCount}
+                  </span>
+                )}
+              </Link>
               <div className="hidden sm:flex items-center gap-2 ml-3 pl-3 border-l border-sand-200">
                 {user ? (
                   <Link
-                    href={user.role === 'admin' ? '/admin/productos' : '/'}
+                    href={user.role === 'admin' ? '/admin/dashboard' : '/perfil'}
                     className="p-2 text-volcanic-700 hover:text-terra-500 transition-colors"
                     title={user.email}
                   >

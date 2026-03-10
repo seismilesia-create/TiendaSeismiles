@@ -3,13 +3,13 @@ import {
   CategoriesGrid, QualitySection, BenefitsBar,
   InstagramSection, NewsletterSection, Footer,
 } from '@/features/shop/components'
-import { getProductLines, getFeaturedProducts } from '@/features/shop/services/product-lines'
+import { getProductLines, getMostViewedProducts } from '@/features/shop/services/product-lines'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
 
 export default async function HomePage() {
-  const [productLines, featuredProducts, supabase] = await Promise.all([
+  const [productLines, mostViewed, supabase] = await Promise.all([
     getProductLines(),
-    getFeaturedProducts(),
+    getMostViewedProducts(undefined, 4),
     createClient(),
   ])
 
@@ -33,7 +33,7 @@ export default async function HomePage() {
 
       <main>
         <HeroSection />
-        <FeaturedProducts dbProducts={featuredProducts} />
+        <FeaturedProducts dbProducts={mostViewed} />
         <AndesDivider />
         <CategoriesGrid />
         <QualitySection />

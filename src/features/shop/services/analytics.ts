@@ -63,7 +63,7 @@ export async function getRevenueByMonth(year: number): Promise<MonthlyRevenue[]>
   const { data, error } = await supabase
     .from('compras')
     .select('created_at, total, cantidad')
-    .eq('estado', 'completada')
+    .in('estado', ['confirmado', 'en_preparacion', 'enviado', 'entregado'])
     .gte('created_at', startDate)
     .lt('created_at', endDate)
 
@@ -104,7 +104,7 @@ export async function getAvailableYears(): Promise<number[]> {
   const { data, error } = await supabase
     .from('compras')
     .select('created_at')
-    .eq('estado', 'completada')
+    .in('estado', ['confirmado', 'en_preparacion', 'enviado', 'entregado'])
     .order('created_at', { ascending: true })
     .limit(1)
 
@@ -142,7 +142,7 @@ export async function getRevenueSummary(): Promise<RevenueSummary> {
   const { data, error } = await supabase
     .from('compras')
     .select('created_at, total, cantidad')
-    .eq('estado', 'completada')
+    .in('estado', ['confirmado', 'en_preparacion', 'enviado', 'entregado'])
     .gte('created_at', lastMonthStart)
 
   if (error) throw error
@@ -171,7 +171,7 @@ export async function getRevenueSummary(): Promise<RevenueSummary> {
   const { data: yearData } = await supabase
     .from('compras')
     .select('total')
-    .eq('estado', 'completada')
+    .in('estado', ['confirmado', 'en_preparacion', 'enviado', 'entregado'])
     .gte('created_at', yearStart)
 
   const totalYear = (yearData ?? []).reduce((sum, r) => sum + Number(r.total), 0)
@@ -195,7 +195,7 @@ export async function getTopProducts(limit = 5): Promise<TopProduct[]> {
   const { data, error } = await supabase
     .from('compras')
     .select('producto_id, total, cantidad, productos(nombre)')
-    .eq('estado', 'completada')
+    .in('estado', ['confirmado', 'en_preparacion', 'enviado', 'entregado'])
     .gte('created_at', yearStart)
 
   if (error) throw error
