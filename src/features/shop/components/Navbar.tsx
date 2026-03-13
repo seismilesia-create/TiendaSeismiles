@@ -22,7 +22,7 @@ interface NavbarProps {
 const AUDIENCES = [
   { label: 'Hombres', slug: 'hombres' },
   { label: 'Mujeres', slug: 'mujeres' },
-  { label: 'Ninos', slug: 'ninos' },
+  { label: 'Niños', slug: 'ninos' },
 ]
 
 const REMERA_TYPES = [
@@ -34,12 +34,6 @@ const SIMPLE_CATEGORIES = [
   { label: 'Buzos', slug: 'buzos', catalogType: 'buzos-camperas' },
   { label: 'Camperas', slug: 'camperas', catalogType: 'buzos-camperas' },
 ]
-
-function SearchIcon({ className }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" className={className}><circle cx="11" cy="11" r="8" /><path d="m21 21-4.35-4.35" /></svg>
-  )
-}
 
 function ShoppingBagIcon({ className }: { className?: string }) {
   return (
@@ -175,14 +169,8 @@ export function Navbar({ productLines, user }: NavbarProps) {
               </Link>
             </div>
 
-            {/* Actions: Search + Cart + Auth */}
+            {/* Actions: Cart + Auth */}
             <div className="flex items-center gap-1">
-              <button
-                className="p-2 text-volcanic-700 hover:text-terra-500 transition-colors"
-                aria-label="Buscar"
-              >
-                <SearchIcon className="w-5 h-5" />
-              </button>
               <Link
                 href="/carrito"
                 className="relative p-2 text-volcanic-700 hover:text-terra-500 transition-colors"

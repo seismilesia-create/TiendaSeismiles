@@ -54,7 +54,7 @@ export function OrderProgressBar({ currentStatus }: Props) {
                     ? 'bg-terra-500 text-white'
                     : isCurrent
                       ? 'bg-terra-500 text-white ring-4 ring-terra-500/20'
-                      : 'bg-sand-200 text-volcanic-400'
+                      : 'bg-sand-200 text-volcanic-500'
                 }`}
               >
                 {isCompleted ? (
@@ -69,7 +69,7 @@ export function OrderProgressBar({ currentStatus }: Props) {
               {/* Label */}
               <span
                 className={`mt-2 text-[11px] sm:text-body-xs font-medium text-center leading-tight ${
-                  isPending ? 'text-volcanic-400' : 'text-volcanic-900'
+                  isPending ? 'text-volcanic-500' : 'text-volcanic-900'
                 }`}
               >
                 {step.label}

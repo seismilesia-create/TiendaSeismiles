@@ -26,7 +26,7 @@ async function canReview(userId: string, productoId: string): Promise<{ allowed:
 
   if (compra) return { allowed: true }
 
-  return { allowed: false, reason: 'Solo los compradores verificados pueden dejar resenas.' }
+  return { allowed: false, reason: 'Solo los compradores verificados pueden dejar reseñas.' }
 }
 
 export async function submitReview(formData: FormData) {
@@ -34,7 +34,7 @@ export async function submitReview(formData: FormData) {
   const { data: { user } } = await supabase.auth.getUser()
 
   if (!user) {
-    return { error: 'Debes iniciar sesion para dejar una resena.' }
+    return { error: 'Debes iniciar sesion para dejar una reseña.' }
   }
 
   const productoId = formData.get('producto_id') as string
@@ -62,7 +62,7 @@ export async function submitReview(formData: FormData) {
 
   // Upsert: if the user already reviewed this product, update it
   const { error } = await supabase
-    .from('resenas')
+    .from('reseñas')
     .upsert(
       {
         producto_id: productoId,
@@ -79,9 +79,9 @@ export async function submitReview(formData: FormData) {
 
   if (error) {
     if (error.code === '23505') {
-      return { error: 'Ya dejaste una resena para este producto.' }
+      return { error: 'Ya dejaste una reseña para este producto.' }
     }
-    return { error: 'No se pudo guardar la resena. Intenta de nuevo.' }
+    return { error: 'No se pudo guardar la reseña. Intenta de nuevo.' }
   }
 
   revalidatePath(`/catalogo/${slug}`)
@@ -100,13 +100,13 @@ export async function deleteReview(formData: FormData) {
   const slug = formData.get('slug') as string
 
   const { error } = await supabase
-    .from('resenas')
+    .from('reseñas')
     .delete()
     .eq('id', reviewId)
     .eq('user_id', user.id)
 
   if (error) {
-    return { error: 'No se pudo eliminar la resena.' }
+    return { error: 'No se pudo eliminar la reseña.' }
   }
 
   revalidatePath(`/catalogo/${slug}`)

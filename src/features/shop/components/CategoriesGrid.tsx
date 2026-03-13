@@ -18,7 +18,7 @@ export function CategoriesGrid() {
   const currentTab = productTypeTabs.find((t) => t.id === activeTab) ?? productTypeTabs[0]
 
   return (
-    <section className="py-20 lg:py-28 bg-[#FAFAF8]">
+    <section className="py-20 lg:py-28 bg-background">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section header */}
         <div className="text-center mb-10 lg:mb-14">
@@ -83,7 +83,7 @@ export function CategoriesGrid() {
               {/* Content */}
               <div className="relative h-full flex flex-col justify-between p-6 lg:p-8">
                 <div className="flex justify-between items-start">
-                  <span className="text-white/40 text-body-xs font-mono">
+                  <span className="text-white/60 text-body-xs font-mono">
                     0{index + 1}
                   </span>
                   <div className="w-10 h-10 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center group-hover:bg-white/20 transition-colors duration-300">

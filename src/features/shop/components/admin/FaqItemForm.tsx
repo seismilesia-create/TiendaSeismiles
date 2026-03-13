@@ -13,8 +13,12 @@ export function FaqItemForm({ faq }: Props) {
   const router = useRouter()
   const isEdit = !!faq
 
+  const SECTION_OPTIONS = ['Envíos', 'Pagos', 'Productos', 'Cambios y Devoluciones', 'Gift Cards', 'Personalización', 'General']
+
   const [question, setQuestion] = useState(faq?.question ?? '')
   const [answer, setAnswer] = useState(faq?.answer ?? '')
+  const [section, setSection] = useState(faq?.section ?? 'General')
+  const [customSection, setCustomSection] = useState('')
   const [displayOrder, setDisplayOrder] = useState(faq?.display_order ?? 0)
   const [isActive, setIsActive] = useState(faq?.is_active ?? true)
   const [loading, setLoading] = useState(false)
@@ -28,6 +32,7 @@ export function FaqItemForm({ faq }: Props) {
     const formData = new FormData()
     formData.set('question', question)
     formData.set('answer', answer)
+    formData.set('section', section === '__custom__' ? customSection : section)
     formData.set('display_order', String(displayOrder))
     formData.set('is_active', String(isActive))
 
@@ -78,6 +83,31 @@ export function FaqItemForm({ faq }: Props) {
             className="w-full px-4 py-3 rounded-xl bg-sand-100/50 border border-sand-200 text-volcanic-900 text-body-sm focus:outline-none focus:border-terra-500/50 transition-all resize-none"
             placeholder="Escribi la respuesta completa..."
           />
+        </div>
+
+        <div>
+          <label className="block text-body-sm font-semibold text-volcanic-900 mb-2">
+            Seccion
+          </label>
+          <select
+            value={section}
+            onChange={(e) => setSection(e.target.value)}
+            className="w-full px-4 py-3 rounded-xl bg-sand-100/50 border border-sand-200 text-volcanic-900 text-body-sm focus:outline-none focus:border-terra-500/50 transition-all"
+          >
+            {SECTION_OPTIONS.map((s) => (
+              <option key={s} value={s}>{s}</option>
+            ))}
+            <option value="__custom__">+ Nueva seccion</option>
+          </select>
+          {section === '__custom__' && (
+            <input
+              type="text"
+              value={customSection}
+              onChange={(e) => setCustomSection(e.target.value)}
+              placeholder="Nombre de la nueva seccion"
+              className="mt-2 w-full px-4 py-3 rounded-xl bg-sand-100/50 border border-sand-200 text-volcanic-900 text-body-sm focus:outline-none focus:border-terra-500/50 transition-all"
+            />
+          )}
         </div>
 
         <div className="flex items-center gap-6">

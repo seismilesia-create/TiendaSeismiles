@@ -71,7 +71,7 @@ export function CartItemCard({ item }: { item: CartItem }) {
           </Link>
           <button
             onClick={() => removeItem(item.variantId)}
-            className="p-1.5 text-volcanic-400 hover:text-red-500 transition-colors shrink-0"
+            className="p-1.5 text-volcanic-500 hover:text-red-500 transition-colors shrink-0"
             aria-label="Eliminar"
           >
             <TrashIcon className="w-4 h-4" />

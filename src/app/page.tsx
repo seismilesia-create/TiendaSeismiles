@@ -1,7 +1,7 @@
 import {
   MarqueeBanner, Navbar, HeroSection, FeaturedProducts, AndesDivider,
   CategoriesGrid, QualitySection, BenefitsBar,
-  InstagramSection, NewsletterSection, Footer,
+  InstagramSection, NewsletterSection, Footer, ScrollReveal,
 } from '@/features/shop/components'
 import { getProductLines, getMostViewedProducts } from '@/features/shop/services/product-lines'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
@@ -33,13 +33,25 @@ export default async function HomePage() {
 
       <main>
         <HeroSection />
-        <FeaturedProducts dbProducts={mostViewed} />
+        <ScrollReveal>
+          <FeaturedProducts dbProducts={mostViewed} />
+        </ScrollReveal>
         <AndesDivider />
-        <CategoriesGrid />
-        <QualitySection />
-        <BenefitsBar />
-        <InstagramSection />
-        <NewsletterSection />
+        <ScrollReveal>
+          <CategoriesGrid />
+        </ScrollReveal>
+        <ScrollReveal delay={100}>
+          <QualitySection />
+        </ScrollReveal>
+        <ScrollReveal>
+          <BenefitsBar />
+        </ScrollReveal>
+        <ScrollReveal>
+          <InstagramSection />
+        </ScrollReveal>
+        <ScrollReveal>
+          <NewsletterSection />
+        </ScrollReveal>
       </main>
 
       <Footer productLines={productLines} />

@@ -477,8 +477,13 @@ export async function setImageAsCover(imageId: string, colorId: string) {
 export async function saveVariants(productoId: string, variantes: VarianteInput[]) {
   const supabase = createServiceClient()
 
-  // Delete existing variants
-  await supabase.from('variantes').delete().eq('producto_id', productoId)
+  // Determine which color IDs are being saved
+  const colorIds = [...new Set(variantes.map((v) => v.color_id))]
+
+  // Delete existing variants only for the colors being saved (preserve other colors)
+  for (const cid of colorIds) {
+    await supabase.from('variantes').delete().eq('producto_id', productoId).eq('color_id', cid)
+  }
 
   if (variantes.length === 0) return
 

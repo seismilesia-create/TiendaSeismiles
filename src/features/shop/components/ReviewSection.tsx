@@ -105,9 +105,9 @@ function ScaleBar({ average, labels, label }: { average: number; labels: string[
         />
       </div>
       <div className="flex justify-between">
-        <span className="text-[10px] text-volcanic-400">{labels[0]}</span>
-        <span className="text-[10px] text-volcanic-400">{labels[2]}</span>
-        <span className="text-[10px] text-volcanic-400">{labels[4]}</span>
+        <span className="text-[10px] text-volcanic-500">{labels[0]}</span>
+        <span className="text-[10px] text-volcanic-500">{labels[2]}</span>
+        <span className="text-[10px] text-volcanic-500">{labels[4]}</span>
       </div>
     </div>
   )
@@ -126,7 +126,7 @@ function StarBar({ average, label }: { average: number; label: string }) {
             <StarIcon key={s} filled={average >= s - 0.25} className="w-3.5 h-3.5" />
           ))}
         </div>
-        <span className="text-body-xs text-volcanic-400">{average.toFixed(1)}</span>
+        <span className="text-body-xs text-volcanic-500">{average.toFixed(1)}</span>
       </div>
     </div>
   )
@@ -146,7 +146,7 @@ function DistributionBar({ star, count, total }: { star: number; count: number; 
           style={{ width: `${pct}%` }}
         />
       </div>
-      <span className="w-6 text-volcanic-400 text-right">{count}</span>
+      <span className="w-6 text-volcanic-500 text-right">{count}</span>
     </div>
   )
 }
@@ -163,7 +163,7 @@ function ReviewCard({ review, isOwn, slug }: { review: ReviewFromDB; isOwn: bool
   })
 
   function handleDelete() {
-    if (!confirm('Seguro que queres eliminar tu resena?')) return
+    if (!confirm('Seguro que queres eliminar tu reseña?')) return
     const fd = new FormData()
     fd.set('review_id', review.id)
     fd.set('slug', slug)
@@ -178,10 +178,10 @@ function ReviewCard({ review, isOwn, slug }: { review: ReviewFromDB; isOwn: bool
             <StarRating rating={review.puntuacion} size="sm" />
             <span className="text-body-sm font-semibold text-volcanic-900">{displayName}</span>
           </div>
-          <p className="text-body-xs text-volcanic-400">{date}</p>
+          <p className="text-body-xs text-volcanic-500">{date}</p>
         </div>
         {isOwn && (
-          <button onClick={handleDelete} disabled={isPending} className="text-body-xs text-volcanic-400 hover:text-red-500 transition-colors">
+          <button onClick={handleDelete} disabled={isPending} className="text-body-xs text-volcanic-500 hover:text-red-500 transition-colors">
             Eliminar
           </button>
         )}
@@ -297,7 +297,7 @@ function ReviewForm({ productoId, slug, existingReview }: {
       {/* Comment */}
       <div>
         <label htmlFor="comentario" className="text-body-xs font-semibold uppercase tracking-widest text-volcanic-700 mb-3 block">
-          Tu comentario <span className="text-volcanic-400 normal-case tracking-normal">(opcional)</span>
+          Tu comentario <span className="text-volcanic-500 normal-case tracking-normal">(opcional)</span>
         </label>
         <textarea
           id="comentario"
@@ -306,15 +306,15 @@ function ReviewForm({ productoId, slug, existingReview }: {
           maxLength={1000}
           rows={3}
           placeholder="Conta tu experiencia con este producto..."
-          className="w-full rounded-xl border border-sand-200 bg-white px-4 py-3 text-body-sm text-volcanic-900 placeholder:text-volcanic-400 focus:border-terra-500 focus:ring-1 focus:ring-terra-500 transition-colors resize-none"
+          className="w-full rounded-xl border border-sand-200 bg-white px-4 py-3 text-body-sm text-volcanic-900 placeholder:text-volcanic-500 focus:border-terra-500 focus:ring-1 focus:ring-terra-500 transition-colors resize-none"
         />
-        <p className="text-body-xs text-volcanic-400 mt-1 text-right">{comentario.length}/1000</p>
+        <p className="text-body-xs text-volcanic-500 mt-1 text-right">{comentario.length}/1000</p>
       </div>
 
       {error && <p className="text-body-sm text-red-500">{error}</p>}
       {success && (
         <p className="text-body-sm text-green-600">
-          {existingReview ? 'Resena actualizada.' : 'Gracias por tu resena!'}
+          {existingReview ? 'Reseña actualizada.' : 'Gracias por tu reseña!'}
         </p>
       )}
 
@@ -323,7 +323,7 @@ function ReviewForm({ productoId, slug, existingReview }: {
         disabled={isPending}
         className="w-full py-3 bg-volcanic-900 hover:bg-volcanic-800 disabled:bg-volcanic-400 text-white text-body-sm font-semibold rounded-xl transition-all duration-300"
       >
-        {isPending ? 'Enviando...' : existingReview ? 'Actualizar resena' : 'Enviar resena'}
+        {isPending ? 'Enviando...' : existingReview ? 'Actualizar reseña' : 'Enviar reseña'}
       </button>
     </form>
   )
@@ -370,10 +370,10 @@ export function ReviewSection({ productoId, slug, reviews, summary, currentUserI
                 <span className="font-heading text-display-md text-volcanic-900">
                   {summary.average.toFixed(1)}
                 </span>
-                <span className="text-body-sm text-volcanic-400">de 5</span>
+                <span className="text-body-sm text-volcanic-500">de 5</span>
               </div>
               <StarRating rating={summary.average} />
-              <p className="text-body-xs text-volcanic-400 mt-2">
+              <p className="text-body-xs text-volcanic-500 mt-2">
                 {summary.total} {summary.total === 1 ? 'valoracion' : 'valoraciones'}
               </p>
 
@@ -399,26 +399,26 @@ export function ReviewSection({ productoId, slug, reviews, summary, currentUserI
           ) : (
             <div className="mb-8 p-6 rounded-2xl bg-sand-50 text-center">
               <p className="text-body-sm text-volcanic-500 mb-1">Sin valoraciones aun</p>
-              <p className="text-body-xs text-volcanic-400">Se el primero en opinar!</p>
+              <p className="text-body-xs text-volcanic-500">Se el primero en opinar!</p>
             </div>
           )}
 
           {/* Write review CTA */}
           {!currentUserId ? (
             <p className="text-body-sm text-volcanic-500 text-center py-3">
-              <a href="/login" className="text-terra-500 hover:underline font-semibold">Inicia sesion</a> para dejar una resena.
+              <a href="/login" className="text-terra-500 hover:underline font-semibold">Inicia sesion</a> para dejar una reseña.
             </p>
           ) : canReview ? (
             <button
               onClick={() => setShowForm(!showForm)}
               className="w-full py-3 px-4 border-2 border-volcanic-900 hover:bg-volcanic-900 hover:text-white text-volcanic-900 text-body-sm font-semibold rounded-xl transition-all duration-300"
             >
-              {existingReview ? 'Editar tu reseña' : 'Escribir una resena'}
+              {existingReview ? 'Editar tu reseña' : 'Escribir una reseña'}
             </button>
           ) : (
             <div className="p-4 rounded-xl bg-sand-50 border border-sand-200 text-center">
               <p className="text-body-sm text-volcanic-500">
-                Solo compradores verificados pueden dejar resenas.
+                Solo compradores verificados pueden dejar reseñas.
               </p>
             </div>
           )}
@@ -440,8 +440,8 @@ export function ReviewSection({ productoId, slug, reviews, summary, currentUserI
               ))}
             </div>
           ) : (
-            <div className="flex items-center justify-center py-16 text-volcanic-400 text-body-sm">
-              Todavia no hay resenas para este producto.
+            <div className="flex items-center justify-center py-16 text-volcanic-500 text-body-sm">
+              Todavia no hay reseñas para este producto.
             </div>
           )}
         </div>

@@ -51,12 +51,9 @@ export function ResultadoContent({ status, paymentId, externalReference }: Props
     didRun.current = true
 
     async function processPayment() {
-      console.log('[Resultado] params:', { status, paymentId, externalReference })
-
       // Verify payment with MP API and update order status in DB
       if (paymentId && externalReference) {
-        const result = await confirmPayment(paymentId, externalReference)
-        console.log('[Resultado] confirmPayment result:', result)
+        await confirmPayment(paymentId, externalReference)
       }
 
       // Clear cart on approved or pending (stock already reserved)

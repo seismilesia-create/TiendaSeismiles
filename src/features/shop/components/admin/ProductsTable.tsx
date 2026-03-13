@@ -109,7 +109,7 @@ export function ProductsTable({ products }: { products: Producto[] }) {
     <div>
       {/* Filters */}
       <div className="flex flex-wrap items-center gap-3 mb-5">
-        <FilterIcon className="w-4 h-4 text-volcanic-400" />
+        <FilterIcon className="w-4 h-4 text-volcanic-500" />
         <select
           value={filterLinea}
           onChange={(e) => setFilterLinea(e.target.value)}
@@ -138,7 +138,7 @@ export function ProductsTable({ products }: { products: Producto[] }) {
             Limpiar filtros
           </button>
         )}
-        <span className="text-body-xs text-volcanic-400 ml-auto">
+        <span className="text-body-xs text-volcanic-500 ml-auto">
           {filtered.length} de {products.length}
         </span>
       </div>
@@ -192,7 +192,7 @@ export function ProductsTable({ products }: { products: Producto[] }) {
 
             {/* Info */}
             <div className="p-4">
-              <p className="text-body-xs text-volcanic-400 uppercase tracking-wide mb-0.5">
+              <p className="text-body-xs text-volcanic-500 uppercase tracking-wide mb-0.5">
                 {LINEA_LABELS[product.linea] ?? product.linea}
               </p>
               <h3 className="font-heading text-body-md text-volcanic-900 mb-1">{product.nombre}</h3>
@@ -217,7 +217,7 @@ export function ProductsTable({ products }: { products: Producto[] }) {
                       </span>
                     )}
                   </div>
-                  <span className="text-body-xs text-volcanic-400">
+                  <span className="text-body-xs text-volcanic-500">
                     {product.variantes.length} var.
                   </span>
                 </div>

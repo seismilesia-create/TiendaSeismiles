@@ -55,7 +55,7 @@ export function FeaturedProducts({ dbProducts }: FeaturedProductsProps) {
         }))
 
   return (
-    <section className="py-16 lg:py-24 bg-[#FAFAF8]">
+    <section className="py-20 lg:py-28 bg-white border-b border-sand-200">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="text-center mb-12">
@@ -109,7 +109,7 @@ export function FeaturedProducts({ dbProducts }: FeaturedProductsProps) {
 
               {/* Info */}
               <div className="flex flex-col gap-1">
-                <span className="text-body-xs text-volcanic-400 uppercase tracking-wide">
+                <span className="text-body-xs text-volcanic-500 uppercase tracking-wide">
                   {product.line}
                 </span>
                 <h3 className="font-heading text-body-md sm:text-lg text-volcanic-900 group-hover:text-terra-500 transition-colors duration-300">

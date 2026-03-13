@@ -89,7 +89,7 @@ export default async function ContactoPage() {
         </section>
 
         {/* Contact info + form */}
-        <section className="py-20 lg:py-28 bg-[#FAFAF8]">
+        <section className="py-20 lg:py-28 bg-background">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20">
               {/* Left: contact cards */}
@@ -106,17 +106,17 @@ export default async function ContactoPage() {
                     href={brand.whatsapp}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="group flex items-start gap-4 p-5 bg-white rounded-2xl border border-sand-200/60 hover:shadow-warm-lg hover:border-green-200 transition-all duration-300"
+                    className="group flex items-start gap-4 p-5 bg-white rounded-2xl border border-sand-200/60 hover:shadow-warm-lg hover:border-terra-200 transition-all duration-300"
                   >
-                    <div className="w-12 h-12 rounded-xl bg-green-50 flex items-center justify-center flex-shrink-0 group-hover:bg-green-100 transition-colors">
-                      <PhoneIcon className="w-5 h-5 text-green-600" />
+                    <div className="w-12 h-12 rounded-xl bg-terra-500/10 flex items-center justify-center flex-shrink-0 group-hover:bg-terra-500/15 transition-colors">
+                      <PhoneIcon className="w-5 h-5 text-terra-500" />
                     </div>
                     <div>
                       <h3 className="font-heading text-base text-volcanic-900 mb-1">WhatsApp</h3>
                       <p className="text-body-sm text-volcanic-500 leading-relaxed">
                         Escribinos y te respondemos al instante. Ideal para consultas rapidas sobre talles, stock y envios.
                       </p>
-                      <span className="inline-flex items-center gap-1.5 mt-3 text-body-xs font-semibold text-green-600 group-hover:gap-2 transition-all">
+                      <span className="inline-flex items-center gap-1.5 mt-3 text-body-xs font-semibold text-terra-500 group-hover:gap-2 transition-all">
                         Enviar mensaje
                         <ArrowRightIcon className="w-3.5 h-3.5" />
                       </span>
@@ -145,17 +145,17 @@ export default async function ContactoPage() {
                     href={brand.instagram}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="group flex items-start gap-4 p-5 bg-white rounded-2xl border border-sand-200/60 hover:shadow-warm-lg hover:border-purple-200 transition-all duration-300"
+                    className="group flex items-start gap-4 p-5 bg-white rounded-2xl border border-sand-200/60 hover:shadow-warm-lg hover:border-volcanic-300 transition-all duration-300"
                   >
-                    <div className="w-12 h-12 rounded-xl bg-purple-50 flex items-center justify-center flex-shrink-0 group-hover:bg-purple-100 transition-colors">
-                      <InstagramIcon className="w-5 h-5 text-purple-600" />
+                    <div className="w-12 h-12 rounded-xl bg-volcanic-900/10 flex items-center justify-center flex-shrink-0 group-hover:bg-volcanic-900/15 transition-colors">
+                      <InstagramIcon className="w-5 h-5 text-volcanic-700" />
                     </div>
                     <div>
                       <h3 className="font-heading text-base text-volcanic-900 mb-1">Instagram</h3>
                       <p className="text-body-sm text-volcanic-500 leading-relaxed">
                         Seguinos para ver las ultimas novedades, lanzamientos y el backstage de nuestra marca.
                       </p>
-                      <span className="inline-flex items-center gap-1.5 mt-3 text-body-xs font-semibold text-purple-600 group-hover:gap-2 transition-all">
+                      <span className="inline-flex items-center gap-1.5 mt-3 text-body-xs font-semibold text-volcanic-700 group-hover:gap-2 transition-all">
                         @seismiles_textil
                         <ArrowRightIcon className="w-3.5 h-3.5" />
                       </span>
@@ -171,8 +171,8 @@ export default async function ContactoPage() {
                       <p className="text-body-sm text-volcanic-500 leading-relaxed">
                         Catamarca, Argentina
                       </p>
-                      <p className="text-body-xs text-volcanic-400 mt-1">
-                        Disenamos y confeccionamos desde el corazon del noroeste argentino.
+                      <p className="text-body-xs text-volcanic-500 mt-1">
+                        Diseñamos y confeccionamos desde el corazon del noroeste argentino.
                       </p>
                     </div>
                   </div>
@@ -216,38 +216,12 @@ export default async function ContactoPage() {
                     <div className="w-full h-px bg-sand-200" />
                     <div className="flex items-center justify-between">
                       <span className="text-body-sm text-volcanic-500">Domingos y feriados</span>
-                      <span className="text-body-sm font-medium text-volcanic-400">Cerrado</span>
+                      <span className="text-body-sm font-medium text-volcanic-500">Cerrado</span>
                     </div>
                   </div>
-                  <p className="text-body-xs text-volcanic-400 mt-4">
+                  <p className="text-body-xs text-volcanic-500 mt-4">
                     WhatsApp e Instagram: respondemos dentro de las 24hs habiles.
                   </p>
-                </div>
-
-                {/* Mayorista / Empresas */}
-                <div className="mt-4 p-6 bg-volcanic-900 rounded-2xl relative overflow-hidden">
-                  <div className="absolute top-0 right-0 w-32 h-32 bg-terra-500/10 blur-[60px] rounded-full pointer-events-none" />
-                  <div className="relative">
-                    <span className="text-body-xs uppercase tracking-widest text-terra-400 font-semibold mb-3 block">
-                      Empresas y mayoristas
-                    </span>
-                    <h3 className="font-heading text-lg text-white mb-3">
-                      Personalizacion DTF para tu marca
-                    </h3>
-                    <p className="text-body-sm text-white/40 leading-relaxed mb-4">
-                      Ofrecemos servicio de personalizacion con tecnologia DTF para empresas,
-                      eventos y equipos. Consulta por precios y minimos.
-                    </p>
-                    <a
-                      href={`${brand.whatsapp}?text=Hola!%20Me%20interesa%20el%20servicio%20de%20personalizacion%20para%20empresas.`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-2 px-5 py-2.5 bg-white/10 hover:bg-white/15 text-white text-body-sm font-semibold rounded-xl border border-white/10 transition-all duration-300"
-                    >
-                      Consultar por WhatsApp
-                      <ArrowRightIcon className="w-3.5 h-3.5" />
-                    </a>
-                  </div>
                 </div>
               </div>
             </div>

@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { useCartStore } from '@/features/shop/stores/cart-store'
 import { createCheckout } from '@/actions/checkout'
+import { validateGiftCardCode } from '@/actions/giftcard-redeem'
 
 function ShieldIcon({ className }: { className?: string }) {
   return (
@@ -23,6 +24,21 @@ function CreditCardIcon({ className }: { className?: string }) {
   )
 }
 
+function GiftIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" className={className}>
+      <rect x="3" y="8" width="18" height="4" rx="1" /><path d="M12 8v13" /><path d="M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7" />
+      <path d="M7.5 8a2.5 2.5 0 0 1 0-5A4.8 8 0 0 1 12 8a4.8 8 0 0 1 4.5-5 2.5 2.5 0 0 1 0 5" />
+    </svg>
+  )
+}
+
+function CloseIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg>
+  )
+}
+
 interface CartSummaryProps {
   userId: string | null
 }
@@ -32,14 +48,62 @@ export function CartSummary({ userId }: CartSummaryProps) {
   const getTotalItems = useCartStore((s) => s.getTotalItems)
   const getTotalPrice = useCartStore((s) => s.getTotalPrice)
   const setPendingOrderRef = useCartStore((s) => s.setPendingOrderRef)
+  const appliedGiftCards = useCartStore((s) => s.appliedGiftCards)
+  const applyGiftCard = useCartStore((s) => s.applyGiftCard)
+  const removeGiftCard = useCartStore((s) => s.removeGiftCard)
+  const clearCart = useCartStore((s) => s.clearCart)
   const router = useRouter()
 
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [gcCode, setGcCode] = useState('')
+  const [gcLoading, setGcLoading] = useState(false)
+  const [gcError, setGcError] = useState<string | null>(null)
 
   const totalItems = getTotalItems()
   const totalPrice = getTotalPrice()
-  const cuotas = Math.round(totalPrice / 3)
+
+  // Calculate descuento for each GC in order (each one discounts from the remaining)
+  let remaining = totalPrice
+  const gcDescuentos = appliedGiftCards.map((gc) => {
+    const d = Math.min(gc.saldo, remaining)
+    remaining -= d
+    return d
+  })
+  const descuentoTotal = gcDescuentos.reduce((sum, d) => sum + d, 0)
+  const saldoSobrante = appliedGiftCards.reduce((sum, gc) => sum + gc.saldo, 0) - descuentoTotal
+  const totalFinal = totalPrice - descuentoTotal
+  const cuotas = totalFinal > 0 ? Math.round(totalFinal / 3) : 0
+
+  async function handleApplyGiftCard() {
+    const code = gcCode.trim().toUpperCase()
+    if (!code) return
+
+    if (appliedGiftCards.some((g) => g.code === code)) {
+      setGcError('Esta gift card ya esta aplicada')
+      return
+    }
+
+    setGcLoading(true)
+    setGcError(null)
+
+    const result = await validateGiftCardCode(gcCode)
+
+    if (!result.valid) {
+      setGcError(result.error ?? 'Codigo invalido')
+      setGcLoading(false)
+      return
+    }
+
+    applyGiftCard({
+      code,
+      giftCardId: result.giftCardId!,
+      saldo: result.saldo_restante!,
+      titulo: result.titulo!,
+    })
+    setGcCode('')
+    setGcLoading(false)
+  }
 
   async function handleCheckout() {
     if (!userId) {
@@ -58,11 +122,22 @@ export function CartSummary({ userId }: CartSummaryProps) {
       precio: i.precio,
     }))
 
-    const result = await createCheckout(checkoutItems)
+    const codes = appliedGiftCards.length > 0
+      ? appliedGiftCards.map((g) => g.code)
+      : undefined
+
+    const result = await createCheckout(checkoutItems, codes)
 
     if (result.error) {
       setError(result.error)
       setLoading(false)
+      return
+    }
+
+    // If gift cards covered the full amount, order was confirmed directly
+    if (result.directConfirm) {
+      clearCart()
+      router.push('/carrito/resultado?collection_status=approved&direct=gc')
       return
     }
 
@@ -94,17 +169,115 @@ export function CartSummary({ userId }: CartSummaryProps) {
         </div>
       </div>
 
+      {/* Gift Card Section */}
+      <div className="border-t border-sand-200 my-4" />
+
+      {/* Applied gift cards */}
+      {appliedGiftCards.length > 0 && (
+        <div className="space-y-2 mb-3">
+          {appliedGiftCards.map((gc, i) => (
+            <div key={gc.code} className="flex items-center justify-between p-3 bg-emerald-50 border border-emerald-200 rounded-xl">
+              <div className="flex items-center gap-2 min-w-0">
+                <GiftIcon className="w-4 h-4 text-emerald-600 shrink-0" />
+                <div className="min-w-0">
+                  <p className="text-body-xs font-semibold text-emerald-700 truncate">
+                    {gc.code}
+                  </p>
+                  <p className="text-body-xs text-emerald-600">
+                    Saldo: ${gc.saldo.toLocaleString('es-AR')}
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2 shrink-0">
+                <span className="text-body-sm font-semibold text-emerald-700 tabular-nums">
+                  -${gcDescuentos[i].toLocaleString('es-AR')}
+                </span>
+                <button
+                  onClick={() => removeGiftCard(gc.code)}
+                  className="p-1 text-emerald-500 hover:text-red-500 transition-colors"
+                  title="Quitar gift card"
+                >
+                  <CloseIcon className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* GC code input — always visible to allow adding more */}
+      <div className="mb-4">
+        <label className="flex items-center gap-1.5 text-body-xs font-medium text-volcanic-600 mb-2">
+          <GiftIcon className="w-3.5 h-3.5" />
+          {appliedGiftCards.length > 0 ? 'Agregar otra Gift Card' : 'Codigo de Gift Card'}
+        </label>
+        <div className="flex gap-2">
+          <input
+            type="text"
+            value={gcCode}
+            onChange={(e) => {
+              // Strip everything except alphanumeric
+              const raw = e.target.value.replace(/[^A-Za-z0-9]/g, '').toUpperCase()
+              // Auto-format: GC-XXXX-XXXX
+              let formatted = raw
+              if (raw.length > 2) {
+                formatted = raw.slice(0, 2) + '-' + raw.slice(2)
+              }
+              if (raw.length > 6) {
+                formatted = raw.slice(0, 2) + '-' + raw.slice(2, 6) + '-' + raw.slice(6, 10)
+              }
+              setGcCode(formatted)
+            }}
+            maxLength={12}
+            placeholder="GC-XXXX-XXXX"
+            className="flex-1 px-3 py-2.5 rounded-xl bg-white border border-sand-200 text-volcanic-900 text-body-sm font-mono uppercase tracking-wider focus:outline-none focus:border-terra-500 focus:ring-1 focus:ring-terra-500 transition-all placeholder:text-volcanic-300"
+          />
+          <button
+            onClick={handleApplyGiftCard}
+            disabled={gcLoading || !gcCode.trim()}
+            className="px-4 py-2.5 bg-volcanic-900 hover:bg-volcanic-800 disabled:bg-volcanic-300 text-white text-body-xs font-semibold rounded-xl transition-colors shrink-0"
+          >
+            {gcLoading ? '...' : 'Aplicar'}
+          </button>
+        </div>
+        {gcError && (
+          <p className="mt-1.5 text-body-xs text-red-600">{gcError}</p>
+        )}
+      </div>
+
       <div className="border-t border-sand-200 my-4" />
 
       <div className="flex items-center justify-between mb-1">
         <span className="text-body-md font-semibold text-volcanic-900">Total</span>
-        <span className="text-body-lg font-bold text-volcanic-900 tabular-nums">
-          ${totalPrice.toLocaleString('es-AR')}
-        </span>
+        <div className="text-right">
+          {descuentoTotal > 0 && (
+            <span className="text-body-xs text-volcanic-500 line-through tabular-nums mr-2">
+              ${totalPrice.toLocaleString('es-AR')}
+            </span>
+          )}
+          <span className="text-body-lg font-bold text-volcanic-900 tabular-nums">
+            ${totalFinal.toLocaleString('es-AR')}
+          </span>
+        </div>
       </div>
-      <p className="text-body-xs text-volcanic-500 mb-6">
-        3 cuotas sin interes de ${cuotas.toLocaleString('es-AR')}
-      </p>
+      {totalFinal > 0 ? (
+        <p className="text-body-xs text-volcanic-500 mb-6">
+          3 cuotas sin interes de ${cuotas.toLocaleString('es-AR')}
+        </p>
+      ) : (
+        <p className="text-body-xs text-emerald-600 font-medium mb-6">
+          Cubierto con Gift Card{appliedGiftCards.length > 1 ? 's' : ''}
+        </p>
+      )}
+
+      {saldoSobrante > 0 && (
+        <div className="mb-5 flex gap-2 p-3 bg-amber-50 border border-amber-200 rounded-xl">
+          <GiftIcon className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+          <p className="text-body-xs text-amber-700">
+            Te quedan <span className="font-semibold">${saldoSobrante.toLocaleString('es-AR')}</span> de saldo sin usar. Podes volver a canjear tu gift card en tu proxima compra.
+          </p>
+        </div>
+      )}
 
       {error && (
         <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-xl">
@@ -127,8 +300,17 @@ export function CartSummary({ userId }: CartSummaryProps) {
           </>
         ) : (
           <>
-            <CreditCardIcon className="w-5 h-5" />
-            {userId ? 'Pagar con Mercado Pago' : 'Ingresar para comprar'}
+            {totalFinal > 0 ? (
+              <>
+                <CreditCardIcon className="w-5 h-5" />
+                {userId ? 'Pagar con Mercado Pago' : 'Ingresar para comprar'}
+              </>
+            ) : (
+              <>
+                <GiftIcon className="w-5 h-5" />
+                {userId ? 'Confirmar pedido' : 'Ingresar para comprar'}
+              </>
+            )}
           </>
         )}
       </button>
@@ -142,7 +324,7 @@ export function CartSummary({ userId }: CartSummaryProps) {
 
       <div className="flex items-center gap-2 mt-5 pt-5 border-t border-sand-200">
         <ShieldIcon className="w-4 h-4 text-terra-500 shrink-0" />
-        <p className="text-body-xs text-volcanic-400">
+        <p className="text-body-xs text-volcanic-500">
           Compra segura · Envio gratis · Cambios por 30 dias
         </p>
       </div>

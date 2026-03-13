@@ -40,7 +40,7 @@ export function OrderProductCard({ order }: Props) {
             <div className="space-y-1.5">
               {order.color && (
                 <div className="flex items-center gap-2">
-                  <span className="text-body-xs text-volcanic-400">Color:</span>
+                  <span className="text-body-xs text-volcanic-500">Color:</span>
                   <div className="flex items-center gap-1.5">
                     <span
                       className="w-3.5 h-3.5 rounded-full border border-sand-200"
@@ -53,18 +53,18 @@ export function OrderProductCard({ order }: Props) {
 
               {order.talle && (
                 <div className="flex items-center gap-2">
-                  <span className="text-body-xs text-volcanic-400">Talle:</span>
+                  <span className="text-body-xs text-volcanic-500">Talle:</span>
                   <span className="text-body-sm font-medium text-volcanic-700">{order.talle}</span>
                 </div>
               )}
 
               <div className="flex items-center gap-2">
-                <span className="text-body-xs text-volcanic-400">Cantidad:</span>
+                <span className="text-body-xs text-volcanic-500">Cantidad:</span>
                 <span className="text-body-sm text-volcanic-700">{order.cantidad}</span>
               </div>
 
               <div className="flex items-center gap-2">
-                <span className="text-body-xs text-volcanic-400">Precio unitario:</span>
+                <span className="text-body-xs text-volcanic-500">Precio unitario:</span>
                 <span className="text-body-sm text-volcanic-700">${order.precio_unitario.toLocaleString('es-AR')}</span>
               </div>
             </div>

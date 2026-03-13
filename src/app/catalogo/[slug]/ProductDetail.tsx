@@ -7,6 +7,7 @@ import { useAuth } from '@/hooks/useAuth'
 import { useCartStore } from '@/features/shop/stores/cart-store'
 import { trackProductView } from '@/actions/track-view'
 import { ProductCard } from '@/features/shop/components/ProductCard'
+import { HeartButton } from '@/features/shop/components/HeartButton'
 import { ReviewSection } from '@/features/shop/components/ReviewSection'
 import { SizeGuideDrawer } from '@/features/shop/components/SizeGuideDrawer'
 import { ProductGallery } from './ProductGallery'
@@ -29,6 +30,69 @@ const LINEA_LABELS: Record<string, string> = {
 }
 
 const TALLE_ORDER = ['XS', 'S', 'M', 'L', 'XL', '2XL', '3XL', '4XL']
+
+// CSS fabric texture patterns per product line
+const FABRIC_TEXTURES: Record<string, { pattern: string; size: string; opacity: number }> = {
+  // Piqué — diamond waffle weave
+  arista: {
+    pattern: `url("data:image/svg+xml,%3Csvg width='8' height='8' viewBox='0 0 8 8' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M4 0L8 4L4 8L0 4Z' fill='%23000' fill-opacity='0.12'/%3E%3C/svg%3E")`,
+    size: '6px 6px',
+    opacity: 1,
+  },
+  // Algodón pesado — horizontal ribbed
+  pissis: {
+    pattern: `url("data:image/svg+xml,%3Csvg width='4' height='4' viewBox='0 0 4 4' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='4' height='1' fill='%23000' fill-opacity='0.08'/%3E%3C/svg%3E")`,
+    size: '4px 4px',
+    opacity: 1,
+  },
+  // Algodón suave — subtle grain
+  origen: {
+    pattern: `url("data:image/svg+xml,%3Csvg width='4' height='4' viewBox='0 0 4 4' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='1' cy='1' r='0.6' fill='%23000' fill-opacity='0.06'/%3E%3C/svg%3E")`,
+    size: '4px 4px',
+    opacity: 1,
+  },
+  // Algodón resistente — crosshatch
+  terreno: {
+    pattern: `url("data:image/svg+xml,%3Csvg width='8' height='8' viewBox='0 0 8 8' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 0L8 8M8 0L0 8' stroke='%23000' stroke-opacity='0.08' stroke-width='0.8'/%3E%3C/svg%3E")`,
+    size: '6px 6px',
+    opacity: 1,
+  },
+  // Estampadas — sin textura especial
+  veta: {
+    pattern: 'none',
+    size: '0',
+    opacity: 0,
+  },
+  // Frisa invisible peinada — diagonal suave
+  'tres-cruces': {
+    pattern: `url("data:image/svg+xml,%3Csvg width='6' height='6' viewBox='0 0 6 6' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 6L6 0' stroke='%23000' stroke-opacity='0.07' stroke-width='1.2'/%3E%3C/svg%3E")`,
+    size: '5px 5px',
+    opacity: 1,
+  },
+  // Frisa cardada — puntos suaves
+  nacimiento: {
+    pattern: `url("data:image/svg+xml,%3Csvg width='6' height='6' viewBox='0 0 6 6' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='1.5' cy='1.5' r='1' fill='%23000' fill-opacity='0.06'/%3E%3Ccircle cx='4.5' cy='4.5' r='1' fill='%23000' fill-opacity='0.06'/%3E%3C/svg%3E")`,
+    size: '6px 6px',
+    opacity: 1,
+  },
+  // Rústico peinado pesado
+  veladero: {
+    pattern: `url("data:image/svg+xml,%3Csvg width='6' height='6' viewBox='0 0 6 6' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 0L6 6M6 0L0 6' stroke='%23000' stroke-opacity='0.1' stroke-width='1'/%3E%3C/svg%3E")`,
+    size: '5px 5px',
+    opacity: 1,
+  },
+  'san-francisco': {
+    pattern: `url("data:image/svg+xml,%3Csvg width='6' height='6' viewBox='0 0 6 6' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 0L6 6M6 0L0 6' stroke='%23000' stroke-opacity='0.1' stroke-width='1'/%3E%3C/svg%3E")`,
+    size: '5px 5px',
+    opacity: 1,
+  },
+  // Fallback — liso
+  _default: {
+    pattern: 'none',
+    size: '0',
+    opacity: 0,
+  },
+}
 
 // ── Icons ──
 
@@ -87,7 +151,7 @@ function Accordion({ title, children }: { title: string; children: React.ReactNo
         <span className="text-body-sm font-semibold text-volcanic-900 group-hover:text-terra-500 transition-colors">
           {title}
         </span>
-        <ChevronIcon className="w-4 h-4 text-volcanic-400" open={open} />
+        <ChevronIcon className="w-4 h-4 text-volcanic-500" open={open} />
       </button>
       {open && (
         <div className="pb-5 text-body-sm text-volcanic-600 leading-relaxed whitespace-pre-line">
@@ -107,9 +171,10 @@ interface ProductDetailProps {
   reviewSummary: ReviewSummary
   currentUserId: string | null
   canReview: boolean
+  isFavorited?: boolean
 }
 
-export function ProductDetail({ product, mostViewedProducts, reviews, reviewSummary, currentUserId, canReview }: ProductDetailProps) {
+export function ProductDetail({ product, mostViewedProducts, reviews, reviewSummary, currentUserId, canReview, isFavorited = false }: ProductDetailProps) {
   const { user } = useAuth()
   const [selectedColorId, setSelectedColorId] = useState(product.colores[0]?.id ?? null)
   const [selectedSize, setSelectedSize] = useState<string | null>(null)
@@ -222,9 +287,18 @@ export function ProductDetail({ product, mostViewedProducts, reviews, reviewSumm
             <p className="text-body-xs uppercase tracking-widest text-terra-500 font-semibold mb-2">
               {lineLabel}
             </p>
-            <h1 className="font-heading text-display-xs sm:text-display-sm text-volcanic-900 mb-3">
-              {product.nombre}
-            </h1>
+            <div className="flex items-start justify-between gap-4 mb-3">
+              <h1 className="font-heading text-display-xs sm:text-display-sm text-volcanic-900">
+                {product.nombre}
+              </h1>
+              <HeartButton
+                productId={product.id}
+                productSlug={product.slug}
+                isFavorited={isFavorited}
+                isLoggedIn={!!currentUserId}
+                size="md"
+              />
+            </div>
             {/* Mini star rating */}
             {reviewSummary.total > 0 && (
               <button
@@ -267,18 +341,24 @@ export function ProductDetail({ product, mostViewedProducts, reviews, reviewSumm
                 <div className="flex flex-wrap gap-3">
                   {product.colores.map((color) => {
                     const isActive = selectedColorId === color.id
+                    const texture = FABRIC_TEXTURES[product.linea] ?? FABRIC_TEXTURES._default
                     return (
                       <button
                         key={color.id}
                         onClick={() => handleColorChange(color.id)}
                         title={color.nombre}
-                        className={`w-10 h-10 rounded-full border-2 transition-all ${
+                        className={`relative w-10 h-10 rounded-full border-2 overflow-hidden transition-all ${
                           isActive
                             ? 'border-terra-500 ring-2 ring-terra-500/20 scale-110'
                             : 'border-sand-300 hover:border-volcanic-400 hover:scale-105'
                         }`}
                         style={{ backgroundColor: color.hex }}
-                      />
+                      >
+                        <span
+                          className="absolute inset-0 rounded-full"
+                          style={{ backgroundImage: texture.pattern, backgroundSize: texture.size, opacity: texture.opacity }}
+                        />
+                      </button>
                     )
                   })}
                 </div>
@@ -305,7 +385,7 @@ export function ProductDetail({ product, mostViewedProducts, reviews, reviewSumm
                               ? 'bg-volcanic-900 text-white'
                               : isAvailable
                                 ? 'bg-sand-100 text-volcanic-700 hover:bg-sand-200 hover:text-volcanic-900'
-                                : 'bg-sand-50 text-volcanic-300 hover:bg-sand-100 hover:text-volcanic-400 cursor-pointer'
+                                : 'bg-sand-50 text-volcanic-300 hover:bg-sand-100 hover:text-volcanic-500 cursor-pointer'
                           }`}
                         >
                           {talle}
@@ -415,7 +495,7 @@ export function ProductDetail({ product, mostViewedProducts, reviews, reviewSumm
       </div>
 
       {/* ── Mobile Sticky Bar ── */}
-      <div className="lg:hidden fixed bottom-0 inset-x-0 z-40 bg-white border-t border-sand-200 px-4 py-3 flex items-center gap-4">
+      <div className="lg:hidden fixed bottom-0 inset-x-0 z-40 bg-white shadow-[0_-4px_12px_rgba(0,0,0,0.08)] px-4 py-3 flex items-center gap-4">
         <div className="flex-1 min-w-0">
           <p className="text-body-lg font-semibold text-volcanic-900 truncate">
             ${product.precio.toLocaleString('es-AR')}

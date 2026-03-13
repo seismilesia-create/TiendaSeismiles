@@ -257,6 +257,64 @@ export async function getProductReviews(productoId: string): Promise<{
   }
 }
 
+// ── Favorites ──
+
+/** Fetch favorite product IDs for a user */
+export async function getUserFavoriteIds(userId: string): Promise<Set<string>> {
+  try {
+    const { createServiceClient } = await import('@/lib/supabase/server')
+    const supabase = createServiceClient()
+    const { data, error } = await supabase
+      .from('favoritos')
+      .select('producto_id')
+      .eq('user_id', userId)
+
+    if (error) throw error
+    return new Set((data ?? []).map((r) => r.producto_id))
+  } catch {
+    return new Set()
+  }
+}
+
+/** Fetch full product data for a user's favorites (for the favorites page) */
+export async function getUserFavoriteProducts(userId: string): Promise<CatalogProductFromDB[]> {
+  try {
+    const { createServiceClient } = await import('@/lib/supabase/server')
+    const supabase = createServiceClient()
+
+    const { data: favs, error: favError } = await supabase
+      .from('favoritos')
+      .select('producto_id')
+      .eq('user_id', userId)
+      .order('created_at', { ascending: false })
+
+    if (favError) throw favError
+    if (!favs || favs.length === 0) return []
+
+    const productIds = favs.map((f) => f.producto_id)
+
+    const { data, error } = await supabase
+      .from('productos')
+      .select(`
+        id, nombre, slug, precio, categoria, linea, genero, destacado, created_at,
+        colores(nombre, hex, imagen_url),
+        variantes(talle)
+      `)
+      .in('id', productIds)
+      .eq('activo', true)
+
+    if (error) throw error
+
+    // Sort by favorite order (most recently favorited first)
+    const orderMap = new Map(productIds.map((id, i) => [id, i]))
+    return ((data ?? []) as CatalogProductFromDB[]).sort(
+      (a, b) => (orderMap.get(a.id) ?? 0) - (orderMap.get(b.id) ?? 0)
+    )
+  } catch {
+    return []
+  }
+}
+
 export async function getProductLines(): Promise<ProductLineRow[]> {
   let order = 0
   const lines: ProductLineRow[] = []

@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import Link from 'next/link'
 import { shopConfig } from '@/features/shop/config'
 import { MarqueeBanner, Navbar, Footer } from '@/features/shop/components'
 import { getProductLines } from '@/features/shop/services/product-lines'
@@ -39,7 +40,7 @@ export default async function FaqPage() {
 
   // Use DB items, fall back to config if empty
   const faqItems = dbFaqs.length > 0
-    ? dbFaqs.map(f => ({ question: f.question, answer: f.answer }))
+    ? dbFaqs.map(f => ({ question: f.question, answer: f.answer, section: f.section }))
     : faq.items
 
   const formUser = user ? { email: user.email ?? '' } : null
@@ -51,7 +52,7 @@ export default async function FaqPage() {
 
       <main>
         {/* Hero */}
-        <section className="relative pt-16 pb-12 lg:pt-24 lg:pb-16 bg-[#FAFAF8] overflow-hidden">
+        <section className="relative pt-16 pb-12 lg:pt-24 lg:pb-16 bg-background overflow-hidden">
           <div className="absolute top-0 left-0 w-[500px] h-[500px] bg-terra-500/5 blur-[150px] rounded-full pointer-events-none" />
 
           <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
@@ -72,9 +73,27 @@ export default async function FaqPage() {
         </section>
 
         {/* FAQ Content */}
-        <section className="py-16 lg:py-24 bg-[#FAFAF8]">
+        <section className="py-16 lg:py-24 bg-background">
           <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
             <FaqAccordion items={faqItems} />
+
+            {/* Returns policy link */}
+            <Link
+              href="/cambios-y-devoluciones"
+              className="mt-8 flex items-center justify-between gap-4 rounded-xl bg-white border border-sand-200 p-5 hover:border-terra-500/30 hover:shadow-sm transition-all group"
+            >
+              <div>
+                <p className="text-body-sm font-semibold text-volcanic-900 group-hover:text-terra-500 transition-colors">
+                  Politica de cambios y devoluciones
+                </p>
+                <p className="text-body-xs text-volcanic-500 mt-0.5">
+                  Conoce los plazos, condiciones y como gestionar tu cambio o devolucion.
+                </p>
+              </div>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5 text-volcanic-500 group-hover:text-terra-500 group-hover:translate-x-1 transition-all shrink-0">
+                <path d="M5 12h14" /><path d="m12 5 7 7-7 7" />
+              </svg>
+            </Link>
 
             {/* Contact form */}
             <div className="mt-16 lg:mt-20">

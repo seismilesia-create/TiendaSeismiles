@@ -170,14 +170,14 @@ export function StockTable({ variants: initialVariants }: Props) {
             <div className="flex gap-2">
               <button
                 onClick={expandAll}
-                className="text-body-xs text-volcanic-400 hover:text-volcanic-700 transition-colors"
+                className="text-body-xs text-volcanic-500 hover:text-volcanic-700 transition-colors"
               >
                 Expandir todos
               </button>
               <span className="text-volcanic-300">|</span>
               <button
                 onClick={collapseAll}
-                className="text-body-xs text-volcanic-400 hover:text-volcanic-700 transition-colors"
+                className="text-body-xs text-volcanic-500 hover:text-volcanic-700 transition-colors"
               >
                 Colapsar todos
               </button>
@@ -187,13 +187,13 @@ export function StockTable({ variants: initialVariants }: Props) {
         <div className="flex flex-col sm:flex-row gap-3 mb-4">
           {/* Search */}
           <div className="relative flex-1">
-            <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-volcanic-400" />
+            <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-volcanic-500" />
             <input
               type="text"
               placeholder="Buscar producto..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-white border border-sand-200 text-body-sm text-volcanic-900 placeholder:text-volcanic-400 focus:outline-none focus:border-terra-500 transition-colors"
+              className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-white border border-sand-200 text-body-sm text-volcanic-900 placeholder:text-volcanic-500 focus:outline-none focus:border-terra-500 transition-colors"
             />
           </div>
           {/* Filter */}
@@ -211,7 +211,7 @@ export function StockTable({ variants: initialVariants }: Props) {
 
       <div className="overflow-x-auto">
         {groups.length === 0 ? (
-          <div className="px-5 lg:px-6 py-8 text-center text-body-sm text-volcanic-400">
+          <div className="px-5 lg:px-6 py-8 text-center text-body-sm text-volcanic-500">
             No se encontraron productos.
           </div>
         ) : (
@@ -230,7 +230,7 @@ export function StockTable({ variants: initialVariants }: Props) {
                     onClick={() => toggleProduct(group.productoId)}
                     className="w-full flex items-center gap-3 px-5 lg:px-6 py-4 hover:bg-sand-100/30 transition-colors text-left"
                   >
-                    <ChevronIcon open={isOpen} className="w-4 h-4 text-volcanic-400 shrink-0" />
+                    <ChevronIcon open={isOpen} className="w-4 h-4 text-volcanic-500 shrink-0" />
                     <div className="flex-1 min-w-0">
                       <span className="text-body-sm font-medium text-volcanic-900 truncate block">
                         {group.productoNombre}
@@ -253,7 +253,7 @@ export function StockTable({ variants: initialVariants }: Props) {
                     </div>
                     {/* Total stock */}
                     <span className="text-body-sm font-semibold text-volcanic-700 tabular-nums shrink-0 w-16 text-right">
-                      {group.totalStock} uds
+                      {group.totalStock} unid.
                     </span>
                     {/* Group status */}
                     <span className={`inline-flex px-2 py-0.5 rounded-full text-[11px] font-semibold shrink-0 ${groupBadge.className}`}>
@@ -267,10 +267,10 @@ export function StockTable({ variants: initialVariants }: Props) {
                       <table className="w-full text-left">
                         <thead>
                           <tr className="border-b border-sand-200/40">
-                            <th className="pl-14 pr-4 lg:pl-16 py-2.5 text-body-xs font-semibold text-volcanic-400 uppercase tracking-wider">Color</th>
-                            <th className="px-4 py-2.5 text-body-xs font-semibold text-volcanic-400 uppercase tracking-wider">Talle</th>
-                            <th className="px-4 py-2.5 text-body-xs font-semibold text-volcanic-400 uppercase tracking-wider">Stock</th>
-                            <th className="px-4 pr-5 lg:pr-6 py-2.5 text-body-xs font-semibold text-volcanic-400 uppercase tracking-wider">Estado</th>
+                            <th className="pl-14 pr-4 lg:pl-16 py-2.5 text-body-xs font-semibold text-volcanic-500 uppercase tracking-wider">Color</th>
+                            <th className="px-4 py-2.5 text-body-xs font-semibold text-volcanic-500 uppercase tracking-wider">Talle</th>
+                            <th className="px-4 py-2.5 text-body-xs font-semibold text-volcanic-500 uppercase tracking-wider">Stock</th>
+                            <th className="px-4 pr-5 lg:pr-6 py-2.5 text-body-xs font-semibold text-volcanic-500 uppercase tracking-wider">Estado</th>
                           </tr>
                         </thead>
                         <tbody>
@@ -311,7 +311,7 @@ export function StockTable({ variants: initialVariants }: Props) {
                                       disabled={isSaving}
                                       className={`px-3 py-1.5 rounded-lg text-body-sm font-semibold transition-colors ${
                                         isSaving
-                                          ? 'text-volcanic-400 cursor-wait'
+                                          ? 'text-volcanic-500 cursor-wait'
                                           : 'text-volcanic-900 hover:bg-white cursor-pointer'
                                       }`}
                                     >

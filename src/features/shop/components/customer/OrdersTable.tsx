@@ -26,10 +26,10 @@ export function OrdersTable({ orders }: Props) {
     return (
       <div className="rounded-2xl bg-white border border-sand-200/60 p-10 text-center">
         <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-sand-100 flex items-center justify-center">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" className="w-7 h-7 text-volcanic-400"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z" /><path d="M3 6h18" /><path d="M16 10a4 4 0 0 1-8 0" /></svg>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" className="w-7 h-7 text-volcanic-500"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z" /><path d="M3 6h18" /><path d="M16 10a4 4 0 0 1-8 0" /></svg>
         </div>
         <p className="text-body-md font-medium text-volcanic-700 mb-1">Sin pedidos aun</p>
-        <p className="text-body-sm text-volcanic-400">Cuando realices tu primera compra, aparecera aqui.</p>
+        <p className="text-body-sm text-volcanic-500">Cuando realices tu primera compra, aparecera aqui.</p>
         <Link
           href="/catalogo"
           className="inline-block mt-5 px-6 py-2.5 bg-volcanic-900 hover:bg-volcanic-800 text-white text-body-sm font-semibold rounded-xl transition-colors"
@@ -47,12 +47,12 @@ export function OrdersTable({ orders }: Props) {
         <table className="w-full text-left">
           <thead>
             <tr className="border-b border-sand-200/60">
-              <th className="px-5 lg:px-6 py-3 text-body-xs font-semibold text-volcanic-400 uppercase tracking-wider">N° Pedido</th>
-              <th className="px-5 lg:px-6 py-3 text-body-xs font-semibold text-volcanic-400 uppercase tracking-wider">Fecha</th>
-              <th className="px-5 lg:px-6 py-3 text-body-xs font-semibold text-volcanic-400 uppercase tracking-wider">Producto</th>
-              <th className="px-5 lg:px-6 py-3 text-body-xs font-semibold text-volcanic-400 uppercase tracking-wider">Cant.</th>
-              <th className="px-5 lg:px-6 py-3 text-body-xs font-semibold text-volcanic-400 uppercase tracking-wider">Total</th>
-              <th className="px-5 lg:px-6 py-3 text-body-xs font-semibold text-volcanic-400 uppercase tracking-wider">Estado</th>
+              <th className="px-5 lg:px-6 py-3 text-body-xs font-semibold text-volcanic-500 uppercase tracking-wider">N° Pedido</th>
+              <th className="px-5 lg:px-6 py-3 text-body-xs font-semibold text-volcanic-500 uppercase tracking-wider">Fecha</th>
+              <th className="px-5 lg:px-6 py-3 text-body-xs font-semibold text-volcanic-500 uppercase tracking-wider">Producto</th>
+              <th className="px-5 lg:px-6 py-3 text-body-xs font-semibold text-volcanic-500 uppercase tracking-wider">Cant.</th>
+              <th className="px-5 lg:px-6 py-3 text-body-xs font-semibold text-volcanic-500 uppercase tracking-wider">Total</th>
+              <th className="px-5 lg:px-6 py-3 text-body-xs font-semibold text-volcanic-500 uppercase tracking-wider">Estado</th>
               <th className="px-5 lg:px-6 py-3"></th>
             </tr>
           </thead>
@@ -114,7 +114,7 @@ export function OrdersTable({ orders }: Props) {
               </div>
               <p className="text-body-sm text-volcanic-700 font-medium truncate">{order.producto_nombre}</p>
               <div className="flex items-center justify-between mt-2">
-                <span className="text-body-xs text-volcanic-400">
+                <span className="text-body-xs text-volcanic-500">
                   {new Date(order.created_at).toLocaleDateString('es-AR', { day: '2-digit', month: 'short', year: 'numeric' })}
                 </span>
                 <span className="text-body-sm font-semibold text-volcanic-900">

@@ -19,5 +19,5 @@ export function getResend(): Resend {
 // Change to your verified domain in production
 export const EMAIL_CONFIG = {
   from: process.env.RESEND_FROM_EMAIL || 'Seismiles <onboarding@resend.dev>',
-  replyTo: 'sinsajo.creators@gmail.com',
+  replyTo: 'seismilestextil@gmail.com',
 }

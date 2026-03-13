@@ -8,7 +8,7 @@ export function TopProductsTable({ products }: Props) {
   if (products.length === 0) {
     return (
       <div className="rounded-2xl bg-white border border-sand-200/60 p-6 text-center">
-        <p className="text-body-sm text-volcanic-400">Sin ventas registradas este ano.</p>
+        <p className="text-body-sm text-volcanic-500">Sin ventas registradas este año.</p>
       </div>
     )
   }
@@ -26,7 +26,7 @@ export function TopProductsTable({ products }: Props) {
               <p className="text-body-sm font-semibold text-volcanic-900 truncate">
                 {product.nombre}
               </p>
-              <p className="text-body-xs text-volcanic-400">
+              <p className="text-body-xs text-volcanic-500">
                 {product.totalUnits} unid. — {product.totalOrders} ventas
               </p>
             </div>

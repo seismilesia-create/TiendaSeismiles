@@ -1,10 +1,12 @@
 import type { Metadata } from 'next'
 import './globals.css'
+import { WhatsAppFloat } from '@/features/shop/components/WhatsAppFloat'
 
 const SITE_NAME = 'Seismiles Textil'
 const SITE_DESCRIPTION = 'Indumentaria urbana premium nacida en la Ruta de los Seismiles, Catamarca. Remeras de algodon, pique superior y buzos canguro super premium. Calidad forjada a 6000 metros de altura.'
 
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://seismilestextil.com'),
   title: {
     default: `${SITE_NAME} | Indumentaria Premium - Catamarca, Argentina`,
     template: `%s | ${SITE_NAME}`,
@@ -31,7 +33,10 @@ export default function RootLayout({
 }) {
   return (
     <html lang="es">
-      <body>{children}</body>
+      <body>
+        {children}
+        <WhatsAppFloat />
+      </body>
     </html>
   )
 }

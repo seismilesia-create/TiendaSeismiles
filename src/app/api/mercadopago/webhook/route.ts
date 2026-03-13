@@ -1,8 +1,43 @@
+import { createHmac, timingSafeEqual } from 'crypto'
 import { NextRequest, NextResponse } from 'next/server'
 import { createServiceClient } from '@/lib/supabase/server'
 import { mpPayment } from '@/lib/mercadopago'
 import { sendOrderConfirmationEmails } from '@/lib/email/send-order-confirmation'
 import { sendGiftcardEmail } from '@/lib/email/send-giftcard-email'
+
+function verifyWebhookSignature(request: NextRequest, dataId: string): boolean {
+  const secret = process.env.MP_WEBHOOK_SECRET
+  if (!secret) return true // Skip verification if no secret configured (dev mode)
+
+  const xSignature = request.headers.get('x-signature')
+  const xRequestId = request.headers.get('x-request-id')
+
+  if (!xSignature || !xRequestId) return false
+
+  // Parse ts and v1 from x-signature header
+  const parts = Object.fromEntries(
+    xSignature.split(',').map((p) => {
+      const [key, ...rest] = p.split('=')
+      return [key.trim(), rest.join('=').trim()]
+    })
+  )
+
+  const ts = parts.ts
+  const hash = parts.v1
+
+  if (!ts || !hash) return false
+
+  // Build manifest and compute HMAC-SHA256
+  const manifest = `id:${dataId};request-id:${xRequestId};ts:${ts};`
+  const computed = createHmac('sha256', secret).update(manifest).digest('hex')
+
+  // Timing-safe comparison
+  try {
+    return timingSafeEqual(Buffer.from(computed), Buffer.from(hash))
+  } catch {
+    return false
+  }
+}
 
 const STATUS_MAP: Record<string, string> = {
   approved: 'confirmado',
@@ -29,6 +64,12 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Missing payment ID' }, { status: 400 })
     }
 
+    // Verify webhook signature (HMAC-SHA256)
+    if (!verifyWebhookSignature(request, String(paymentId))) {
+      console.error('MP webhook: invalid signature')
+      return NextResponse.json({ error: 'Invalid signature' }, { status: 401 })
+    }
+
     // Fetch full payment details from MP API (verifies authenticity)
     const payment = await mpPayment.get({ id: paymentId })
 
@@ -47,9 +88,16 @@ export async function POST(request: NextRequest) {
       const mpStatus = status ?? ''
 
       if (mpStatus === 'approved' || mpStatus === 'authorized') {
+        // Get monto first to set saldo_restante
+        const { data: existing } = await service
+          .from('gift_cards')
+          .select('monto')
+          .eq('id', giftcardId)
+          .single()
+
         const { data: gc } = await service
           .from('gift_cards')
-          .update({ estado: 'activa', mp_payment_id: String(paymentId) })
+          .update({ estado: 'activa', mp_payment_id: String(paymentId), saldo_restante: existing?.monto ?? 0 })
           .eq('id', giftcardId)
           .select('codigo, monto, titulo, user_id')
           .single()
@@ -106,8 +154,35 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Send confirmation email when payment is approved
+    // If confirmed, deduct gift card balances and send email
     if (newEstado === 'confirmado') {
+      // Read gift_cards_applied JSONB from the first order (all share the same data)
+      const { data: orderWithGc } = await service
+        .from('compras')
+        .select('gift_cards_applied')
+        .in('numero_pedido', orderNumbers)
+        .not('gift_cards_applied', 'is', null)
+        .limit(1)
+        .single()
+
+      if (orderWithGc?.gift_cards_applied) {
+        const gcList = orderWithGc.gift_cards_applied as { id: string; descuento: number }[]
+        for (const gc of gcList) {
+          const { data: current } = await service
+            .from('gift_cards')
+            .select('saldo_restante')
+            .eq('id', gc.id)
+            .single()
+
+          if (current) {
+            await service
+              .from('gift_cards')
+              .update({ saldo_restante: Math.max(0, (current.saldo_restante ?? 0) - gc.descuento) })
+              .eq('id', gc.id)
+          }
+        }
+      }
+
       sendOrderConfirmationEmails(orderNumbers)
     }
 

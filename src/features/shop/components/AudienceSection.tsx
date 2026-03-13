@@ -13,7 +13,7 @@ const AUDIENCES = [
     image: 'https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?w=400&h=500&fit=crop&crop=top',
   },
   {
-    label: 'Ninos',
+    label: 'Niños',
     href: '/tienda/ninos',
     image: 'https://images.unsplash.com/photo-1503454537195-1dcabb73ffb9?w=400&h=500&fit=crop&crop=top',
   },

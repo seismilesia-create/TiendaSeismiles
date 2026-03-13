@@ -59,17 +59,16 @@ export default async function NosotrosPage() {
               </span>
             </div>
             <h1 className="font-heading text-display-lg sm:text-display-xl lg:text-[4.5rem] leading-[1.05] text-white mb-4 max-w-3xl">
-              Nacidos a 6000 metros de altura
+              El Horizonte que nos Guía
             </h1>
             <p className="text-body-lg text-white/60 max-w-2xl leading-relaxed">
-              Desde el corazon de Catamarca, donde los volcanes tocan el cielo,
-              creamos prendas que honran nuestra tierra.
+              En SEISMILES, nuestra identidad nace de la contemplación de los gigantes que definen el cielo de Catamarca. Los "Seismiles" —esos colosos que desafían los 6.000 metros de altura— no son solo parte de nuestro paisaje; son el estándar de solidez, resistencia y presencia que buscamos en cada prenda que fabricamos.
             </p>
           </div>
         </section>
 
         {/* Origin story */}
-        <section className="py-20 lg:py-28 bg-[#FAFAF8]">
+        <section className="py-20 lg:py-28 bg-background">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center">
               {/* Text */}
@@ -78,23 +77,17 @@ export default async function NosotrosPage() {
                   Quienes somos
                 </span>
                 <h2 className="font-heading text-display-sm sm:text-display-md text-volcanic-900 mb-6">
-                  La ruta que nos inspira
+                  Manos Catamarqueñas, Diseño de Altura
                 </h2>
                 <div className="space-y-5 text-body-md text-volcanic-500 leading-relaxed">
                   <p>
-                    La Ruta de los Seismiles recorre la Ruta Nacional 60 entre Tinogasta y el
-                    Paso de San Francisco, en Catamarca. Un camino rodeado de volcanes de mas
-                    de 6.000 metros, paisajes aridos y la majestuosidad del altiplano andino.
+                    No somos una marca de paso. Somos un taller textil con raíces profundas en nuestra provincia, ubicado en la Avenida Presidente Castillo. Aquí, cada pieza es el resultado de un proceso consciente: desde la selección técnica de las materias primas hasta el control riguroso de la última puntada.
                   </p>
                   <p>
-                    Esa grandeza nos inspira. Cada prenda lleva la fuerza de la tierra, la
-                    resistencia de la roca volcanica y la calidez del desierto que nos vio nacer.
-                    Somos de la montana, para la ciudad.
+                    En un mundo de moda descartable, en SEISMILES elegimos el camino de la perdurabilidad. Trabajamos con algodones peinados de gramaje superior, rústicos premium y piqués de textura firme, diseñados para acompañarte durante años, manteniendo su forma y su carácter intactos.
                   </p>
                   <p>
-                    Seismiles Textil nace de la conviccion de que la calidad no es un lujo,
-                    sino un estandar. Disenamos y confeccionamos en Catamarca, con materiales
-                    premium seleccionados y procesos que respetan el tiempo que cada prenda merece.
+                    Diseñamos para quienes valoran el origen de lo que visten. Para quienes buscan la comodidad de un básico pero exigen la distinción de una pieza bien lograda. Nuestra promesa es simple: ofrecerte indumentaria de autor que se sienta tan sólida y auténtica como la tierra de la que venimos.
                   </p>
                 </div>
 
@@ -102,17 +95,17 @@ export default async function NosotrosPage() {
                 <div className="flex items-center gap-10 mt-10 pt-10 border-t border-sand-200">
                   <div>
                     <p className="font-heading text-display-sm text-volcanic-900">6.000</p>
-                    <p className="text-body-xs text-volcanic-400 uppercase tracking-wider mt-1">Metros de altura</p>
+                    <p className="text-body-xs text-volcanic-500 uppercase tracking-wider mt-1">Metros de altura</p>
                   </div>
                   <div className="w-px h-12 bg-sand-200" />
                   <div>
                     <p className="font-heading text-display-sm text-volcanic-900">600</p>
-                    <p className="text-body-xs text-volcanic-400 uppercase tracking-wider mt-1">km de recorrido</p>
+                    <p className="text-body-xs text-volcanic-500 uppercase tracking-wider mt-1">km de recorrido</p>
                   </div>
                   <div className="w-px h-12 bg-sand-200" />
                   <div>
                     <p className="font-heading text-display-sm text-terra-500">RN 60</p>
-                    <p className="text-body-xs text-volcanic-400 uppercase tracking-wider mt-1">Ruta Nacional</p>
+                    <p className="text-body-xs text-volcanic-500 uppercase tracking-wider mt-1">Ruta Nacional</p>
                   </div>
                 </div>
               </div>
@@ -121,7 +114,7 @@ export default async function NosotrosPage() {
               <div className="relative aspect-[4/5] rounded-2xl overflow-hidden">
                 <Image
                   src="/images/balcon pissis.jpg"
-                  alt="Balcon del Pissis, lagunas y salares del altiplano catamarqueno"
+                  alt="Balcon del Pissis, lagunas y salares del altiplano catamarqueño"
                   fill
                   className="object-cover"
                   sizes="(max-width: 1024px) 100vw, 50vw"
@@ -145,7 +138,7 @@ export default async function NosotrosPage() {
               <h2 className="font-heading text-display-sm sm:text-display-md text-white mb-4">
                 Lo que nos define
               </h2>
-              <p className="text-body-md text-white/40 max-w-2xl mx-auto">
+              <p className="text-body-md text-white/60 max-w-2xl mx-auto">
                 Cada decision que tomamos esta guiada por estos principios. Son nuestra brujula,
                 como la cordillera lo es para el viajero.
               </p>
@@ -161,17 +154,17 @@ export default async function NosotrosPage() {
                 {
                   number: '02',
                   title: 'Raices catamarquenas',
-                  description: 'Disenamos y confeccionamos en Catamarca. Nuestra identidad nace de la tierra, de sus colores, de su fuerza. Cada prenda lleva el ADN del altiplano.',
+                  description: 'Diseñamos y confeccionamos en Catamarca. Nuestra identidad nace de la tierra, de sus colores, de su fuerza. Cada prenda lleva el ADN del altiplano.',
                 },
                 {
                   number: '03',
                   title: 'Hecho para durar',
-                  description: 'Costuras reforzadas, tinturas de alta fijacion, terminaciones impecables. Nuestras prendas estan hechas para acompanarte, no para descartarse.',
+                  description: 'Costuras reforzadas, tinturas de alta fijacion, terminaciones impecables. Nuestras prendas estan hechas para acompañarte, no para descartarse.',
                 },
                 {
                   number: '04',
-                  title: 'Diseno con proposito',
-                  description: 'Cada linea tiene nombre de volcan, cada detalle tiene razon de ser. Creamos ropa urbana con alma de montana: versatil, resistente y con caracter.',
+                  title: 'Diseño con proposito',
+                  description: 'Cada linea tiene nombre de volcan, cada detalle tiene razon de ser. Creamos ropa urbana con alma de montaña: versatil, resistente y con caracter.',
                 },
                 {
                   number: '05',
@@ -194,7 +187,7 @@ export default async function NosotrosPage() {
                   <h3 className="font-heading text-lg text-white mb-3">
                     {value.title}
                   </h3>
-                  <p className="text-body-sm text-white/40 leading-relaxed">
+                  <p className="text-body-sm text-white/60 leading-relaxed">
                     {value.description}
                   </p>
                 </div>
@@ -225,7 +218,7 @@ export default async function NosotrosPage() {
         </section>
 
         {/* CTA */}
-        <section className="py-20 lg:py-28 bg-[#FAFAF8]">
+        <section className="py-20 lg:py-28 bg-background">
           <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
             <span className="text-body-xs uppercase tracking-widest text-terra-500 font-semibold mb-4 block">
               Unite a Seismiles
@@ -235,7 +228,7 @@ export default async function NosotrosPage() {
             </h2>
             <p className="text-body-md text-volcanic-500 leading-relaxed mb-10 max-w-xl mx-auto">
               Cada prenda es una declaracion de lo que somos: resistencia, calidez y autenticidad.
-              Explora las lineas que nacen de la montana.
+              Explora las lineas que nacen de la montaña.
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
               <Link

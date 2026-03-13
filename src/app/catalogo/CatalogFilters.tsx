@@ -27,7 +27,7 @@ const AUDIENCES = [
   { value: 'todos', label: 'Todos' },
   { value: 'hombres', label: 'Hombres' },
   { value: 'mujeres', label: 'Mujeres' },
-  { value: 'ninos', label: 'Ninos' },
+  { value: 'ninos', label: 'Niños' },
 ]
 
 const SORT_OPTIONS = [
@@ -104,16 +104,16 @@ export function MobileFilters(props: CatalogFiltersProps) {
   return (
     <div className="lg:hidden">
       {/* Top bar */}
-      <div className="flex items-center justify-between py-4">
+      <div className="space-y-3 py-4">
         <p className="text-body-sm text-volcanic-600">
           <span className="font-semibold text-volcanic-900">{props.totalProducts}</span>{' '}
           {props.totalProducts === 1 ? 'producto' : 'productos'}
         </p>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center justify-between gap-3">
           <select
             value={props.activeSort}
             onChange={(e) => props.onSortChange(e.target.value)}
-            className="text-body-sm text-volcanic-700 bg-transparent border-none focus:outline-none cursor-pointer pr-6"
+            className="flex-1 min-w-0 text-body-sm text-volcanic-700 bg-white px-3 py-2.5 rounded-xl border border-sand-200 focus:outline-none cursor-pointer"
           >
             {SORT_OPTIONS.map((opt) => (
               <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -121,7 +121,7 @@ export function MobileFilters(props: CatalogFiltersProps) {
           </select>
           <button
             onClick={() => setOpen(true)}
-            className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-sand-200 text-body-sm font-medium text-volcanic-700 hover:border-volcanic-400 transition-colors"
+            className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-sand-200 text-body-sm font-medium text-volcanic-700 hover:border-volcanic-400 transition-colors whitespace-nowrap"
           >
             <FilterIcon className="w-4 h-4" />
             Filtros
@@ -178,7 +178,7 @@ export function MobileFilters(props: CatalogFiltersProps) {
 export function DesktopFilters(props: CatalogFiltersProps) {
   return (
     <div className="hidden lg:block">
-      <div className="sticky top-28 space-y-1">
+      <div className="sticky top-28 bg-white rounded-2xl shadow-card p-5 space-y-1">
         <div className="flex items-center justify-between pb-4 border-b border-sand-200">
           <h2 className="text-body-lg font-semibold text-volcanic-900">Filtros</h2>
           {hasActiveFilters(props) && (
@@ -301,7 +301,7 @@ function FilterSection({
         <span className="text-body-xs font-semibold uppercase tracking-widest text-volcanic-700 group-hover:text-volcanic-900 transition-colors">
           {title}
         </span>
-        <ChevronIcon className="w-4 h-4 text-volcanic-400" open={open} />
+        <ChevronIcon className="w-4 h-4 text-volcanic-500" open={open} />
       </button>
       {open && <div className="pb-2">{children}</div>}
     </div>

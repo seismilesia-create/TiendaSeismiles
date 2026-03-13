@@ -5,6 +5,7 @@ import { requireAuth } from '@/lib/auth/customer'
 import { getMyOrders } from '@/features/shop/services/orders'
 import { OrdersTable } from '@/features/shop/components/customer/OrdersTable'
 import { signout } from '@/actions/auth'
+import { ProfileNav } from './ProfileNav'
 
 export const metadata: Metadata = {
   title: 'Mi perfil | Seismiles Textil',
@@ -56,16 +57,7 @@ export default async function PerfilPage() {
         </form>
       </div>
 
-      {/* Orders section */}
-      <div className="mb-6">
-        <div className="flex items-center gap-2 mb-1">
-          <PackageIcon className="w-5 h-5 text-terra-500" />
-          <h2 className="font-heading text-xl text-volcanic-900">Mis pedidos</h2>
-        </div>
-        <p className="text-body-sm text-volcanic-400">
-          Historial de tus compras y el estado de cada pedido.
-        </p>
-      </div>
+      <ProfileNav active="pedidos" />
 
       <OrdersTable orders={orders} />
     </div>

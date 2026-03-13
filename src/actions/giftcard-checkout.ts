@@ -97,7 +97,9 @@ export async function confirmGiftcardPayment(
   paymentId: string,
   giftcardId: string
 ): Promise<ConfirmGiftcardResult> {
-  if (!paymentId || !giftcardId) return { confirmed: false, error: 'Datos incompletos' }
+  if (!paymentId || !giftcardId) {
+    return { confirmed: false, error: 'Datos incompletos' }
+  }
 
   try {
     const payment = await mpPayment.get({ id: Number(paymentId) })
@@ -106,9 +108,16 @@ export async function confirmGiftcardPayment(
     const service = createServiceClient()
 
     if (mpStatus === 'approved' || mpStatus === 'authorized') {
-      const { data: gc } = await service
+      // First get the monto to set saldo_restante
+      const { data: existing } = await service
         .from('gift_cards')
-        .update({ estado: 'activa', mp_payment_id: String(paymentId) })
+        .select('monto')
+        .eq('id', giftcardId)
+        .single()
+
+      const { data: gc, error: updateError } = await service
+        .from('gift_cards')
+        .update({ estado: 'activa', mp_payment_id: String(paymentId), saldo_restante: existing?.monto ?? 0 })
         .eq('id', giftcardId)
         .select('codigo, monto, titulo, user_id')
         .single()
@@ -140,5 +149,62 @@ export async function confirmGiftcardPayment(
   } catch (err) {
     console.error('confirmGiftcardPayment error:', err)
     return { confirmed: false, error: 'Error al verificar el pago' }
+  }
+}
+
+/* ─── Check pending gift card (fallback for sandbox / manual return) ─── */
+
+export async function checkPendingGiftcard(): Promise<ConfirmGiftcardResult> {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+
+  if (!user) return { confirmed: false }
+
+  const service = createServiceClient()
+
+  // Find the most recent pending gift card with an MP preference
+  const { data: gc } = await service
+    .from('gift_cards')
+    .select('id, codigo, monto, titulo, user_id, mp_preference_id')
+    .eq('user_id', user.id)
+    .eq('estado', 'pendiente_pago')
+    .not('mp_preference_id', 'is', null)
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .single()
+
+  if (!gc?.mp_preference_id) return { confirmed: false }
+
+  // Search for payments linked to this preference
+  try {
+    const searchUrl = `https://api.mercadopago.com/v1/payments/search?external_reference=gc:${gc.id}&sort=date_created&criteria=desc&limit=1`
+    const response = await fetch(searchUrl, {
+      headers: { Authorization: `Bearer ${process.env.MP_ACCESS_TOKEN}` },
+    })
+    const data = await response.json()
+    const payment = data.results?.[0]
+    if (!payment) return { confirmed: false }
+
+    const mpStatus = payment.status ?? ''
+
+    if (mpStatus === 'approved' || mpStatus === 'authorized') {
+      const { data: updated } = await service
+        .from('gift_cards')
+        .update({ estado: 'activa', mp_payment_id: String(payment.id), saldo_restante: gc.monto })
+        .eq('id', gc.id)
+        .select('codigo, monto, titulo, user_id')
+        .single()
+
+      if (updated) {
+        sendGiftcardEmail(updated.user_id, updated.codigo, updated.monto, updated.titulo)
+      }
+
+      return { confirmed: true, codigo: updated?.codigo ?? gc.codigo }
+    }
+
+    return { confirmed: false }
+  } catch (err) {
+    console.error('[GC Check] Error:', err)
+    return { confirmed: false }
   }
 }

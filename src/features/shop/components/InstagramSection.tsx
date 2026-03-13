@@ -20,7 +20,7 @@ export function InstagramSection() {
   const { instagram } = shopConfig
 
   return (
-    <section className="py-20 lg:py-28 bg-[#FAFAF8]">
+    <section className="py-20 lg:py-28 bg-white border-t border-sand-200">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="text-center mb-12 lg:mb-16">
@@ -33,7 +33,7 @@ export function InstagramSection() {
           <h2 className="font-heading text-display-md lg:text-display-lg text-volcanic-900 mb-4">
             {instagram.heading}
           </h2>
-          <p className="text-body-md text-volcanic-400 max-w-md mx-auto">
+          <p className="text-body-md text-volcanic-500 max-w-md mx-auto">
             {instagram.subtitle}
           </p>
         </div>

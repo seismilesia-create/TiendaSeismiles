@@ -83,7 +83,7 @@ export function FaqContactForm({ user }: FaqContactFormProps) {
   // Logged in - show question form
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      <p className="text-body-xs text-white/40">
+      <p className="text-body-xs text-white/60">
         Enviando como <span className="text-white/70 font-medium">{user.email}</span>
       </p>
 

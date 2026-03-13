@@ -18,7 +18,7 @@ export function OriginSection() {
   const { origin } = shopConfig
 
   return (
-    <section id="origen" className="py-20 lg:py-32 bg-[#FAFAF8] overflow-hidden">
+    <section id="origen" className="py-20 lg:py-32 bg-background overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center">
 
@@ -113,7 +113,7 @@ export function OriginSection() {
             {/* Key phrase */}
             <blockquote className="relative pl-6 mb-10 border-l-2 border-terra-500/30">
               <p className="font-heading text-body-lg lg:text-xl text-volcanic-700 italic">
-                &ldquo;Somos de la montana, para la ciudad.&rdquo;
+                &ldquo;Somos de la montaña, para la ciudad.&rdquo;
               </p>
             </blockquote>
 

@@ -2,7 +2,7 @@ import type { ShopConfig } from './types'
 
 // ============================================================
 // SHOP CONFIG - Seismiles Textil
-// Indumentaria urbana premium con alma de montana
+// Indumentaria urbana premium con alma de montaña
 // ============================================================
 
 export const shopConfig: ShopConfig = {
@@ -11,10 +11,10 @@ export const shopConfig: ShopConfig = {
     tagline: 'Ruta Nacional 60',
     subtitle: 'Nacidas a 6000 metros de altura',
     description:
-      'Nacidas en la inmensidad del altiplano catamarqueno. Donde los volcanes tocan el cielo, vestimos confianza.',
+      'Nacidas en la inmensidad del altiplano catamarqueño. Donde los volcanes tocan el cielo, vestimos confianza.',
     instagram: 'https://instagram.com/seismiles_textil',
-    whatsapp: 'https://wa.me/5493834000000',
-    email: 'contacto@seismilestextil.com',
+    whatsapp: 'https://wa.me/5493834243614',
+    email: 'seismilestextil@gmail.com',
   },
 
   hero: {
@@ -103,7 +103,7 @@ export const shopConfig: ShopConfig = {
           slug: 'linea-arista',
           gradientFrom: '#2C2420',
           gradientTo: '#4A3D35',
-          imageUrl: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=800&h=600&fit=crop&crop=center',
+          imageUrl: '/images/Nahuel Piqué.webp',
         },
         {
           title: 'Linea Pissis',
@@ -191,7 +191,7 @@ export const shopConfig: ShopConfig = {
     heading: 'Donde nace nuestro nombre',
     paragraphs: [
       'La Ruta de los Seismiles recorre la Ruta Nacional 60 entre Tinogasta y el Paso de San Francisco, en Catamarca. Un camino rodeado de volcanes de mas de 6.000 metros, paisajes aridos y la majestuosidad del altiplano andino.',
-      'Esa grandeza nos inspira. Cada prenda lleva la fuerza de la tierra, la resistencia de la roca volcanica y la calidez del desierto que nos vio nacer. Somos de la montana, para la ciudad.',
+      'Esa grandeza nos inspira. Cada prenda lleva la fuerza de la tierra, la resistencia de la roca volcanica y la calidez del desierto que nos vio nacer. Somos de la montaña, para la ciudad.',
     ],
     stats: [
       { value: '6000', label: 'Metros de altura' },
@@ -236,7 +236,7 @@ export const shopConfig: ShopConfig = {
   benefits: [
     {
       icon: 'truck',
-      title: 'Envios a todo el pais',
+      title: 'Envíos a todo el país',
       description: 'Entregas rapidas y seguras',
     },
     {
@@ -262,36 +262,44 @@ export const shopConfig: ShopConfig = {
     contactPrompt: 'No encontraste lo que buscabas? Escribinos tu consulta y te respondemos a la brevedad.',
     items: [
       {
+        section: 'Envíos',
         question: 'Hacen envios a todo el pais?',
         answer: 'Si, realizamos envios a todo el territorio argentino a traves de correo y servicios de mensajeria. Los tiempos de entrega varian segun la localidad, pero generalmente son de 3 a 7 dias habiles.',
       },
       {
+        section: 'Envíos',
+        question: 'Cuanto tarda en llegar mi pedido?',
+        answer: 'Los pedidos dentro de Catamarca capital llegan en 24-48 horas. Para el resto del pais, el plazo es de 3 a 7 dias habiles dependiendo de la localidad. Recibiras un codigo de seguimiento por email.',
+      },
+      {
+        section: 'Pagos',
         question: 'Cuales son los medios de pago disponibles?',
         answer: 'Aceptamos tarjetas de credito y debito (Visa, Mastercard, American Express), transferencia bancaria, Mercado Pago y efectivo a traves de Rapipago y Pago Facil. Ofrecemos hasta 3 cuotas sin interes con tarjeta.',
       },
       {
+        section: 'Productos',
         question: 'Como se la guia de talles?',
         answer: 'En cada producto encontras una tabla de talles detallada con medidas en centimetros. Si tenes dudas, escribinos por WhatsApp con tu altura y peso, y te asesoramos para que elijas el talle perfecto.',
       },
       {
-        question: 'Puedo cambiar o devolver un producto?',
-        answer: 'Si, tenes 30 dias desde la recepcion para solicitar un cambio o devolucion. El producto debe estar sin uso, con etiquetas y en su empaque original. Los cambios por talle no tienen costo adicional.',
+        section: 'Productos',
+        question: 'De donde son las prendas?',
+        answer: 'Todas nuestras prendas son diseñadas y confeccionadas en Catamarca, Argentina. Usamos materiales premium seleccionados: algodon de fibra larga, pique superior y frisas peinadas de primera calidad.',
       },
       {
+        section: 'Cambios y Devoluciones',
+        question: 'Puedo cambiar o devolver un producto?',
+        answer: 'Si, tenes 30 dias desde la recepcion para solicitar un cambio o devolucion. El producto debe estar sin uso, con etiquetas y en su empaque original. Los cambios por talle no tienen costo adicional. Para conocer todos los detalles, plazos y condiciones visita la seccion de Cambios y Devoluciones en el pie de pagina.',
+      },
+      {
+        section: 'Gift Cards',
         question: 'Las gift cards tienen vencimiento?',
         answer: 'No, nuestras gift cards no tienen fecha de vencimiento. Pueden ser canjeadas en cualquier momento y son validas para todos los productos de la tienda online.',
       },
       {
+        section: 'Personalización',
         question: 'Hacen personalizacion para empresas?',
         answer: 'Si, ofrecemos servicio de personalizacion con tecnologia DTF (Direct to Film) para empresas, eventos y equipos. Podes consultar precios y minimos escribiendonos por la seccion de contacto.',
-      },
-      {
-        question: 'De donde son las prendas?',
-        answer: 'Todas nuestras prendas son disenadas y confeccionadas en Catamarca, Argentina. Usamos materiales premium seleccionados: algodon de fibra larga, pique superior y frisas peinadas de primera calidad.',
-      },
-      {
-        question: 'Cuanto tarda en llegar mi pedido?',
-        answer: 'Los pedidos dentro de Catamarca capital llegan en 24-48 horas. Para el resto del pais, el plazo es de 3 a 7 dias habiles dependiendo de la localidad. Recibiras un codigo de seguimiento por email.',
       },
     ],
   },
@@ -336,7 +344,7 @@ export const shopConfig: ShopConfig = {
 
   footer: {
     tagline:
-      'Nacidas en la inmensidad del altiplano catamarqueno. Donde los volcanes tocan el cielo, vestimos confianza.',
+      'Nacidas en la inmensidad del altiplano catamarqueño. Donde los volcanes tocan el cielo, vestimos confianza.',
     columns: [
       {
         title: 'Tienda',
@@ -358,6 +366,7 @@ export const shopConfig: ShopConfig = {
         title: 'Ayuda',
         links: [
           { label: 'Preguntas frecuentes', href: '/faq' },
+          { label: 'Cambios y devoluciones', href: '/cambios-y-devoluciones' },
           { label: 'Contacto', href: '/contacto' },
         ],
       },

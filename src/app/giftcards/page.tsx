@@ -52,7 +52,7 @@ export default async function GiftCardsPage() {
 
       <main>
         {/* Hero */}
-        <section className="relative pt-16 pb-12 lg:pt-24 lg:pb-16 bg-[#FAFAF8] overflow-hidden">
+        <section className="relative pt-16 pb-12 lg:pt-24 lg:pb-16 bg-background overflow-hidden">
           {/* Decorative gradient */}
           <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-terra-500/5 blur-[150px] rounded-full pointer-events-none" />
 
@@ -74,7 +74,7 @@ export default async function GiftCardsPage() {
         </section>
 
         {/* Gift Cards Grid */}
-        <section className="py-16 lg:py-24 bg-[#FAFAF8]">
+        <section className="py-16 lg:py-24 bg-background">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <GiftCardGrid cards={cardDefs} userId={navUser ? user!.id : null} />
 

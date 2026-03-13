@@ -45,7 +45,7 @@ export function GiftCardDefsTable({ definitions }: { definitions: GiftCardDef[] 
 
   if (!definitions.length) {
     return (
-      <div className="text-center py-16 text-body-md text-volcanic-400">
+      <div className="text-center py-16 text-body-md text-volcanic-500">
         No hay gift cards definidas. Crea la primera.
       </div>
     )
@@ -80,7 +80,7 @@ export function GiftCardDefsTable({ definitions }: { definitions: GiftCardDef[] 
               {/* Titulo */}
               <td className="py-3 pr-4">
                 <p className="font-semibold text-volcanic-900">{def.titulo}</p>
-                <p className="text-volcanic-400 text-body-xs truncate max-w-[200px]">{def.descripcion}</p>
+                <p className="text-volcanic-500 text-body-xs truncate max-w-[200px]">{def.descripcion}</p>
               </td>
 
               {/* Precio */}
@@ -109,7 +109,7 @@ export function GiftCardDefsTable({ definitions }: { definitions: GiftCardDef[] 
                 <div className="flex items-center justify-end gap-1">
                   <Link
                     href={`/admin/gift-cards/${def.id}`}
-                    className="p-2 rounded-lg hover:bg-sand-100 text-volcanic-400 hover:text-volcanic-700 transition-colors"
+                    className="p-2 rounded-lg hover:bg-sand-100 text-volcanic-500 hover:text-volcanic-700 transition-colors"
                     title="Editar"
                   >
                     <EditIcon className="w-4 h-4" />
@@ -117,7 +117,7 @@ export function GiftCardDefsTable({ definitions }: { definitions: GiftCardDef[] 
                   <button
                     onClick={() => handleDelete(def.id)}
                     disabled={deleting === def.id}
-                    className="p-2 rounded-lg hover:bg-red-50 text-volcanic-400 hover:text-red-600 transition-colors disabled:opacity-50"
+                    className="p-2 rounded-lg hover:bg-red-50 text-volcanic-500 hover:text-red-600 transition-colors disabled:opacity-50"
                     title="Eliminar"
                   >
                     <TrashIcon className="w-4 h-4" />

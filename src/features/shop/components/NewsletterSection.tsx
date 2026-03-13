@@ -67,7 +67,7 @@ export function NewsletterSection() {
   }
 
   return (
-    <section className="relative py-24 lg:py-32 bg-volcanic-900 overflow-hidden">
+    <section className="relative py-20 lg:py-28 bg-volcanic-900 overflow-hidden">
       {/* Subtle radial glow */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[400px] bg-terra-500/5 blur-[150px] rounded-full pointer-events-none" />
 
@@ -96,7 +96,7 @@ export function NewsletterSection() {
         </h2>
 
         {/* Subtitle */}
-        <p className="text-body-md text-white/40 leading-relaxed mb-10 max-w-lg mx-auto">
+        <p className="text-body-md text-white/60 leading-relaxed mb-10 max-w-lg mx-auto">
           Suscribite y recibi tu cupon de descuento. Se el primero en conocer nuevos colores,
           lanzamientos exclusivos y novedades desde la altura.
         </p>

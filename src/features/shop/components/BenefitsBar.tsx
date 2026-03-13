@@ -52,7 +52,7 @@ export function BenefitsBar() {
   const { benefits } = shopConfig
 
   return (
-    <section className="py-16 lg:py-20 bg-sand-50 border-y border-sand-200/60">
+    <section className="py-12 lg:py-16 bg-sand-50 border-y border-sand-200/60">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-6">
           {benefits.map((benefit) => {
@@ -72,7 +72,7 @@ export function BenefitsBar() {
                   <h3 className="text-body-sm font-semibold text-volcanic-900 mb-0.5">
                     {benefit.title}
                   </h3>
-                  <p className="text-body-xs text-volcanic-400">
+                  <p className="text-body-xs text-volcanic-500">
                     {benefit.description}
                   </p>
                 </div>

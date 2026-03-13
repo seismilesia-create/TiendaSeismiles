@@ -509,3 +509,63 @@ export function giftCardEmail(data: GiftCardEmailData): string {
   `
   return baseLayout(content, 'Recibis este email porque compraste una Gift Card en Seismiles Textil.')
 }
+
+// ── Password changed confirmation email ──
+
+interface PasswordChangedData {
+  customerName: string | null
+  siteUrl: string
+}
+
+export function passwordChangedEmail(data: PasswordChangedData): string {
+  const content = `
+    <p style="margin:0 0 4px;font-size:11px;color:${BRAND.terra};text-transform:uppercase;letter-spacing:0.1em;font-weight:600;">
+      Seguridad de tu cuenta
+    </p>
+    <h1 style="margin:0 0 8px;font-size:20px;font-weight:700;color:${BRAND.textPrimary};">
+      Contraseña actualizada
+    </h1>
+    <p style="margin:0 0 28px;font-size:14px;color:${BRAND.textSecondary};line-height:1.6;">
+      Hola${data.customerName ? ` ${data.customerName}` : ''}! Te confirmamos que tu contraseña fue cambiada con exito.
+    </p>
+
+    <!-- Confirmation card -->
+    <table width="100%" cellpadding="0" cellspacing="0" style="background-color:${BRAND.sand};border-radius:12px;padding:20px 24px;margin-bottom:28px;">
+      <tr>
+        <td style="text-align:center;">
+          <span style="display:inline-block;width:48px;height:48px;border-radius:50%;background-color:#D1FAE5;line-height:48px;font-size:24px;margin-bottom:12px;">
+            &#10003;
+          </span>
+          <p style="margin:0 0 8px;font-size:14px;font-weight:600;color:${BRAND.textPrimary};">
+            Tu contraseña fue actualizada
+          </p>
+          <p style="margin:0;font-size:13px;color:${BRAND.textSecondary};line-height:1.6;">
+            Ya podes iniciar sesion con tu nueva contraseña.
+          </p>
+        </td>
+      </tr>
+    </table>
+
+    <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#FEF3C7;border-radius:12px;padding:16px 24px;margin-bottom:28px;">
+      <tr>
+        <td>
+          <p style="margin:0;font-size:13px;color:#92400E;line-height:1.6;">
+            Si no fuiste vos quien cambio la contraseña, contactanos inmediatamente.
+          </p>
+        </td>
+      </tr>
+    </table>
+
+    <!-- CTA -->
+    <table width="100%" cellpadding="0" cellspacing="0">
+      <tr>
+        <td align="center">
+          <a href="${data.siteUrl}/login" style="display:inline-block;background-color:${BRAND.volcanic};color:white;font-size:13px;font-weight:700;text-decoration:none;padding:14px 32px;border-radius:12px;letter-spacing:0.05em;text-transform:uppercase;">
+            Iniciar sesion
+          </a>
+        </td>
+      </tr>
+    </table>
+  `
+  return baseLayout(content, 'Recibis este email porque se actualizo la contraseña de tu cuenta en Seismiles Textil.')
+}

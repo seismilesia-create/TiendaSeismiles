@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
+import { HeartButton } from './HeartButton'
 
 const LINEA_LABELS: Record<string, string> = {
   arista: 'Linea Arista',
@@ -26,7 +27,13 @@ export interface Product {
   colores: { nombre: string; hex: string; imagen_url: string | null }[]
 }
 
-export function ProductCard({ product }: { product: Product }) {
+interface ProductCardProps {
+  product: Product
+  isFavorited?: boolean
+  isLoggedIn?: boolean
+}
+
+export function ProductCard({ product, isFavorited = false, isLoggedIn = false }: ProductCardProps) {
   const [isHovered, setIsHovered] = useState(false)
   const imageUrl = product.colores[0]?.imagen_url
   const lineLabel = LINEA_LABELS[product.linea] ?? product.linea
@@ -34,7 +41,7 @@ export function ProductCard({ product }: { product: Product }) {
   return (
     <Link
       href={`/catalogo/${product.slug}`}
-      className="group block"
+      className="group block bg-white rounded-2xl p-3 shadow-card hover:shadow-card-hover transition-shadow duration-300"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
@@ -67,12 +74,23 @@ export function ProductCard({ product }: { product: Product }) {
           )}
         </div>
 
+        {/* Favorite button */}
+        <div className="absolute right-3 top-3 z-10">
+          <HeartButton
+            productId={product.id}
+            productSlug={product.slug}
+            isFavorited={isFavorited}
+            isLoggedIn={isLoggedIn}
+            size="sm"
+          />
+        </div>
+
         {/* Quick view overlay */}
         <div
           className={`absolute inset-x-0 bottom-0 flex items-center justify-center bg-volcanic-900/80 py-3 transition-all duration-300 ${isHovered ? 'translate-y-0 opacity-100' : 'translate-y-full opacity-0'}`}
         >
           <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-white">
-            Vista rapida
+            Ver producto
           </span>
         </div>
       </div>

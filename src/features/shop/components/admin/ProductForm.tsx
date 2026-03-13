@@ -43,7 +43,7 @@ const LINEAS: Record<string, { value: string; label: string }[]> = {
 const GENEROS = [
   { value: 'hombres', label: 'Hombres' },
   { value: 'mujeres', label: 'Mujeres' },
-  { value: 'ninos', label: 'Ninos' },
+  { value: 'ninos', label: 'Niños' },
 ]
 
 const TALLES = ['XS', 'S', 'M', 'L', 'XL', '2XL', '3XL', '4XL']
@@ -453,7 +453,7 @@ export function ProductForm({ product }: ProductFormProps) {
         {!canUploadImages ? (
           <div className="text-center py-10">
             <ImageIcon className="w-10 h-10 text-volcanic-300 mx-auto mb-3" />
-            <p className="text-body-sm text-volcanic-400">
+            <p className="text-body-sm text-volcanic-500">
               Guarda el producto primero para subir imagenes.
             </p>
           </div>
@@ -500,7 +500,7 @@ export function ProductForm({ product }: ProductFormProps) {
 
               {/* Upload card */}
               <label className={`aspect-square rounded-xl border-2 border-dashed border-sand-300 flex flex-col items-center justify-center cursor-pointer hover:border-terra-400 hover:bg-sand-50 transition-all ${uploading ? 'pointer-events-none opacity-50' : ''}`}>
-                <UploadIcon className="w-6 h-6 text-volcanic-400 mb-2" />
+                <UploadIcon className="w-6 h-6 text-volcanic-500 mb-2" />
                 <span className="text-body-xs text-volcanic-500 text-center px-2">
                   {uploading ? 'Subiendo...' : 'Subir imagenes'}
                 </span>
@@ -518,7 +518,7 @@ export function ProductForm({ product }: ProductFormProps) {
             </div>
 
             {imagenes.length === 0 && (
-              <p className="mt-4 text-center text-body-xs text-volcanic-400">
+              <p className="mt-4 text-center text-body-xs text-volcanic-500">
                 Todavia no hay imagenes. Subi al menos una foto del producto.
               </p>
             )}
@@ -532,7 +532,7 @@ export function ProductForm({ product }: ProductFormProps) {
         <p className="text-body-xs text-volcanic-500 mb-6">Ingresa el stock disponible para cada talle.</p>
 
         {!colorId ? (
-          <p className="text-body-sm text-volcanic-400 text-center py-8">
+          <p className="text-body-sm text-volcanic-500 text-center py-8">
             Guarda el producto con su color para definir el stock.
           </p>
         ) : (

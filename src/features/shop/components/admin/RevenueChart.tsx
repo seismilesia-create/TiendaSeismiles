@@ -46,7 +46,7 @@ export function RevenueChart({ initialData, years, allYearsData }: Props) {
       <div className="flex items-center justify-between mb-6">
         <div>
           <h3 className="font-heading text-lg text-volcanic-900">Ingresos por mes</h3>
-          <p className="text-body-xs text-volcanic-400 mt-1">
+          <p className="text-body-xs text-volcanic-500 mt-1">
             Total: ${data.reduce((s, d) => s + d.revenue, 0).toLocaleString('es-AR')}
           </p>
         </div>

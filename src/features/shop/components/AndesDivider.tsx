@@ -1,6 +1,6 @@
 export function AndesDivider() {
   return (
-    <div className="relative py-10 lg:py-14 bg-[#FAFAF8] overflow-hidden">
+    <div className="relative py-12 lg:py-16 bg-background overflow-hidden">
       {/* Mountain silhouette divider */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="relative flex items-center gap-6">

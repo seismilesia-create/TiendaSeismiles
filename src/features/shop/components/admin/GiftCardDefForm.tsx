@@ -234,7 +234,7 @@ export function GiftCardDefForm({ existing }: { existing?: GiftCardDef }) {
             <label className="block text-body-sm font-medium text-volcanic-700 mb-1.5">
               Imagen (opcional)
             </label>
-            <p className="text-body-xs text-volcanic-400 mb-3">
+            <p className="text-body-xs text-volcanic-500 mb-3">
               Si subis una imagen, se muestra en lugar del gradiente.{!isEdit && ' Guarda la gift card primero para subir imagen.'}
             </p>
 
@@ -252,7 +252,7 @@ export function GiftCardDefForm({ existing }: { existing?: GiftCardDef }) {
               </div>
             ) : isEdit ? (
               <label className={`flex flex-col items-center justify-center w-full max-w-[280px] aspect-[4/3] rounded-xl border-2 border-dashed border-sand-300 cursor-pointer hover:border-terra-400 hover:bg-sand-50 transition-all ${uploading ? 'pointer-events-none opacity-50' : ''}`}>
-                <UploadIcon className="w-6 h-6 text-volcanic-400 mb-2" />
+                <UploadIcon className="w-6 h-6 text-volcanic-500 mb-2" />
                 <span className="text-body-xs text-volcanic-500">
                   {uploading ? 'Subiendo...' : 'Subir imagen'}
                 </span>

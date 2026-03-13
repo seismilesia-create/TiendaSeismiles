@@ -16,10 +16,16 @@ interface CheckoutItem {
 interface CheckoutResult {
   initPoint?: string
   externalRef?: string
+  directConfirm?: boolean
   error?: string
 }
 
-export async function createCheckout(items: CheckoutItem[]): Promise<CheckoutResult> {
+interface GcApplied {
+  id: string
+  descuento: number
+}
+
+export async function createCheckout(items: CheckoutItem[], giftCardCodes?: string[]): Promise<CheckoutResult> {
   if (!items.length) return { error: 'El carrito esta vacio' }
 
   const supabase = await createClient()
@@ -98,22 +104,94 @@ export async function createCheckout(items: CheckoutItem[]): Promise<CheckoutRes
 
   const externalRef = orderNumbers.join(',')
 
-  // 2. Create Mercado Pago preference
+  // 2. Calculate total and check gift cards
+  const totalPedido = items.reduce((sum, i) => sum + i.precio * i.cantidad, 0)
+  const gcList: GcApplied[] = []
+  let descuentoTotal = 0
+
+  if (giftCardCodes && giftCardCodes.length > 0) {
+    let restante = totalPedido
+
+    for (const code of giftCardCodes) {
+      if (restante <= 0) break
+
+      const { data: gc } = await service
+        .from('gift_cards')
+        .select('id, saldo_restante, estado')
+        .eq('codigo', code.trim().toUpperCase())
+        .eq('estado', 'activa')
+        .single()
+
+      if (gc && gc.saldo_restante && gc.saldo_restante > 0) {
+        const descuento = Math.min(gc.saldo_restante, restante)
+        gcList.push({ id: gc.id, descuento })
+        descuentoTotal += descuento
+        restante -= descuento
+      }
+    }
+  }
+
+  const totalAPagar = totalPedido - descuentoTotal
+
+  // 3a. Gift cards cover the full amount — confirm directly without MP
+  if (totalAPagar === 0 && gcList.length > 0) {
+    // Deduct balance from each gift card
+    for (const gc of gcList) {
+      const { data: current } = await service
+        .from('gift_cards')
+        .select('saldo_restante')
+        .eq('id', gc.id)
+        .single()
+
+      if (current) {
+        await service
+          .from('gift_cards')
+          .update({ saldo_restante: Math.max(0, (current.saldo_restante ?? 0) - gc.descuento) })
+          .eq('id', gc.id)
+      }
+    }
+
+    // Confirm orders directly
+    await service
+      .from('compras')
+      .update({
+        estado: 'confirmado',
+        metodo_pago: 'gift_card',
+        gift_cards_applied: gcList,
+      })
+      .in('numero_pedido', orderNumbers)
+
+    sendOrderConfirmationEmails(orderNumbers)
+
+    revalidatePath('/catalogo')
+    revalidatePath('/admin/inventario')
+    revalidatePath('/perfil')
+
+    return { directConfirm: true }
+  }
+
+  // 3b. Create Mercado Pago preference (full or partial after GC discount)
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
 
   let preferenceId: string
   let initPoint: string
 
+  // If GCs cover part, adjust item prices proportionally
+  const ratio = totalAPagar / totalPedido
+  const mpItems = items.map((item) => ({
+    id: item.variantId,
+    title: item.productName,
+    quantity: item.cantidad,
+    unit_price: descuentoTotal > 0
+      ? Math.round(item.precio * ratio)
+      : item.precio,
+    currency_id: 'ARS' as const,
+  }))
+
   try {
     const response = await mpPreference.create({
       body: {
-        items: items.map((item) => ({
-          id: item.variantId,
-          title: item.productName,
-          quantity: item.cantidad,
-          unit_price: item.precio,
-          currency_id: 'ARS',
-        })),
+        items: mpItems,
         back_urls: {
           success: `${siteUrl}/carrito/resultado`,
           failure: `${siteUrl}/carrito/resultado`,
@@ -134,13 +212,14 @@ export async function createCheckout(items: CheckoutItem[]): Promise<CheckoutRes
     return { error: 'Error al conectar con Mercado Pago. Intenta de nuevo.' }
   }
 
-  // 3. Update created orders: set estado to pendiente_pago, attach MP info
+  // 4. Update created orders: set estado to pendiente_pago, attach MP info and GC if used
   await service
     .from('compras')
     .update({
       estado: 'pendiente_pago',
-      metodo_pago: 'mercadopago',
+      metodo_pago: gcList.length > 0 ? 'gift_card+mercadopago' : 'mercadopago',
       mp_preference_id: preferenceId,
+      ...(gcList.length > 0 ? { gift_cards_applied: gcList } : {}),
     })
     .in('numero_pedido', orderNumbers)
 
@@ -216,8 +295,35 @@ export async function confirmPayment(paymentId: string, externalReference: strin
       }
     }
 
-    // Send confirmation email when payment is approved
+    // If confirmed, deduct gift card balances and send email
     if (newEstado === 'confirmado') {
+      // Read gift_cards_applied JSONB from the first order (all share the same data)
+      const { data: orderWithGc } = await service
+        .from('compras')
+        .select('gift_cards_applied')
+        .in('numero_pedido', orderNumbers)
+        .not('gift_cards_applied', 'is', null)
+        .limit(1)
+        .single()
+
+      if (orderWithGc?.gift_cards_applied) {
+        const gcList = orderWithGc.gift_cards_applied as GcApplied[]
+        for (const gc of gcList) {
+          const { data: current } = await service
+            .from('gift_cards')
+            .select('saldo_restante')
+            .eq('id', gc.id)
+            .single()
+
+          if (current) {
+            await service
+              .from('gift_cards')
+              .update({ saldo_restante: Math.max(0, (current.saldo_restante ?? 0) - gc.descuento) })
+              .eq('id', gc.id)
+          }
+        }
+      }
+
       sendOrderConfirmationEmails(orderNumbers)
     }
 

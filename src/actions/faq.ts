@@ -146,12 +146,13 @@ export async function createFaqItem(formData: FormData) {
 
   const question = (formData.get('question') as string)?.trim()
   const answer = (formData.get('answer') as string)?.trim()
+  const section = (formData.get('section') as string)?.trim() || 'General'
   const display_order = parseInt(formData.get('display_order') as string) || 0
 
   if (!question || !answer) return { error: 'Pregunta y respuesta son obligatorias.' }
 
   const service = createServiceClient()
-  const { error } = await service.from('faqs').insert({ question, answer, display_order })
+  const { error } = await service.from('faqs').insert({ question, answer, section, display_order })
 
   if (error) return { error: 'No se pudo crear la pregunta frecuente.' }
 
@@ -166,6 +167,7 @@ export async function updateFaqItem(id: string, formData: FormData) {
 
   const question = (formData.get('question') as string)?.trim()
   const answer = (formData.get('answer') as string)?.trim()
+  const section = (formData.get('section') as string)?.trim() || 'General'
   const display_order = parseInt(formData.get('display_order') as string) || 0
   const is_active = formData.get('is_active') === 'true'
 
@@ -174,7 +176,7 @@ export async function updateFaqItem(id: string, formData: FormData) {
   const service = createServiceClient()
   const { error } = await service
     .from('faqs')
-    .update({ question, answer, display_order, is_active, updated_at: new Date().toISOString() })
+    .update({ question, answer, section, display_order, is_active, updated_at: new Date().toISOString() })
     .eq('id', id)
 
   if (error) return { error: 'No se pudo actualizar.' }

@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
-import { confirmGiftcardPayment } from '@/actions/giftcard-checkout'
+import { confirmGiftcardPayment, checkPendingGiftcard } from '@/actions/giftcard-checkout'
 
 function CheckCircleIcon({ className }: { className?: string }) {
   return (
@@ -32,6 +32,15 @@ function XCircleIcon({ className }: { className?: string }) {
   )
 }
 
+function SpinnerIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none">
+      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+    </svg>
+  )
+}
+
 interface Props {
   status?: string
   paymentId?: string
@@ -41,35 +50,66 @@ interface Props {
 export function ResultadoGiftcard({ status, paymentId, externalReference }: Props) {
   const didRun = useRef(false)
   const [codigo, setCodigo] = useState<string | null>(null)
-
-  const isApproved = status === 'approved'
-  const isPending = status === 'pending'
+  const [resolvedStatus, setResolvedStatus] = useState<'loading' | 'approved' | 'pending' | 'rejected'>(
+    status === 'approved' ? 'approved' : status === 'pending' ? 'pending' : 'loading'
+  )
 
   useEffect(() => {
     if (didRun.current) return
     didRun.current = true
 
     async function process() {
-      if (!paymentId || !externalReference) return
+      // Path 1: MP redirected with full params
+      if (paymentId && externalReference) {
+        const giftcardId = externalReference.startsWith('gc:')
+          ? externalReference.slice(3)
+          : externalReference
 
-      // Extract giftcard ID from external_reference (format: "gc:uuid")
-      const giftcardId = externalReference.startsWith('gc:')
-        ? externalReference.slice(3)
-        : externalReference
+        const result = await confirmGiftcardPayment(paymentId, giftcardId)
 
-      const result = await confirmGiftcardPayment(paymentId, giftcardId)
+        if (result.confirmed && result.codigo) {
+          setCodigo(result.codigo)
+          setResolvedStatus('approved')
+        } else if (result.error) {
+          setResolvedStatus('rejected')
+        }
+        return
+      }
 
-      if (result.codigo) {
+      // Path 2: User returned manually (no params) — check for pending gift card
+      const result = await checkPendingGiftcard()
+
+      if (result.confirmed && result.codigo) {
         setCodigo(result.codigo)
+        setResolvedStatus('approved')
+      } else {
+        // Could be pending or no pending card found
+        setResolvedStatus('pending')
       }
     }
 
     process()
   }, [status, paymentId, externalReference])
 
+  if (resolvedStatus === 'loading') {
+    return (
+      <div className="max-w-lg mx-auto px-4 py-16 text-center">
+        <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-sand-100 flex items-center justify-center">
+          <SpinnerIcon className="w-10 h-10 text-volcanic-500 animate-spin" />
+        </div>
+        <h1 className="font-heading text-display-sm text-volcanic-900 mb-3">
+          Verificando tu pago...
+        </h1>
+        <p className="text-body-md text-volcanic-500">
+          Estamos consultando el estado de tu compra con Mercado Pago.
+        </p>
+      </div>
+    )
+  }
+
   return (
     <div className="max-w-lg mx-auto px-4 py-16 text-center">
-      {isApproved && (
+      {resolvedStatus === 'approved' && (
         <>
           <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-emerald-100 flex items-center justify-center">
             <CheckCircleIcon className="w-10 h-10 text-emerald-600" />
@@ -101,7 +141,7 @@ export function ResultadoGiftcard({ status, paymentId, externalReference }: Prop
         </>
       )}
 
-      {isPending && (
+      {resolvedStatus === 'pending' && (
         <>
           <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-yellow-100 flex items-center justify-center">
             <ClockIcon className="w-10 h-10 text-yellow-600" />
@@ -121,7 +161,7 @@ export function ResultadoGiftcard({ status, paymentId, externalReference }: Prop
         </>
       )}
 
-      {!isApproved && !isPending && (
+      {resolvedStatus === 'rejected' && (
         <>
           <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-red-100 flex items-center justify-center">
             <XCircleIcon className="w-10 h-10 text-red-600" />

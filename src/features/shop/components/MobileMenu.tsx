@@ -40,7 +40,7 @@ function ChevronDownIcon({ className }: { className?: string }) {
 const AUDIENCES = [
   { label: 'Hombres', slug: 'hombres' },
   { label: 'Mujeres', slug: 'mujeres' },
-  { label: 'Ninos', slug: 'ninos' },
+  { label: 'Niños', slug: 'ninos' },
 ]
 
 const REMERA_TYPES = [
@@ -91,7 +91,7 @@ export function MobileMenu({ open, onClose, user }: MobileMenuProps) {
       />
 
       {/* Panel */}
-      <div className="absolute right-0 top-0 bottom-0 w-[85%] max-w-sm bg-white shadow-modal animate-slide-in-right">
+      <div className="absolute left-0 top-0 bottom-0 w-[85%] max-w-sm bg-white shadow-modal animate-slide-in-left">
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-5 border-b border-sand-200">
           <Image
@@ -103,7 +103,7 @@ export function MobileMenu({ open, onClose, user }: MobileMenuProps) {
           />
           <button
             onClick={onClose}
-            className="p-2 -mr-2 text-volcanic-400 hover:text-volcanic-900 transition-colors"
+            className="p-2 -mr-2 text-volcanic-500 hover:text-volcanic-900 transition-colors"
             aria-label="Cerrar menu"
           >
             <CloseIcon className="w-5 h-5" />

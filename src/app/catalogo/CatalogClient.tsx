@@ -78,13 +78,16 @@ function sortProducts(products: CatalogProductFromDB[], sort: string): CatalogPr
 
 interface CatalogClientProps {
   products: CatalogProductFromDB[]
+  favoriteProductIds?: string[]
+  isLoggedIn?: boolean
 }
 
 /* Valid type param values that map to catalog filter */
 const VALID_TYPES = ['remeras-lisas', 'estampadas', 'buzos-camperas']
 const VALID_AUDIENCES = ['hombres', 'mujeres', 'ninos']
 
-function CatalogInner({ products }: CatalogClientProps) {
+function CatalogInner({ products, favoriteProductIds = [], isLoggedIn = false }: CatalogClientProps) {
+  const favoriteSet = useMemo(() => new Set(favoriteProductIds), [favoriteProductIds])
   const searchParams = useSearchParams()
   const paramType = searchParams.get('type')
   const paramGenero = searchParams.get('genero')
@@ -174,7 +177,8 @@ function CatalogInner({ products }: CatalogClientProps) {
         subtitle="Cada prenda nace de la inmensidad del altiplano. Algodones premium, estampas unicas, la confianza que vestis."
       />
 
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-12">
+      <section className="bg-sand-50 min-h-screen">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-12">
         {/* Mobile filters */}
         <MobileFilters {...filterProps} />
 
@@ -193,7 +197,12 @@ function CatalogInner({ products }: CatalogClientProps) {
             {filteredProducts.length > 0 ? (
               <div className="mt-6 lg:mt-8 grid grid-cols-2 gap-x-4 gap-y-8 md:grid-cols-3 lg:gap-x-6 lg:gap-y-10">
                 {filteredProducts.map((product) => (
-                  <ProductCard key={product.id} product={product} />
+                  <ProductCard
+                    key={product.id}
+                    product={product}
+                    isFavorited={favoriteSet.has(product.id)}
+                    isLoggedIn={isLoggedIn}
+                  />
                 ))}
               </div>
             ) : (
@@ -235,15 +244,16 @@ function CatalogInner({ products }: CatalogClientProps) {
             )}
           </div>
         </div>
+      </div>
       </section>
     </>
   )
 }
 
-export function CatalogClient({ products }: CatalogClientProps) {
+export function CatalogClient({ products, favoriteProductIds, isLoggedIn }: CatalogClientProps) {
   return (
     <Suspense>
-      <CatalogInner products={products} />
+      <CatalogInner products={products} favoriteProductIds={favoriteProductIds} isLoggedIn={isLoggedIn} />
     </Suspense>
   )
 }

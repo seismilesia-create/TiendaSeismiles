@@ -55,7 +55,7 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
   return (
     <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-10 lg:py-14">
       {/* Breadcrumb */}
-      <nav className="flex items-center gap-2 text-body-xs text-volcanic-400 mb-6">
+      <nav className="flex items-center gap-2 text-body-xs text-volcanic-500 mb-6">
         <Link href="/perfil" className="hover:text-terra-500 transition-colors">Mi perfil</Link>
         <span>/</span>
         <span className="text-volcanic-700 font-medium">{order.numero_pedido}</span>
@@ -65,7 +65,7 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
       <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 mb-8">
         <Link
           href="/perfil"
-          className="p-2 -ml-2 rounded-lg text-volcanic-400 hover:text-volcanic-900 hover:bg-sand-100 transition-all self-start"
+          className="p-2 -ml-2 rounded-lg text-volcanic-500 hover:text-volcanic-900 hover:bg-sand-100 transition-all self-start"
         >
           <ArrowLeftIcon className="w-5 h-5" />
         </Link>
@@ -73,7 +73,7 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
           <h1 className="font-heading text-display-sm text-volcanic-900">
             Pedido {order.numero_pedido}
           </h1>
-          <div className="flex items-center gap-4 mt-1 text-body-xs text-volcanic-400">
+          <div className="flex items-center gap-4 mt-1 text-body-xs text-volcanic-500">
             <span className="flex items-center gap-1.5">
               <CalendarIcon className="w-3.5 h-3.5" />
               {new Date(order.created_at).toLocaleDateString('es-AR', {
@@ -98,7 +98,7 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
           </div>
         ) : (
           <div className="rounded-2xl bg-white border border-sand-200/60 p-5 lg:p-8">
-            <h3 className="text-body-xs uppercase tracking-widest text-volcanic-400 font-semibold mb-5">
+            <h3 className="text-body-xs uppercase tracking-widest text-volcanic-500 font-semibold mb-5">
               Estado del pedido
             </h3>
             <OrderProgressBar currentStatus={order.estado} />

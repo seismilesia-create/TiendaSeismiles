@@ -138,7 +138,7 @@ export function StockNotifyModal({
         {/* Close button */}
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 p-2 text-volcanic-400 hover:text-volcanic-900 transition-colors rounded-lg hover:bg-sand-100"
+          className="absolute top-4 right-4 p-2 text-volcanic-500 hover:text-volcanic-900 transition-colors rounded-lg hover:bg-sand-100"
           aria-label="Cerrar"
         >
           <CloseIcon className="w-5 h-5" />
@@ -249,7 +249,7 @@ export function StockNotifyModal({
               {submitting ? 'Registrando...' : 'Avisame'}
             </button>
 
-            <p className="mt-4 text-center text-body-xs text-volcanic-400">
+            <p className="mt-4 text-center text-body-xs text-volcanic-500">
               Solo te enviaremos un email cuando haya stock. Sin spam.
             </p>
           </div>

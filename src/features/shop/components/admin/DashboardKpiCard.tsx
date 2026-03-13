@@ -28,7 +28,7 @@ export function DashboardKpiCard({ title, value, icon, change }: Props) {
         )}
       </div>
       <p className="font-heading text-xl lg:text-2xl text-volcanic-900 mb-1">{value}</p>
-      <p className="text-body-xs text-volcanic-400">{title}</p>
+      <p className="text-body-xs text-volcanic-500">{title}</p>
     </div>
   )
 }

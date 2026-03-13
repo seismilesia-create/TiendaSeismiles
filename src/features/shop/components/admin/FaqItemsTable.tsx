@@ -38,16 +38,19 @@ export function FaqItemsTable({ faqs }: Props) {
         <div key={faq.id} className="rounded-2xl bg-white border border-sand-200/60 p-5 lg:p-6">
           <div className="flex items-start justify-between gap-4">
             <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2 mb-2">
+              <div className="flex items-center gap-2 mb-2 flex-wrap">
                 <h3 className="text-body-sm font-semibold text-volcanic-900">
                   {faq.question}
                 </h3>
+                <span className="inline-flex px-2 py-0.5 rounded-full bg-terra-500/10 text-terra-600 text-[11px] font-semibold">
+                  {faq.section}
+                </span>
                 {!faq.is_active && (
                   <span className="inline-flex px-2 py-0.5 rounded-full bg-volcanic-100 text-volcanic-500 text-[11px] font-semibold">
                     Inactiva
                   </span>
                 )}
-                <span className="text-body-xs text-volcanic-400">
+                <span className="text-body-xs text-volcanic-500">
                   #{faq.display_order}
                 </span>
               </div>
@@ -59,7 +62,7 @@ export function FaqItemsTable({ faqs }: Props) {
             <div className="flex items-center gap-1 shrink-0">
               <Link
                 href={`/admin/faq/${faq.id}`}
-                className="p-2 rounded-lg text-volcanic-400 hover:text-terra-500 hover:bg-sand-100 transition-all"
+                className="p-2 rounded-lg text-volcanic-500 hover:text-terra-500 hover:bg-sand-100 transition-all"
                 title="Editar"
               >
                 <EditIcon className="w-4 h-4" />
@@ -76,7 +79,7 @@ export function FaqItemsTable({ faqs }: Props) {
                   </button>
                   <button
                     onClick={() => setConfirmId(null)}
-                    className="px-2 py-1.5 text-[11px] text-volcanic-400 hover:text-volcanic-600"
+                    className="px-2 py-1.5 text-[11px] text-volcanic-500 hover:text-volcanic-600"
                   >
                     No
                   </button>
@@ -84,7 +87,7 @@ export function FaqItemsTable({ faqs }: Props) {
               ) : (
                 <button
                   onClick={() => setConfirmId(faq.id)}
-                  className="p-2 rounded-lg text-volcanic-400 hover:text-red-500 hover:bg-red-50 transition-all"
+                  className="p-2 rounded-lg text-volcanic-500 hover:text-red-500 hover:bg-red-50 transition-all"
                   title="Eliminar"
                 >
                   <TrashIcon className="w-4 h-4" />

@@ -81,6 +81,7 @@ export interface PaymentMethod {
 export interface FaqItem {
   question: string
   answer: string
+  section?: string
 }
 
 /** Producto destacado para la landing */

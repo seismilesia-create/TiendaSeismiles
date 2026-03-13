@@ -18,6 +18,18 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
 
   const { data: { user } } = await supabase.auth.getUser()
 
+  // Check if product is in user's favorites
+  let isFavorited = false
+  if (user) {
+    const { data: fav } = await supabase
+      .from('favoritos')
+      .select('id')
+      .eq('user_id', user.id)
+      .eq('producto_id', product.id)
+      .maybeSingle()
+    isFavorited = !!fav
+  }
+
   // Determine if user can leave a review (admin or verified purchaser)
   let canReview = false
   if (user) {
@@ -49,6 +61,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
       reviewSummary={reviewData.summary}
       currentUserId={user?.id ?? null}
       canReview={canReview}
+      isFavorited={isFavorited}
     />
   )
 }

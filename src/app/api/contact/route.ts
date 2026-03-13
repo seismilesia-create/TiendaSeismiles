@@ -44,12 +44,7 @@ export async function POST(request: NextRequest) {
         // Continue - don't fail the request just because email didn't send
       }
     } else {
-      console.log('Contact form submission (RESEND_API_KEY not configured):', {
-        name: name.trim(),
-        email: email.trim(),
-        phone: phone?.trim(),
-        message: message.trim().substring(0, 100) + '...',
-      })
+      // RESEND_API_KEY not configured — skip email
     }
 
     return NextResponse.json({ success: true })

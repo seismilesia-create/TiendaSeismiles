@@ -7,7 +7,7 @@ export default async function ShopAdminLayout({ children }: { children: React.Re
   if (!admin) redirect('/login')
 
   return (
-    <div className="min-h-screen bg-[#FAFAF8]">
+    <div className="min-h-screen bg-background">
       <AdminSidebar />
 
       {/* Main content - offset for sidebar on desktop, top bar on mobile */}

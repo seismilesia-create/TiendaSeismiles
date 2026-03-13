@@ -12,7 +12,7 @@ export function StockNotificationsTable({ notifications }: Props) {
   if (notifications.length === 0) {
     return (
       <div className="rounded-2xl bg-white border border-sand-200/60 p-6 text-center">
-        <p className="text-body-sm text-volcanic-400">No hay solicitudes de notificacion de stock.</p>
+        <p className="text-body-sm text-volcanic-500">No hay solicitudes de notificacion de stock.</p>
       </div>
     )
   }
@@ -34,12 +34,12 @@ export function StockNotificationsTable({ notifications }: Props) {
         <table className="w-full text-left">
           <thead>
             <tr className="border-b border-sand-200/60">
-              <th className="px-5 lg:px-6 py-3 text-body-xs font-semibold text-volcanic-400 uppercase tracking-wider">Email</th>
-              <th className="px-5 lg:px-6 py-3 text-body-xs font-semibold text-volcanic-400 uppercase tracking-wider">Producto</th>
-              <th className="px-5 lg:px-6 py-3 text-body-xs font-semibold text-volcanic-400 uppercase tracking-wider">Talle</th>
-              <th className="px-5 lg:px-6 py-3 text-body-xs font-semibold text-volcanic-400 uppercase tracking-wider">Color</th>
-              <th className="px-5 lg:px-6 py-3 text-body-xs font-semibold text-volcanic-400 uppercase tracking-wider">Fecha</th>
-              <th className="px-5 lg:px-6 py-3 text-body-xs font-semibold text-volcanic-400 uppercase tracking-wider">Estado</th>
+              <th className="px-5 lg:px-6 py-3 text-body-xs font-semibold text-volcanic-500 uppercase tracking-wider">Email</th>
+              <th className="px-5 lg:px-6 py-3 text-body-xs font-semibold text-volcanic-500 uppercase tracking-wider">Producto</th>
+              <th className="px-5 lg:px-6 py-3 text-body-xs font-semibold text-volcanic-500 uppercase tracking-wider">Talle</th>
+              <th className="px-5 lg:px-6 py-3 text-body-xs font-semibold text-volcanic-500 uppercase tracking-wider">Color</th>
+              <th className="px-5 lg:px-6 py-3 text-body-xs font-semibold text-volcanic-500 uppercase tracking-wider">Fecha</th>
+              <th className="px-5 lg:px-6 py-3 text-body-xs font-semibold text-volcanic-500 uppercase tracking-wider">Estado</th>
             </tr>
           </thead>
           <tbody>

@@ -70,7 +70,7 @@ export function FaqQuestionsTable({ questions }: Props) {
                     {status.label}
                   </span>
                 </div>
-                <p className="text-body-xs text-volcanic-400">
+                <p className="text-body-xs text-volcanic-500">
                   {q.user_email} — {new Date(q.created_at).toLocaleDateString('es-AR', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
                 </p>
               </div>
@@ -92,7 +92,7 @@ export function FaqQuestionsTable({ questions }: Props) {
                   <button
                     onClick={() => handleArchive(q.id)}
                     disabled={loading}
-                    className="p-1.5 rounded-lg text-volcanic-400 hover:text-volcanic-600 hover:bg-sand-100 transition-all"
+                    className="p-1.5 rounded-lg text-volcanic-500 hover:text-volcanic-600 hover:bg-sand-100 transition-all"
                     title="Archivar"
                   >
                     <ArchiveIcon className="w-4 h-4" />
@@ -112,7 +112,7 @@ export function FaqQuestionsTable({ questions }: Props) {
                 <p className="text-[11px] uppercase tracking-wider text-emerald-600 font-semibold mb-1">Tu respuesta</p>
                 <p className="text-body-sm text-volcanic-700 leading-relaxed">{q.admin_reply}</p>
                 {q.replied_at && (
-                  <p className="text-body-xs text-volcanic-400 mt-2">
+                  <p className="text-body-xs text-volcanic-500 mt-2">
                     {new Date(q.replied_at).toLocaleDateString('es-AR', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}
                   </p>
                 )}
@@ -143,7 +143,7 @@ export function FaqQuestionsTable({ questions }: Props) {
                   </button>
                   <button
                     onClick={() => { setExpandedId(null); setReplyText(''); setError(null) }}
-                    className="text-body-xs text-volcanic-400 hover:text-volcanic-600 transition-colors"
+                    className="text-body-xs text-volcanic-500 hover:text-volcanic-600 transition-colors"
                   >
                     Cancelar
                   </button>

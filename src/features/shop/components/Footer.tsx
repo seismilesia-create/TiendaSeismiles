@@ -19,6 +19,14 @@ function WhatsappIcon({ className }: { className?: string }) {
   )
 }
 
+const PAYMENT_ICONS = [
+  { slug: 'visa', alt: 'Visa', width: 48, height: 32 },
+  { slug: 'mastercard', alt: 'Mastercard', width: 48, height: 32 },
+  { slug: 'amex', alt: 'American Express', width: 48, height: 32 },
+  { slug: 'mercadopago', alt: 'Mercado Pago', width: 80, height: 32 },
+  { slug: 'transferencia', alt: 'Transferencia bancaria', width: 48, height: 32 },
+]
+
 export function Footer({ productLines }: FooterProps) {
   const { brand, footer } = shopConfig
 
@@ -38,7 +46,7 @@ export function Footer({ productLines }: FooterProps) {
                 className="h-12 w-auto brightness-0 invert opacity-90 hover:opacity-100 transition-opacity duration-300"
               />
             </Link>
-            <p className="text-body-sm text-volcanic-400 leading-relaxed mb-5">
+            <p className="text-body-sm text-volcanic-500 leading-relaxed mb-5">
               {footer.tagline}
             </p>
             <div className="flex items-center gap-3">
@@ -71,7 +79,7 @@ export function Footer({ productLines }: FooterProps) {
                 <li key={line.id}>
                   <Link
                     href={`/catalogo?line=${line.slug}`}
-                    className="text-body-sm text-volcanic-400 hover:text-terra-400 transition-colors"
+                    className="text-body-sm text-volcanic-500 hover:text-terra-400 transition-colors"
                   >
                     {line.name}
                   </Link>
@@ -80,7 +88,7 @@ export function Footer({ productLines }: FooterProps) {
               <li>
                 <Link
                   href="/catalogo"
-                  className="text-body-sm text-volcanic-400 hover:text-terra-400 transition-colors"
+                  className="text-body-sm text-volcanic-500 hover:text-terra-400 transition-colors"
                 >
                   Todos los productos
                 </Link>
@@ -88,15 +96,32 @@ export function Footer({ productLines }: FooterProps) {
             </ul>
           </div>
 
+          {/* Columna 3: Información */}
+          <div>
+            <h3 className="font-heading text-white text-body-md mb-4">{footer.columns[1].title}</h3>
+            <ul className="space-y-2.5">
+              {footer.columns[1].links.map((link) => (
+                <li key={link.href}>
+                  <Link
+                    href={link.href}
+                    className="text-body-sm text-volcanic-500 hover:text-terra-400 transition-colors"
+                  >
+                    {link.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
           {/* Columna 4: Ayuda */}
           <div>
-            <h3 className="font-heading text-white text-body-md mb-4">Ayuda</h3>
+            <h3 className="font-heading text-white text-body-md mb-4">{footer.columns[2].title}</h3>
             <ul className="space-y-2.5">
               {footer.columns[2].links.map((link) => (
                 <li key={link.href}>
                   <Link
                     href={link.href}
-                    className="text-body-sm text-volcanic-400 hover:text-terra-400 transition-colors"
+                    className="text-body-sm text-volcanic-500 hover:text-terra-400 transition-colors"
                   >
                     {link.label}
                   </Link>
@@ -114,14 +139,16 @@ export function Footer({ productLines }: FooterProps) {
             <p className="text-body-xs text-volcanic-500">
               {footer.copyright}
             </p>
-            <div className="flex items-center gap-3">
-              {footer.paymentMethods.map((method) => (
-                <span
-                  key={method.slug}
-                  className="px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-volcanic-400 bg-volcanic-800 rounded"
-                >
-                  {method.name}
-                </span>
+            <div className="flex items-center gap-2">
+              {PAYMENT_ICONS.map((pm) => (
+                <Image
+                  key={pm.slug}
+                  src={`/images/payment/${pm.slug}.svg`}
+                  alt={pm.alt}
+                  width={pm.width}
+                  height={pm.height}
+                  className="h-8 w-auto rounded"
+                />
               ))}
             </div>
           </div>

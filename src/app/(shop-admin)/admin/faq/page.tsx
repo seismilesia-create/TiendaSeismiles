@@ -65,7 +65,7 @@ export default async function AdminFaqPage() {
       <section>
         <h2 className="font-heading text-lg text-volcanic-900 mb-4">
           Preguntas frecuentes publicas
-          <span className="ml-2 text-body-sm text-volcanic-400 font-normal">({faqs.length})</span>
+          <span className="ml-2 text-body-sm text-volcanic-500 font-normal">({faqs.length})</span>
         </h2>
         {faqs.length === 0 ? (
           <div className="text-center py-12 rounded-2xl bg-white border border-sand-200/60">

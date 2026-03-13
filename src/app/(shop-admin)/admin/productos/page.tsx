@@ -36,7 +36,7 @@ export default async function AdminProductsPage() {
       {products.length === 0 ? (
         <div className="text-center py-20 rounded-2xl bg-white border border-sand-200/60">
           <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-sand-100 mb-4">
-            <PlusIcon className="w-7 h-7 text-volcanic-400" />
+            <PlusIcon className="w-7 h-7 text-volcanic-500" />
           </div>
           <h2 className="font-heading text-lg text-volcanic-900 mb-2">Sin productos aun</h2>
           <p className="text-body-sm text-volcanic-500 mb-6">Crea tu primer producto para empezar a llenar la tienda.</p>

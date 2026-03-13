@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect } from 'react'
+import { shopConfig } from '../config'
 
 // ── Size data ──
 
@@ -241,7 +242,7 @@ export function SizeGuideDrawer({ open, onClose, defaultCategory = 'remeras' }: 
                 <span className="font-semibold text-volcanic-900">Dudas con tu talle?</span>{' '}
                 Escribinos por{' '}
                 <a
-                  href="https://wa.me/5493834000000"
+                  href={shopConfig.brand.whatsapp}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-terra-500 hover:underline font-semibold"

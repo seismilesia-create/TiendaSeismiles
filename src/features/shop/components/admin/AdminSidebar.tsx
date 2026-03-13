@@ -134,7 +134,7 @@ export function AdminSidebar() {
               className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-body-sm font-medium transition-all duration-200 ${
                 active
                   ? 'bg-white/10 text-white'
-                  : 'text-volcanic-400 hover:text-white hover:bg-white/5'
+                  : 'text-volcanic-500 hover:text-white hover:bg-white/5'
               }`}
             >
               <item.icon className="w-[18px] h-[18px] shrink-0" />
@@ -149,13 +149,13 @@ export function AdminSidebar() {
         <Link
           href="/"
           onClick={() => setMobileOpen(false)}
-          className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-body-sm text-volcanic-400 hover:text-white hover:bg-white/5 transition-all duration-200"
+          className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-body-sm text-volcanic-500 hover:text-white hover:bg-white/5 transition-all duration-200"
         >
           <StoreIcon className="w-[18px] h-[18px] shrink-0" />
           Ver tienda
         </Link>
         <form action={signout}>
-          <button className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-body-sm text-volcanic-400 hover:text-red-400 hover:bg-white/5 transition-all duration-200 w-full">
+          <button className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-body-sm text-volcanic-500 hover:text-red-400 hover:bg-white/5 transition-all duration-200 w-full">
             <LogoutIcon className="w-[18px] h-[18px] shrink-0" />
             Cerrar sesion
           </button>

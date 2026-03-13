@@ -17,8 +17,8 @@ export interface SiteConfig {
 export const siteConfig: SiteConfig = {
   firmName: 'Seismiles Textil',
   contact: {
-    phone: '+5493834000000',
-    email: 'contacto@seismilestextil.com',
-    whatsappNumber: '+5493834000000',
+    phone: '+5493834243614',
+    email: 'seismilestextil@gmail.com',
+    whatsappNumber: '+5493834243614',
   },
 }

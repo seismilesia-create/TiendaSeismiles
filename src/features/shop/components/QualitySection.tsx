@@ -56,7 +56,7 @@ export function QualitySection() {
   const { quality } = shopConfig
 
   return (
-    <section className="relative py-24 lg:py-36 bg-volcanic-900 overflow-hidden">
+    <section className="relative py-20 lg:py-28 bg-volcanic-900 overflow-hidden">
       {/* Subtle texture overlay */}
       <div className="absolute inset-0 opacity-[0.03]" style={{
         backgroundImage: `radial-gradient(circle at 1px 1px, rgba(255,255,255,0.3) 1px, transparent 0)`,
@@ -80,7 +80,7 @@ export function QualitySection() {
             {quality.heading}
           </h2>
 
-          <p className="text-body-lg text-white/40 leading-relaxed">
+          <p className="text-body-lg text-white/60 leading-relaxed">
             No hablamos de calidad: la demostramos en cada fibra, cada trama, cada costura.
           </p>
         </div>
@@ -135,7 +135,7 @@ export function QualitySection() {
                           {feature.title}
                         </h3>
                       </div>
-                      <p className="text-body-sm text-white/40 leading-relaxed">
+                      <p className="text-body-sm text-white/60 leading-relaxed">
                         {feature.description}
                       </p>
                     </div>

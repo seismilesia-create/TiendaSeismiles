@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
+import { sendPasswordChangedEmail } from '@/lib/email/send-password-changed'
 
 export async function login(formData: FormData) {
   const supabase = await createClient()
@@ -66,7 +67,7 @@ export async function resetPassword(formData: FormData) {
   const email = formData.get('email') as string
 
   const { error } = await supabase.auth.resetPasswordForEmail(email, {
-    redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/update-password`,
+    redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/reset`,
   })
 
   if (error) {
@@ -80,14 +81,18 @@ export async function updatePassword(formData: FormData) {
   const supabase = await createClient()
   const password = formData.get('password') as string
 
-  const { error } = await supabase.auth.updateUser({ password })
+  const { data, error } = await supabase.auth.updateUser({ password })
 
   if (error) {
     return { error: error.message }
   }
 
+  if (data.user) {
+    sendPasswordChangedEmail(data.user.id)
+  }
+
   revalidatePath('/', 'layout')
-  redirect('/dashboard')
+  redirect('/login')
 }
 
 export async function updateProfile(formData: FormData) {

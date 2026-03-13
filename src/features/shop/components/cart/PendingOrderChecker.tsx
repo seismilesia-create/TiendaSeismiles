@@ -16,15 +16,11 @@ export function PendingOrderChecker() {
     didCheck.current = true
 
     async function check() {
-      console.log('[PendingOrderChecker] Verifying:', pendingOrderRef)
       const result = await verifyPendingOrders(pendingOrderRef!)
 
       if (result.confirmed) {
-        console.log('[PendingOrderChecker] Payment confirmed, clearing cart')
         clearCart()
         router.push('/carrito/resultado?status=approved')
-      } else {
-        console.log('[PendingOrderChecker] Payment not confirmed yet:', result)
       }
     }
 
