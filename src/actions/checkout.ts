@@ -25,7 +25,39 @@ interface GcApplied {
   descuento: number
 }
 
-export async function createCheckout(items: CheckoutItem[], giftCardCodes?: string[]): Promise<CheckoutResult> {
+/** Helper: register coupon usage and increment counter */
+async function registerCouponUsage(
+  service: ReturnType<typeof createServiceClient>,
+  couponId: string,
+  userId: string,
+  compraIds: string[],
+  descuento: number,
+) {
+  await service
+    .from('cupon_usos')
+    .insert({
+      cupon_id: couponId,
+      user_id: userId,
+      compra_ids: compraIds,
+      descuento_aplicado: descuento,
+    })
+
+  // Increment usage counter
+  const { data: current } = await service
+    .from('cupones')
+    .select('usos_actuales')
+    .eq('id', couponId)
+    .single()
+
+  if (current) {
+    await service
+      .from('cupones')
+      .update({ usos_actuales: (current.usos_actuales ?? 0) + 1 })
+      .eq('id', couponId)
+  }
+}
+
+export async function createCheckout(items: CheckoutItem[], giftCardCodes?: string[], couponCode?: string): Promise<CheckoutResult> {
   if (!items.length) return { error: 'El carrito esta vacio' }
 
   const supabase = await createClient()
@@ -104,13 +136,60 @@ export async function createCheckout(items: CheckoutItem[], giftCardCodes?: stri
 
   const externalRef = orderNumbers.join(',')
 
-  // 2. Calculate total and check gift cards
+  // 2. Calculate total
   const totalPedido = items.reduce((sum, i) => sum + i.precio * i.cantidad, 0)
+
+  // 2a. Validate and apply coupon discount
+  let cuponId: string | null = null
+  let descuentoCupon = 0
+
+  if (couponCode) {
+    const normalizedCode = couponCode.trim().toUpperCase()
+    const { data: coupon } = await service
+      .from('cupones')
+      .select('*')
+      .eq('codigo', normalizedCode)
+      .eq('activo', true)
+      .single()
+
+    if (coupon) {
+      const now = new Date()
+      const validDate = (!coupon.fecha_fin || new Date(coupon.fecha_fin) >= now) &&
+                        (!coupon.fecha_inicio || new Date(coupon.fecha_inicio) <= now)
+      const validUsos = coupon.max_usos === null || coupon.usos_actuales < coupon.max_usos
+
+      // Check per-user usage
+      let validUser = true
+      if (coupon.un_uso_por_usuario) {
+        const { data: usage } = await service
+          .from('cupon_usos')
+          .select('id')
+          .eq('cupon_id', coupon.id)
+          .eq('user_id', user.id)
+          .limit(1)
+
+        if (usage && usage.length > 0) validUser = false
+      }
+
+      const validMinimo = Number(coupon.minimo_compra) <= totalPedido
+
+      if (validDate && validUsos && validUser && validMinimo) {
+        cuponId = coupon.id
+        descuentoCupon = coupon.tipo === 'porcentaje'
+          ? Math.round(totalPedido * Number(coupon.valor) / 100)
+          : Math.min(Number(coupon.valor), totalPedido)
+      }
+    }
+  }
+
+  const totalDespuesCupon = totalPedido - descuentoCupon
+
+  // 2b. Check gift cards (applied on amount after coupon)
   const gcList: GcApplied[] = []
-  let descuentoTotal = 0
+  let descuentoGc = 0
 
   if (giftCardCodes && giftCardCodes.length > 0) {
-    let restante = totalPedido
+    let restante = totalDespuesCupon
 
     for (const code of giftCardCodes) {
       if (restante <= 0) break
@@ -125,16 +204,24 @@ export async function createCheckout(items: CheckoutItem[], giftCardCodes?: stri
       if (gc && gc.saldo_restante && gc.saldo_restante > 0) {
         const descuento = Math.min(gc.saldo_restante, restante)
         gcList.push({ id: gc.id, descuento })
-        descuentoTotal += descuento
+        descuentoGc += descuento
         restante -= descuento
       }
     }
   }
 
-  const totalAPagar = totalPedido - descuentoTotal
+  const totalAPagar = totalDespuesCupon - descuentoGc
 
-  // 3a. Gift cards cover the full amount — confirm directly without MP
-  if (totalAPagar === 0 && gcList.length > 0) {
+  // Update orders with coupon info if applicable
+  if (cuponId) {
+    await service
+      .from('compras')
+      .update({ cupon_id: cuponId, cupon_descuento: descuentoCupon })
+      .in('numero_pedido', orderNumbers)
+  }
+
+  // 3a. Discounts cover the full amount — confirm directly without MP
+  if (totalAPagar <= 0) {
     // Deduct balance from each gift card
     for (const gc of gcList) {
       const { data: current } = await service
@@ -151,15 +238,25 @@ export async function createCheckout(items: CheckoutItem[], giftCardCodes?: stri
       }
     }
 
+    // Determine payment method label
+    let metodoPago = 'gift_card'
+    if (cuponId && gcList.length === 0) metodoPago = 'cupon'
+    else if (cuponId && gcList.length > 0) metodoPago = 'cupon+gift_card'
+
     // Confirm orders directly
     await service
       .from('compras')
       .update({
         estado: 'confirmado',
-        metodo_pago: 'gift_card',
-        gift_cards_applied: gcList,
+        metodo_pago: metodoPago,
+        gift_cards_applied: gcList.length > 0 ? gcList : null,
       })
       .in('numero_pedido', orderNumbers)
+
+    // Register coupon usage immediately (payment confirmed)
+    if (cuponId) {
+      await registerCouponUsage(service, cuponId, user.id, orderNumbers, descuentoCupon)
+    }
 
     sendOrderConfirmationEmails(orderNumbers)
 
@@ -170,19 +267,19 @@ export async function createCheckout(items: CheckoutItem[], giftCardCodes?: stri
     return { directConfirm: true }
   }
 
-  // 3b. Create Mercado Pago preference (full or partial after GC discount)
+  // 3b. Create Mercado Pago preference (remaining after coupon + GC discounts)
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
 
   let preferenceId: string
   let initPoint: string
 
-  // If GCs cover part, adjust item prices proportionally
+  // Adjust item prices proportionally for the amount to pay
   const ratio = totalAPagar / totalPedido
   const mpItems = items.map((item) => ({
     id: item.variantId,
     title: item.productName,
     quantity: item.cantidad,
-    unit_price: descuentoTotal > 0
+    unit_price: (descuentoCupon > 0 || descuentoGc > 0)
       ? Math.round(item.precio * ratio)
       : item.precio,
     currency_id: 'ARS' as const,
@@ -212,12 +309,18 @@ export async function createCheckout(items: CheckoutItem[], giftCardCodes?: stri
     return { error: 'Error al conectar con Mercado Pago. Intenta de nuevo.' }
   }
 
-  // 4. Update created orders: set estado to pendiente_pago, attach MP info and GC if used
+  // Determine payment method label
+  let metodoPago = 'mercadopago'
+  if (gcList.length > 0 && cuponId) metodoPago = 'cupon+gift_card+mercadopago'
+  else if (gcList.length > 0) metodoPago = 'gift_card+mercadopago'
+  else if (cuponId) metodoPago = 'cupon+mercadopago'
+
+  // 4. Update created orders: set estado to pendiente_pago, attach MP info, GC and coupon
   await service
     .from('compras')
     .update({
       estado: 'pendiente_pago',
-      metodo_pago: gcList.length > 0 ? 'gift_card+mercadopago' : 'mercadopago',
+      metodo_pago: metodoPago,
       mp_preference_id: preferenceId,
       ...(gcList.length > 0 ? { gift_cards_applied: gcList } : {}),
     })
@@ -295,19 +398,18 @@ export async function confirmPayment(paymentId: string, externalReference: strin
       }
     }
 
-    // If confirmed, deduct gift card balances and send email
+    // If confirmed, deduct gift card balances, register coupon usage, and send email
     if (newEstado === 'confirmado') {
-      // Read gift_cards_applied JSONB from the first order (all share the same data)
-      const { data: orderWithGc } = await service
+      // Read gift_cards_applied and coupon info from the first order
+      const { data: orderWithData } = await service
         .from('compras')
-        .select('gift_cards_applied')
+        .select('gift_cards_applied, cupon_id, cupon_descuento, user_id')
         .in('numero_pedido', orderNumbers)
-        .not('gift_cards_applied', 'is', null)
         .limit(1)
         .single()
 
-      if (orderWithGc?.gift_cards_applied) {
-        const gcList = orderWithGc.gift_cards_applied as GcApplied[]
+      if (orderWithData?.gift_cards_applied) {
+        const gcList = orderWithData.gift_cards_applied as GcApplied[]
         for (const gc of gcList) {
           const { data: current } = await service
             .from('gift_cards')
@@ -322,6 +424,17 @@ export async function confirmPayment(paymentId: string, externalReference: strin
               .eq('id', gc.id)
           }
         }
+      }
+
+      // Register coupon usage on payment confirmation
+      if (orderWithData?.cupon_id && orderWithData?.user_id) {
+        await registerCouponUsage(
+          service,
+          orderWithData.cupon_id,
+          orderWithData.user_id,
+          orderNumbers,
+          Number(orderWithData.cupon_descuento) || 0,
+        )
       }
 
       sendOrderConfirmationEmails(orderNumbers)

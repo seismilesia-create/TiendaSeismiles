@@ -84,6 +84,20 @@ export interface FaqItem {
   section?: string
 }
 
+/** Categoria de blog */
+export interface BlogCategory {
+  id: string
+  label: string
+}
+
+/** Articulo de blog (config) */
+export interface BlogItem {
+  title: string
+  slug: string
+  excerpt: string
+  category: string
+}
+
 /** Producto destacado para la landing */
 export interface FeaturedProduct {
   name: string
@@ -175,6 +189,12 @@ export interface ShopConfig {
     placeholder: string
     buttonText: string
     disclaimer: string
+  }
+
+  blog: {
+    heading: string
+    subtitle: string
+    categories: BlogCategory[]
   }
 
   footer: {

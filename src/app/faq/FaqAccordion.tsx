@@ -153,70 +153,62 @@ export function FaqAccordion({ items }: { items: FaqItem[] }) {
     )
   }
 
-  return (
-    <div>
-      {/* Section cards grid */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-8">
-        {sections.map((s) => {
-          const isActive = activeSection === s
-          const count = grouped.get(s)?.length ?? 0
-          const Icon = SECTION_ICONS[s] ?? DefaultIcon
+  const current = activeSection
 
-          return (
+  return (
+    <div className="space-y-3">
+      {sections.map((s) => {
+        const isActive = current === s
+        const Icon = SECTION_ICONS[s] ?? DefaultIcon
+        const sectionItems = grouped.get(s) ?? []
+
+        return (
+          <div key={s}>
+            {/* Section bar */}
             <button
-              key={s}
-              onClick={() => setActiveSection(isActive ? null : s)}
-              className={`group relative rounded-xl border p-4 text-left transition-all duration-200 ${
+              onClick={() => { setActiveSection(isActive ? null : s); setOpenKey(null) }}
+              className={`flex items-center justify-between w-full px-6 py-5 rounded-xl border transition-all duration-300 ${
                 isActive
-                  ? 'bg-volcanic-900 border-volcanic-900 shadow-lg'
-                  : 'bg-white border-sand-200 hover:border-terra-500/30 hover:shadow-sm'
+                  ? 'bg-volcanic-900 border-volcanic-900 text-white shadow-lg'
+                  : 'bg-white border-sand-200/60 text-volcanic-900 hover:shadow-warm'
               }`}
             >
-              <div className={`w-9 h-9 rounded-lg flex items-center justify-center mb-3 ${
-                isActive ? 'bg-terra-500/20' : 'bg-sand-100'
-              }`}>
-                <Icon className={`w-[18px] h-[18px] ${isActive ? 'text-terra-400' : 'text-volcanic-500 group-hover:text-terra-500'} transition-colors`} />
+              <div className="flex items-center gap-3">
+                <Icon className={`w-5 h-5 ${isActive ? 'text-terra-400' : 'text-volcanic-500'} transition-colors`} />
+                <span className="font-heading text-body-md lg:text-lg">{s}</span>
               </div>
-              <p className={`text-body-sm font-semibold leading-tight transition-colors ${
-                isActive ? 'text-white' : 'text-volcanic-900'
-              }`}>
-                {s}
-              </p>
-              <p className={`text-[11px] mt-1 transition-colors ${
-                isActive ? 'text-white/50' : 'text-volcanic-500'
-              }`}>
-                {count} {count === 1 ? 'pregunta' : 'preguntas'}
-              </p>
-            </button>
-          )
-        })}
-      </div>
-
-      {/* FAQ items for active section */}
-      {activeSection && (
-        <div className="space-y-3">
-          {(grouped.get(activeSection) ?? []).map((item, i) => {
-            const key = `${activeSection}-${i}`
-            return (
-              <AccordionItem
-                key={key}
-                item={item}
-                isOpen={openKey === key}
-                onToggle={() => setOpenKey(openKey === key ? null : key)}
+              <ChevronDownIcon
+                className={`w-5 h-5 shrink-0 transition-transform duration-300 ${
+                  isActive ? 'rotate-180 text-terra-400' : 'text-volcanic-500'
+                }`}
               />
-            )
-          })}
-        </div>
-      )}
+            </button>
 
-      {/* Prompt when no section selected */}
-      {!activeSection && (
-        <div className="text-center py-8">
-          <p className="text-body-sm text-volcanic-500">
-            Selecciona una categoria para ver las preguntas
-          </p>
-        </div>
-      )}
+            {/* Section content */}
+            <div
+              className={`grid transition-all duration-300 ${
+                isActive ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'
+              }`}
+            >
+              <div className="overflow-hidden">
+                <div className="space-y-3 pt-3">
+                  {sectionItems.map((item, i) => {
+                    const key = `${s}-${i}`
+                    return (
+                      <AccordionItem
+                        key={key}
+                        item={item}
+                        isOpen={openKey === key}
+                        onToggle={() => setOpenKey(openKey === key ? null : key)}
+                      />
+                    )
+                  })}
+                </div>
+              </div>
+            </div>
+          </div>
+        )
+      })}
     </div>
   )
 }

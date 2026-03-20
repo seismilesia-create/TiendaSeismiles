@@ -149,6 +149,7 @@ const config: Config = {
       fontFamily: {
         sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
         heading: ['"DM Serif Display"', 'Georgia', 'serif'],
+        display: ['"Bebas Neue"', 'Impact', 'sans-serif'],
         body: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
       },
 
@@ -222,7 +223,9 @@ const config: Config = {
       },
     },
   },
-  plugins: [],
+  plugins: [
+    require('@tailwindcss/typography'),
+  ],
 }
 
 export default config

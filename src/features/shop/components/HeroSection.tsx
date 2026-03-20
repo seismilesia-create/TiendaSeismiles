@@ -42,7 +42,7 @@ export function HeroSection() {
           </div>
 
           {/* Headline */}
-          <h1 className="font-heading text-display-lg sm:text-display-xl lg:text-[4.5rem] leading-[1.05] text-volcanic-900 mb-6 animate-fade-in-up">
+          <h1 className="font-display text-[3.5rem] sm:text-[5rem] lg:text-[7rem] leading-[0.95] tracking-[0.04em] uppercase text-volcanic-900 mb-6 animate-fade-in-up">
             {hero.headline}
           </h1>
 

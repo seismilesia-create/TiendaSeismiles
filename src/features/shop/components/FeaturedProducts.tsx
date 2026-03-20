@@ -35,9 +35,10 @@ function mapDBProducts(dbProducts: CatalogProductFromDB[]): DisplayProduct[] {
 
 interface FeaturedProductsProps {
   dbProducts?: CatalogProductFromDB[]
+  seasonSubtitle?: string
 }
 
-export function FeaturedProducts({ dbProducts }: FeaturedProductsProps) {
+export function FeaturedProducts({ dbProducts, seasonSubtitle }: FeaturedProductsProps) {
   const { featuredProducts } = shopConfig
 
   // Use DB products if available, otherwise fallback to config
@@ -66,7 +67,7 @@ export function FeaturedProducts({ dbProducts }: FeaturedProductsProps) {
             {featuredProducts.heading}
           </h2>
           <p className="text-body-md text-volcanic-500 max-w-2xl mx-auto">
-            {featuredProducts.subtitle}
+            {seasonSubtitle || featuredProducts.subtitle}
           </p>
         </div>
 

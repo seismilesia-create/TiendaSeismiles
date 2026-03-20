@@ -23,10 +23,19 @@ export interface AppliedGiftCard {
   titulo: string
 }
 
+export interface AppliedCoupon {
+  code: string
+  couponId: string
+  tipo: 'porcentaje' | 'monto_fijo'
+  valor: number
+  descuento: number
+}
+
 interface CartState {
   items: CartItem[]
   pendingOrderRef: string | null
   appliedGiftCards: AppliedGiftCard[]
+  appliedCoupon: AppliedCoupon | null
   addItem: (item: Omit<CartItem, 'cantidad'>) => void
   removeItem: (variantId: string) => void
   updateQuantity: (variantId: string, cantidad: number) => void
@@ -35,6 +44,8 @@ interface CartState {
   clearPendingOrderRef: () => void
   applyGiftCard: (gc: AppliedGiftCard) => void
   removeGiftCard: (code: string) => void
+  applyCoupon: (coupon: AppliedCoupon) => void
+  removeCoupon: () => void
   getTotalItems: () => number
   getTotalPrice: () => number
 }
@@ -45,6 +56,7 @@ export const useCartStore = create<CartState>()(
       items: [],
       pendingOrderRef: null,
       appliedGiftCards: [],
+      appliedCoupon: null,
 
       addItem: (item) =>
         set((state) => {
@@ -80,7 +92,7 @@ export const useCartStore = create<CartState>()(
           }
         }),
 
-      clearCart: () => set({ items: [], pendingOrderRef: null, appliedGiftCards: [] }),
+      clearCart: () => set({ items: [], pendingOrderRef: null, appliedGiftCards: [], appliedCoupon: null }),
 
       setPendingOrderRef: (ref) => set({ pendingOrderRef: ref }),
       clearPendingOrderRef: () => set({ pendingOrderRef: null }),
@@ -95,6 +107,9 @@ export const useCartStore = create<CartState>()(
           appliedGiftCards: state.appliedGiftCards.filter((g) => g.code !== code),
         })),
 
+      applyCoupon: (coupon) => set({ appliedCoupon: coupon }),
+      removeCoupon: () => set({ appliedCoupon: null }),
+
       getTotalItems: () => get().items.reduce((sum, i) => sum + i.cantidad, 0),
 
       getTotalPrice: () =>
@@ -102,7 +117,7 @@ export const useCartStore = create<CartState>()(
     }),
     {
       name: 'seismiles-cart',
-      version: 4,
+      version: 5,
       migrate: (persisted, version) => {
         const state = persisted as Record<string, unknown>
         if (version < 4) {
@@ -111,6 +126,13 @@ export const useCartStore = create<CartState>()(
             ...state,
             appliedGiftCards: old ? [old] : [],
             appliedGiftCard: undefined,
+            appliedCoupon: null,
+          }
+        }
+        if (version < 5) {
+          return {
+            ...state,
+            appliedCoupon: null,
           }
         }
         return state

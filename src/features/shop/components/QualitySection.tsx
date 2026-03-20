@@ -57,12 +57,6 @@ export function QualitySection() {
 
   return (
     <section className="relative py-20 lg:py-28 bg-volcanic-900 overflow-hidden">
-      {/* Subtle texture overlay */}
-      <div className="absolute inset-0 opacity-[0.03]" style={{
-        backgroundImage: `radial-gradient(circle at 1px 1px, rgba(255,255,255,0.3) 1px, transparent 0)`,
-        backgroundSize: '24px 24px',
-      }} />
-
       {/* Warm glow */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[300px] bg-terra-500/8 blur-[120px] rounded-full pointer-events-none" />
 

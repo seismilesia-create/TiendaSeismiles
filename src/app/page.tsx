@@ -1,15 +1,17 @@
 import {
-  MarqueeBanner, Navbar, HeroSection, FeaturedProducts, AndesDivider,
+  MarqueeBanner, Navbar, HeroSection, FeaturedProducts,
   CategoriesGrid, QualitySection, BenefitsBar,
   InstagramSection, NewsletterSection, Footer, ScrollReveal,
 } from '@/features/shop/components'
-import { getProductLines, getMostViewedProducts } from '@/features/shop/services/product-lines'
+import { getProductLines, getSeasonalFeaturedProducts } from '@/features/shop/services/product-lines'
+import { getSeason, getSeasonDefaultTab, getSeasonSubtitle } from '@/features/shop/utils/season'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
 
 export default async function HomePage() {
-  const [productLines, mostViewed, supabase] = await Promise.all([
+  const season = getSeason()
+  const [productLines, seasonalProducts, supabase] = await Promise.all([
     getProductLines(),
-    getMostViewedProducts(undefined, 4),
+    getSeasonalFeaturedProducts(season, 4),
     createClient(),
   ])
 
@@ -34,11 +36,10 @@ export default async function HomePage() {
       <main>
         <HeroSection />
         <ScrollReveal>
-          <FeaturedProducts dbProducts={mostViewed} />
+          <FeaturedProducts dbProducts={seasonalProducts} seasonSubtitle={getSeasonSubtitle(season)} />
         </ScrollReveal>
-        <AndesDivider />
         <ScrollReveal>
-          <CategoriesGrid />
+          <CategoriesGrid defaultTab={getSeasonDefaultTab(season)} />
         </ScrollReveal>
         <ScrollReveal delay={100}>
           <QualitySection />

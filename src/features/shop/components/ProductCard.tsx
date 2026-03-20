@@ -66,16 +66,16 @@ export function ProductCard({ product, isFavorited = false, isLoggedIn = false }
         )}
 
         {/* Tags */}
-        <div className="absolute left-3 top-3 flex flex-col gap-1.5">
+        <div className="absolute left-2 top-2 sm:left-3 sm:top-3 flex flex-col gap-1.5">
           {product.destacado && (
-            <span className="bg-terra-500 px-2.5 py-1 text-[9px] font-bold uppercase tracking-[0.15em] text-white rounded-md">
+            <span className="bg-terra-500 px-2.5 py-1 text-[9px] font-bold uppercase tracking-widest text-white rounded-md">
               Destacado
             </span>
           )}
         </div>
 
         {/* Favorite button */}
-        <div className="absolute right-3 top-3 z-10">
+        <div className="absolute right-2 top-2 sm:right-3 sm:top-3 z-10">
           <HeartButton
             productId={product.id}
             productSlug={product.slug}
@@ -89,7 +89,7 @@ export function ProductCard({ product, isFavorited = false, isLoggedIn = false }
         <div
           className={`absolute inset-x-0 bottom-0 flex items-center justify-center bg-volcanic-900/80 py-3 transition-all duration-300 ${isHovered ? 'translate-y-0 opacity-100' : 'translate-y-full opacity-0'}`}
         >
-          <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-white">
+          <span className="text-[10px] font-bold uppercase tracking-widest text-white">
             Ver producto
           </span>
         </div>

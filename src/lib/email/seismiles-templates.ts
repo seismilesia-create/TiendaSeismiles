@@ -510,6 +510,83 @@ export function giftCardEmail(data: GiftCardEmailData): string {
   return baseLayout(content, 'Recibis este email porque compraste una Gift Card en Seismiles Textil.')
 }
 
+// ── Admin digest: stock demand summary ──
+
+interface StockDemandItem {
+  productName: string
+  talle: string
+  colorName: string
+  colorHex: string
+  count: number
+}
+
+interface AdminStockDigestData {
+  totalPending: number
+  items: StockDemandItem[]
+  siteUrl: string
+}
+
+export function adminStockDigestEmail(data: AdminStockDigestData): string {
+  const adminUrl = `${data.siteUrl}/admin/inventario`
+
+  const rows = data.items.map((item) => `
+    <tr>
+      <td style="padding:8px 0;font-size:13px;color:${BRAND.textPrimary};border-bottom:1px solid ${BRAND.sandDark};">
+        ${item.productName}
+      </td>
+      <td style="padding:8px 0;font-size:13px;color:${BRAND.textPrimary};border-bottom:1px solid ${BRAND.sandDark};text-align:center;">
+        ${item.talle}
+      </td>
+      <td style="padding:8px 0;border-bottom:1px solid ${BRAND.sandDark};text-align:center;">
+        <span style="display:inline-block;width:14px;height:14px;border-radius:50%;background-color:${item.colorHex};border:1px solid ${BRAND.sandDark};vertical-align:middle;"></span>
+        <span style="font-size:13px;color:${BRAND.textPrimary};vertical-align:middle;margin-left:4px;">${item.colorName}</span>
+      </td>
+      <td style="padding:8px 0;font-size:13px;font-weight:700;color:${BRAND.terra};border-bottom:1px solid ${BRAND.sandDark};text-align:right;">
+        ${item.count}
+      </td>
+    </tr>
+  `).join('')
+
+  const content = `
+    <p style="margin:0 0 4px;font-size:11px;color:${BRAND.terra};text-transform:uppercase;letter-spacing:0.1em;font-weight:600;">
+      Resumen de demanda
+    </p>
+    <h1 style="margin:0 0 8px;font-size:20px;font-weight:700;color:${BRAND.textPrimary};">
+      ${data.totalPending} clientes esperando stock
+    </h1>
+    <p style="margin:0 0 28px;font-size:14px;color:${BRAND.textSecondary};line-height:1.6;">
+      Hay nuevos pedidos de reposicion. Aca tenes un resumen de lo mas solicitado.
+    </p>
+
+    <table width="100%" cellpadding="0" cellspacing="0" style="background-color:${BRAND.sand};border-radius:12px;padding:20px 24px;margin-bottom:28px;">
+      <tr>
+        <td>
+          <table width="100%" cellpadding="0" cellspacing="0">
+            <tr>
+              <td style="padding:0 0 8px;font-size:11px;color:${BRAND.textSecondary};text-transform:uppercase;letter-spacing:0.08em;border-bottom:2px solid ${BRAND.sandDark};">Producto</td>
+              <td style="padding:0 0 8px;font-size:11px;color:${BRAND.textSecondary};text-transform:uppercase;letter-spacing:0.08em;border-bottom:2px solid ${BRAND.sandDark};text-align:center;">Talle</td>
+              <td style="padding:0 0 8px;font-size:11px;color:${BRAND.textSecondary};text-transform:uppercase;letter-spacing:0.08em;border-bottom:2px solid ${BRAND.sandDark};text-align:center;">Color</td>
+              <td style="padding:0 0 8px;font-size:11px;color:${BRAND.textSecondary};text-transform:uppercase;letter-spacing:0.08em;border-bottom:2px solid ${BRAND.sandDark};text-align:right;">Pedidos</td>
+            </tr>
+            ${rows}
+          </table>
+        </td>
+      </tr>
+    </table>
+
+    <table width="100%" cellpadding="0" cellspacing="0">
+      <tr>
+        <td align="center">
+          <a href="${adminUrl}" style="display:inline-block;background-color:${BRAND.terra};color:white;font-size:13px;font-weight:700;text-decoration:none;padding:14px 32px;border-radius:12px;letter-spacing:0.05em;text-transform:uppercase;">
+            Ver inventario
+          </a>
+        </td>
+      </tr>
+    </table>
+  `
+  return baseLayout(content, 'Recibis este email porque sos administrador de Seismiles Textil.')
+}
+
 // ── Password changed confirmation email ──
 
 interface PasswordChangedData {
@@ -568,4 +645,239 @@ export function passwordChangedEmail(data: PasswordChangedData): string {
     </table>
   `
   return baseLayout(content, 'Recibis este email porque se actualizo la contraseña de tu cuenta en Seismiles Textil.')
+}
+
+// ── Order status update email ──
+
+const STATUS_MESSAGES: Record<string, { heading: string; description: string; badgeColor: string; badgeBg: string }> = {
+  en_preparacion: {
+    heading: 'Tu pedido esta siendo preparado',
+    description: 'Estamos preparando tu pedido con mucho cuidado. Te avisaremos cuando lo despachemos.',
+    badgeColor: '#1D4ED8',
+    badgeBg: '#DBEAFE',
+  },
+  enviado: {
+    heading: 'Tu pedido fue enviado',
+    description: 'Tu pedido ya esta en camino. Podes hacer seguimiento con el numero que te dejamos abajo.',
+    badgeColor: '#0369A1',
+    badgeBg: '#E0F2FE',
+  },
+  entregado: {
+    heading: 'Tu pedido fue entregado',
+    description: 'Esperamos que disfrutes tu compra. Si tenes alguna consulta, no dudes en escribirnos.',
+    badgeColor: '#047857',
+    badgeBg: '#D1FAE5',
+  },
+  cancelada: {
+    heading: 'Tu pedido fue cancelado',
+    description: 'Lamentamos informarte que tu pedido fue cancelado. Si tenes dudas, contactanos.',
+    badgeColor: '#DC2626',
+    badgeBg: '#FEE2E2',
+  },
+}
+
+const STATUS_LABELS: Record<string, string> = {
+  en_preparacion: 'En preparación',
+  enviado: 'Enviado',
+  entregado: 'Entregado',
+  cancelada: 'Cancelada',
+}
+
+interface OrderStatusUpdateData {
+  customerName: string | null
+  numeroPedido: string
+  productName: string
+  newStatus: string
+  trackingNumber?: string | null
+  siteUrl: string
+}
+
+export function orderStatusUpdateEmail(data: OrderStatusUpdateData): string {
+  const statusInfo = STATUS_MESSAGES[data.newStatus]
+  if (!statusInfo) return ''
+
+  const statusLabel = STATUS_LABELS[data.newStatus] ?? data.newStatus
+  const perfilUrl = `${data.siteUrl}/perfil`
+
+  const trackingBlock = data.trackingNumber
+    ? `
+    <!-- Tracking number -->
+    <table width="100%" cellpadding="0" cellspacing="0" style="background-color:${BRAND.sand};border-radius:12px;padding:20px 24px;margin-bottom:16px;">
+      <tr>
+        <td>
+          <p style="margin:0 0 4px;font-size:11px;color:${BRAND.terra};text-transform:uppercase;letter-spacing:0.1em;font-weight:600;">
+            Numero de seguimiento
+          </p>
+          <p style="margin:0;font-size:18px;font-weight:700;color:${BRAND.textPrimary};letter-spacing:0.05em;font-family:'Courier New',Courier,monospace;">
+            ${data.trackingNumber}
+          </p>
+        </td>
+      </tr>
+    </table>
+    `
+    : ''
+
+  const content = `
+    <p style="margin:0 0 4px;font-size:11px;color:${BRAND.terra};text-transform:uppercase;letter-spacing:0.1em;font-weight:600;">
+      Actualizacion de pedido
+    </p>
+    <h1 style="margin:0 0 8px;font-size:20px;font-weight:700;color:${BRAND.textPrimary};">
+      ${statusInfo.heading}${data.customerName ? `, ${data.customerName}` : ''}
+    </h1>
+    <p style="margin:0 0 28px;font-size:14px;color:${BRAND.textSecondary};line-height:1.6;">
+      ${statusInfo.description}
+    </p>
+
+    <!-- Order info card -->
+    <table width="100%" cellpadding="0" cellspacing="0" style="background-color:${BRAND.sand};border-radius:12px;padding:20px 24px;margin-bottom:16px;">
+      <tr>
+        <td>
+          <table width="100%" cellpadding="0" cellspacing="0">
+            <tr>
+              <td style="padding:6px 0;font-size:13px;color:${BRAND.textSecondary};">Pedido</td>
+              <td style="padding:6px 0;font-size:13px;color:${BRAND.textPrimary};text-align:right;font-weight:600;">${data.numeroPedido}</td>
+            </tr>
+            <tr>
+              <td style="padding:6px 0;font-size:13px;color:${BRAND.textSecondary};">Producto</td>
+              <td style="padding:6px 0;font-size:13px;color:${BRAND.textPrimary};text-align:right;font-weight:600;">${data.productName}</td>
+            </tr>
+            <tr>
+              <td style="padding:6px 0;font-size:13px;color:${BRAND.textSecondary};">Estado</td>
+              <td style="padding:6px 0;text-align:right;">
+                <span style="display:inline-block;background-color:${statusInfo.badgeBg};color:${statusInfo.badgeColor};font-size:12px;font-weight:700;padding:4px 12px;border-radius:20px;">
+                  ${statusLabel}
+                </span>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+
+    ${trackingBlock}
+
+    <!-- CTA Button -->
+    <table width="100%" cellpadding="0" cellspacing="0">
+      <tr>
+        <td align="center">
+          <a href="${perfilUrl}" style="display:inline-block;background-color:${BRAND.volcanic};color:white;font-size:13px;font-weight:700;text-decoration:none;padding:14px 32px;border-radius:12px;letter-spacing:0.05em;text-transform:uppercase;">
+            Ver mis pedidos
+          </a>
+        </td>
+      </tr>
+    </table>
+
+    <p style="margin:20px 0 0;font-size:13px;color:${BRAND.textSecondary};line-height:1.6;text-align:center;">
+      Podes seguir el estado de tu pedido desde tu perfil.
+    </p>
+  `
+  return baseLayout(content, 'Recibis este email porque realizaste una compra en Seismiles Textil.')
+}
+
+// ── Newsletter email helpers ──
+
+function markdownToEmailHtml(md: string): string {
+  let html = md
+    // Escape HTML entities
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    // Headings (process h3 before h2 before h1)
+    .replace(/^### (.+)$/gm, `<h3 style="margin:24px 0 8px;font-size:16px;font-weight:700;color:${BRAND.textPrimary};">$1</h3>`)
+    .replace(/^## (.+)$/gm, `<h2 style="margin:24px 0 8px;font-size:18px;font-weight:700;color:${BRAND.textPrimary};">$1</h2>`)
+    .replace(/^# (.+)$/gm, `<h1 style="margin:24px 0 8px;font-size:20px;font-weight:700;color:${BRAND.textPrimary};">$1</h1>`)
+    // Bold and italic
+    .replace(/\*\*(.+?)\*\*/g, `<strong style="color:${BRAND.textPrimary};">$1</strong>`)
+    .replace(/\*(.+?)\*/g, '<em>$1</em>')
+    // Links
+    .replace(/\[(.+?)\]\((.+?)\)/g, `<a href="$2" style="color:${BRAND.terra};text-decoration:underline;">$1</a>`)
+    // Double newline = paragraph break
+    .replace(/\n\n/g, `</p><p style="margin:0 0 16px;font-size:14px;color:${BRAND.textPrimary};line-height:1.7;">`)
+    // Single newline = line break
+    .replace(/\n/g, '<br/>')
+
+  return `<p style="margin:0 0 16px;font-size:14px;color:${BRAND.textPrimary};line-height:1.7;">${html}</p>`
+}
+
+// ── Welcome newsletter email (sent on subscription) ──
+
+interface WelcomeNewsletterData {
+  couponCode: string
+  siteUrl: string
+  unsubscribeUrl: string
+}
+
+export function welcomeNewsletterEmail(data: WelcomeNewsletterData): string {
+  const content = `
+    <p style="margin:0 0 4px;font-size:11px;color:${BRAND.terra};text-transform:uppercase;letter-spacing:0.1em;font-weight:600;">
+      Bienvenido/a a la expedicion
+    </p>
+    <h1 style="margin:0 0 8px;font-size:20px;font-weight:700;color:${BRAND.textPrimary};">
+      ¡Ya sos parte de Seismiles!
+    </h1>
+    <p style="margin:0 0 28px;font-size:14px;color:${BRAND.textSecondary};line-height:1.6;">
+      Gracias por suscribirte. Aca tenes tu cupon de descuento del 10% para tu primera compra.
+    </p>
+
+    <!-- Coupon card -->
+    <table width="100%" cellpadding="0" cellspacing="0" style="background:linear-gradient(135deg,${BRAND.volcanic},#4A3D35);border-radius:16px;padding:28px 24px;margin-bottom:16px;">
+      <tr>
+        <td style="text-align:center;">
+          <p style="margin:0 0 4px;font-size:11px;color:rgba(255,255,255,0.5);text-transform:uppercase;letter-spacing:0.15em;">
+            Tu cupon de descuento
+          </p>
+          <p style="margin:0 0 8px;font-size:24px;font-weight:700;color:white;letter-spacing:0.12em;font-family:'Courier New',Courier,monospace;">
+            ${data.couponCode}
+          </p>
+          <p style="margin:0;font-size:13px;color:rgba(255,255,255,0.6);">
+            10% de descuento en tu primera compra
+          </p>
+        </td>
+      </tr>
+    </table>
+
+    <!-- How to use -->
+    <table width="100%" cellpadding="0" cellspacing="0" style="background-color:${BRAND.sand};border-radius:12px;padding:20px 24px;margin-bottom:28px;">
+      <tr>
+        <td>
+          <p style="margin:0 0 8px;font-size:13px;color:${BRAND.textPrimary};line-height:1.6;">
+            Ingresa este codigo en el carrito de compras al momento de pagar.
+          </p>
+          <p style="margin:0;font-size:13px;color:${BRAND.textSecondary};line-height:1.6;">
+            Valido por unica vez · Aplica a toda la tienda
+          </p>
+        </td>
+      </tr>
+    </table>
+
+    <!-- CTA -->
+    <table width="100%" cellpadding="0" cellspacing="0">
+      <tr>
+        <td align="center">
+          <a href="${data.siteUrl}/catalogo" style="display:inline-block;background-color:${BRAND.volcanic};color:white;font-size:13px;font-weight:700;text-decoration:none;padding:14px 32px;border-radius:12px;letter-spacing:0.05em;text-transform:uppercase;">
+            Explorar la tienda
+          </a>
+        </td>
+      </tr>
+    </table>
+  `
+  return baseLayout(content, `Recibis este email porque te suscribiste al newsletter de Seismiles Textil.<br/><a href="${data.unsubscribeUrl}" style="color:${BRAND.textSecondary};text-decoration:underline;">Desuscribirse</a>`)
+}
+
+// ── Campaign newsletter email ──
+
+interface CampaignEmailData {
+  markdownContent: string
+  unsubscribeUrl: string
+}
+
+export function campaignEmail(data: CampaignEmailData): string {
+  const htmlContent = markdownToEmailHtml(data.markdownContent)
+
+  const content = `
+    <div>
+      ${htmlContent}
+    </div>
+  `
+  return baseLayout(content, `Recibis este email porque te suscribiste al newsletter de Seismiles Textil.<br/><a href="${data.unsubscribeUrl}" style="color:${BRAND.textSecondary};text-decoration:underline;">Desuscribirse</a>`)
 }

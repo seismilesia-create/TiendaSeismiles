@@ -1,6 +1,14 @@
 import { DashboardKpiCard } from './DashboardKpiCard'
 import type { InventoryOverview } from '@/features/shop/services/inventory'
 
+function DollarIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
+      <line x1="12" y1="1" x2="12" y2="23" /><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+    </svg>
+  )
+}
+
 function BoxIcon() {
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
@@ -9,10 +17,10 @@ function BoxIcon() {
   )
 }
 
-function CheckCircleIcon() {
+function ShieldIcon() {
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
-      <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" /><polyline points="22 4 12 14.01 9 11.01" />
+      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /><polyline points="9 12 12 15 22 5" className="hidden" /><path d="m9 12 2 2 4-4" />
     </svg>
   )
 }
@@ -25,12 +33,10 @@ function AlertTriangleIcon() {
   )
 }
 
-function BellIcon() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
-      <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" /><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" />
-    </svg>
-  )
+function formatARS(value: number): string {
+  if (value >= 1_000_000) return `$${(value / 1_000_000).toFixed(1)}M`
+  if (value >= 1_000) return `$${(value / 1_000).toFixed(0)}K`
+  return `$${value.toLocaleString('es-AR')}`
 }
 
 interface Props {
@@ -38,27 +44,29 @@ interface Props {
 }
 
 export function InventoryKpiCards({ overview }: Props) {
+  const requierenAtencion = overview.sinStock + overview.stockBajo
+
   return (
     <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+      <DashboardKpiCard
+        title="Valor inventario"
+        value={formatARS(overview.valorInventario)}
+        icon={<DollarIcon />}
+      />
       <DashboardKpiCard
         title="Total unidades"
         value={overview.totalUnidades.toLocaleString('es-AR')}
         icon={<BoxIcon />}
       />
       <DashboardKpiCard
-        title="Productos activos"
-        value={`${overview.productosActivos}`}
-        icon={<CheckCircleIcon />}
+        title="Cobertura"
+        value={`${overview.coberturaPorcentaje}%`}
+        icon={<ShieldIcon />}
       />
       <DashboardKpiCard
-        title="Sin stock"
-        value={`${overview.sinStock}`}
+        title="Requieren atencion"
+        value={`${requierenAtencion}`}
         icon={<AlertTriangleIcon />}
-      />
-      <DashboardKpiCard
-        title="Notificaciones pendientes"
-        value={`${overview.notificacionesPendientes}`}
-        icon={<BellIcon />}
       />
     </div>
   )

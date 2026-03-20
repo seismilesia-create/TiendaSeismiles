@@ -23,7 +23,7 @@ export const shopConfig: ShopConfig = {
     subheadline:
       'Desde el corazón de Catamarca, diseñamos y confeccionamos ropa de alta gama. Inspirados en la solidez de nuestros Seismiles, creamos prendas que honran nuestra tierra y están hechas para durar.',
     ctaPrimary: { text: 'Ver coleccion', href: '/catalogo' },
-    ctaSecondary: { text: 'Nuestro origen', href: '#origen' },
+    ctaSecondary: { text: 'Nuestro origen', href: '/nosotros' },
   },
 
   marqueeMessages: [
@@ -45,6 +45,7 @@ export const shopConfig: ShopConfig = {
         { label: 'Todos los productos', href: '/catalogo' },
       ],
     },
+    { label: 'Blog', href: '/blog' },
     { label: 'Nuestro Origen', href: '#origen' },
     { label: 'FAQ', href: '/faq' },
   ],
@@ -197,7 +198,7 @@ export const shopConfig: ShopConfig = {
       { value: '6000', label: 'Metros de altura' },
       { value: '600', label: 'km de recorrido' },
     ],
-    cta: { text: 'Conoce la ruta', href: '#origen' },
+    cta: { text: 'Conoce la ruta', href: '/nosotros' },
   },
 
   quality: {
@@ -332,6 +333,18 @@ export const shopConfig: ShopConfig = {
     },
   },
 
+  blog: {
+    heading: 'Blog Seismiles',
+    subtitle:
+      'Cuidados de tela, materiales premium y la historia detras de cada prenda. Conoce lo que nos diferencia.',
+    categories: [
+      { id: 'cuidados', label: 'Cuidados' },
+      { id: 'materiales', label: 'Materiales' },
+      { id: 'estilo', label: 'Estilo' },
+      { id: 'marca', label: 'Marca' },
+    ],
+  },
+
   newsletter: {
     label: 'Newsletter',
     heading: '10% en tu primera compra',
@@ -359,6 +372,7 @@ export const shopConfig: ShopConfig = {
         title: 'Informacion',
         links: [
           { label: 'Nosotros', href: '/nosotros' },
+          { label: 'Blog', href: '/blog' },
           { label: 'Gift Cards', href: '/giftcards' },
         ],
       },

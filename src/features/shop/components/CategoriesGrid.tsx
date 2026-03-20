@@ -11,9 +11,16 @@ function ArrowUpRightIcon({ className }: { className?: string }) {
   )
 }
 
-export function CategoriesGrid() {
+interface CategoriesGridProps {
+  defaultTab?: string
+}
+
+export function CategoriesGrid({ defaultTab }: CategoriesGridProps) {
   const { productTypeTabs } = shopConfig
-  const [activeTab, setActiveTab] = useState(productTypeTabs[0].id)
+  const initialTab = defaultTab && productTypeTabs.some(t => t.id === defaultTab)
+    ? defaultTab
+    : productTypeTabs[0].id
+  const [activeTab, setActiveTab] = useState(initialTab)
 
   const currentTab = productTypeTabs.find((t) => t.id === activeTab) ?? productTypeTabs[0]
 

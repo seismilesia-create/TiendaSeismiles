@@ -46,10 +46,35 @@ function GiftCardIcon({ className }: { className?: string }) {
   )
 }
 
+function CouponIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" className={className}>
+      <path d="M12.586 2.586A2 2 0 0 0 11.172 2H4a2 2 0 0 0-2 2v7.172a2 2 0 0 0 .586 1.414l8.704 8.704a2.426 2.426 0 0 0 3.42 0l6.58-6.58a2.426 2.426 0 0 0 0-3.42z" />
+      <circle cx="7.5" cy="7.5" r=".5" fill="currentColor" />
+    </svg>
+  )
+}
+
 function FaqIcon({ className }: { className?: string }) {
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" className={className}>
       <circle cx="12" cy="12" r="10" /><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" /><path d="M12 17h.01" />
+    </svg>
+  )
+}
+
+function BlogIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" className={className}>
+      <path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-2 2Zm0 0a2 2 0 0 1-2-2v-9c0-1.1.9-2 2-2h2" /><path d="M18 14h-8" /><path d="M15 18h-5" /><path d="M10 6h8v4h-8V6Z" />
+    </svg>
+  )
+}
+
+function NewsletterIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" className={className}>
+      <rect width="20" height="16" x="2" y="4" rx="2" /><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
     </svg>
   )
 }
@@ -92,7 +117,10 @@ const NAV_ITEMS = [
   { href: '/admin/productos', label: 'Productos', icon: ProductIcon },
   { href: '/admin/inventario', label: 'Inventario', icon: InventoryIcon },
   { href: '/admin/gift-cards', label: 'Gift Cards', icon: GiftCardIcon },
+  { href: '/admin/cupones', label: 'Cupones', icon: CouponIcon },
   { href: '/admin/faq', label: 'FAQ', icon: FaqIcon },
+  { href: '/admin/blog', label: 'Blog', icon: BlogIcon },
+  { href: '/admin/newsletter', label: 'Newsletter', icon: NewsletterIcon },
 ]
 
 export function AdminSidebar() {

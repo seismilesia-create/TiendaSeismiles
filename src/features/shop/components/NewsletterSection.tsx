@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { MountainIcon } from './MountainIcon'
+import { subscribeNewsletter } from '@/actions/newsletter'
 
 function CheckIcon({ className }: { className?: string }) {
   return (
@@ -38,25 +39,11 @@ export function NewsletterSection() {
     setErrorMsg('')
 
     try {
-      const { createClient } = await import('@supabase/supabase-js')
-      const supabase = createClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-      )
+      const result = await subscribeNewsletter(trimmed)
 
-      const couponCode = `SEISMILES10-${Math.random().toString(36).substring(2, 8).toUpperCase()}`
-
-      const { error } = await supabase
-        .from('newsletter_subscribers')
-        .insert({ email: trimmed, coupon_code: couponCode })
-
-      if (error) {
-        if (error.code === '23505') {
-          // Email ya registrado - no revelar info, mostrar exito igual
-          setState('success')
-        } else {
-          throw error
-        }
+      if (result.error) {
+        setState('error')
+        setErrorMsg(result.error)
       } else {
         setState('success')
       }
@@ -70,12 +57,6 @@ export function NewsletterSection() {
     <section className="relative py-20 lg:py-28 bg-volcanic-900 overflow-hidden">
       {/* Subtle radial glow */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[400px] bg-terra-500/5 blur-[150px] rounded-full pointer-events-none" />
-
-      {/* Dot texture */}
-      <div className="absolute inset-0 opacity-[0.02]" style={{
-        backgroundImage: 'radial-gradient(circle at 1px 1px, rgba(255,255,255,0.4) 1px, transparent 0)',
-        backgroundSize: '32px 32px',
-      }} />
 
       <div className="relative max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
         {/* Mountain icon */}

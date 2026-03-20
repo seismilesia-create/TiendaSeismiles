@@ -1,5 +1,6 @@
 import { createClient } from '@supabase/supabase-js'
 import { shopConfig } from '../config'
+import { type Season, getSeasonCategoryPriority } from '../utils/season'
 
 /** Client anonimo sin cookies - seguro para Server Components y build estatico */
 function createAnonClient() {
@@ -90,6 +91,42 @@ export async function getMostViewedProducts(excludeId?: string, limit = 4): Prom
     const { data, error } = await query
     if (error) throw error
     return (data ?? []).slice(0, limit) as CatalogProductFromDB[]
+  } catch {
+    return []
+  }
+}
+
+/** Fetch featured products prioritized by season */
+export async function getSeasonalFeaturedProducts(season: Season, limit = 4): Promise<CatalogProductFromDB[]> {
+  try {
+    const supabase = createAnonClient()
+    const { data, error } = await supabase
+      .from('productos')
+      .select(`
+        id, nombre, slug, precio, categoria, linea, genero, destacado, created_at,
+        colores(nombre, hex, imagen_url),
+        variantes(talle)
+      `)
+      .eq('activo', true)
+      .order('visualizaciones', { ascending: false })
+      .limit(limit * 3)
+
+    if (error) throw error
+    if (!data || data.length === 0) return []
+
+    const products = data as CatalogProductFromDB[]
+    const priority = getSeasonCategoryPriority(season)
+
+    // Sort: seasonal categories first, then by original view order
+    products.sort((a, b) => {
+      const aPriority = priority.indexOf(a.categoria)
+      const bPriority = priority.indexOf(b.categoria)
+      const aScore = aPriority === -1 ? priority.length : aPriority
+      const bScore = bPriority === -1 ? priority.length : bPriority
+      return aScore - bScore
+    })
+
+    return products.slice(0, limit)
   } catch {
     return []
   }

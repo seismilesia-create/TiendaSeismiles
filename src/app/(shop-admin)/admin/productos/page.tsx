@@ -1,7 +1,8 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
-import { getAdminProducts } from '@/features/shop/services/admin-products'
+import { getAdminProducts, getProductsForExport } from '@/features/shop/services/admin-products'
 import { ProductsTable } from '@/features/shop/components/admin/ProductsTable'
+import { CatalogBulkActions } from '@/features/shop/components/admin/CatalogBulkActions'
 
 export const metadata: Metadata = { title: 'Productos | Admin Seismiles' }
 
@@ -12,12 +13,15 @@ function PlusIcon({ className }: { className?: string }) {
 }
 
 export default async function AdminProductsPage() {
-  const products = await getAdminProducts()
+  const [products, exportData] = await Promise.all([
+    getAdminProducts(),
+    getProductsForExport(),
+  ])
 
   return (
     <div>
       {/* Header */}
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex items-center justify-between mb-4">
         <div>
           <h1 className="font-heading text-2xl text-volcanic-900">Productos</h1>
           <p className="text-body-sm text-volcanic-500 mt-1">
@@ -31,6 +35,11 @@ export default async function AdminProductsPage() {
           <PlusIcon className="w-4 h-4" />
           Nuevo Producto
         </Link>
+      </div>
+
+      {/* Bulk actions */}
+      <div className="mb-6">
+        <CatalogBulkActions exportData={exportData} />
       </div>
 
       {products.length === 0 ? (

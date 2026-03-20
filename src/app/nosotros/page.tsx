@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import Image from 'next/image'
 import Link from 'next/link'
-import { MarqueeBanner, Navbar, Footer } from '@/features/shop/components'
+import { MarqueeBanner, Navbar, Footer, TopoPattern } from '@/features/shop/components'
 import { getProductLines } from '@/features/shop/services/product-lines'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
 
@@ -90,24 +90,6 @@ export default async function NosotrosPage() {
                     Diseñamos para quienes valoran el origen de lo que visten. Para quienes buscan la comodidad de un básico pero exigen la distinción de una pieza bien lograda. Nuestra promesa es simple: ofrecerte indumentaria de autor que se sienta tan sólida y auténtica como la tierra de la que venimos.
                   </p>
                 </div>
-
-                {/* Stats */}
-                <div className="flex items-center gap-10 mt-10 pt-10 border-t border-sand-200">
-                  <div>
-                    <p className="font-heading text-display-sm text-volcanic-900">6.000</p>
-                    <p className="text-body-xs text-volcanic-500 uppercase tracking-wider mt-1">Metros de altura</p>
-                  </div>
-                  <div className="w-px h-12 bg-sand-200" />
-                  <div>
-                    <p className="font-heading text-display-sm text-volcanic-900">600</p>
-                    <p className="text-body-xs text-volcanic-500 uppercase tracking-wider mt-1">km de recorrido</p>
-                  </div>
-                  <div className="w-px h-12 bg-sand-200" />
-                  <div>
-                    <p className="font-heading text-display-sm text-terra-500">RN 60</p>
-                    <p className="text-body-xs text-volcanic-500 uppercase tracking-wider mt-1">Ruta Nacional</p>
-                  </div>
-                </div>
               </div>
 
               {/* Image */}
@@ -126,6 +108,9 @@ export default async function NosotrosPage() {
 
         {/* Values */}
         <section className="py-20 lg:py-28 bg-volcanic-900 relative overflow-hidden">
+          {/* Topographic contour lines */}
+          <TopoPattern className="text-white/[0.035]" />
+
           {/* Decorative blurs */}
           <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-terra-500/5 blur-[150px] rounded-full pointer-events-none" />
           <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-terra-500/5 blur-[120px] rounded-full pointer-events-none" />
@@ -210,7 +195,7 @@ export default async function NosotrosPage() {
           {/* Floating quote */}
           <div className="absolute inset-0 flex items-center justify-center">
             <div className="text-center px-4 max-w-3xl">
-              <blockquote className="font-heading text-display-sm sm:text-display-md text-white drop-shadow-lg">
+              <blockquote className="font-heading italic text-display-sm sm:text-display-md text-white drop-shadow-lg">
                 &ldquo;Donde los volcanes tocan el cielo, vestimos confianza&rdquo;
               </blockquote>
             </div>

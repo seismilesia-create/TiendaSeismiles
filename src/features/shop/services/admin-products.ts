@@ -497,3 +497,98 @@ export async function saveVariants(productoId: string, variantes: VarianteInput[
   const { error } = await supabase.from('variantes').insert(rows)
   if (error) throw error
 }
+
+// ============================================================
+// EXPORT — Flat data for Excel bulk editing
+// ============================================================
+
+export interface ProductExportRow {
+  producto_id: string
+  nombre: string
+  slug: string
+  precio: number
+  categoria: string
+  linea: string
+  genero: string
+  activo: boolean
+  destacado: boolean
+  descripcion: string | null
+  detalles: string | null
+  cuidado: string | null
+  color_id: string
+  color_nombre: string
+  color_hex: string
+  stock: Record<string, number>
+}
+
+export async function getProductsForExport(): Promise<ProductExportRow[]> {
+  const supabase = createServiceClient()
+
+  const { data, error } = await supabase
+    .from('productos')
+    .select(`
+      *,
+      colores(id, nombre, hex),
+      variantes(color_id, talle, stock)
+    `)
+    .order('nombre', { ascending: true })
+
+  if (error) throw error
+
+  const rows: ProductExportRow[] = []
+
+  for (const p of data ?? []) {
+    const colores = (p.colores ?? []) as { id: string; nombre: string; hex: string }[]
+    const variantes = (p.variantes ?? []) as { color_id: string; talle: string; stock: number }[]
+
+    if (colores.length === 0) {
+      rows.push({
+        producto_id: p.id,
+        nombre: p.nombre,
+        slug: p.slug,
+        precio: p.precio,
+        categoria: p.categoria,
+        linea: p.linea,
+        genero: p.genero,
+        activo: p.activo,
+        destacado: p.destacado,
+        descripcion: p.descripcion,
+        detalles: p.detalles,
+        cuidado: p.cuidado,
+        color_id: '',
+        color_nombre: '',
+        color_hex: '',
+        stock: {},
+      })
+      continue
+    }
+
+    for (const color of colores) {
+      const stockMap: Record<string, number> = {}
+      for (const v of variantes.filter((v) => v.color_id === color.id)) {
+        stockMap[v.talle] = v.stock
+      }
+
+      rows.push({
+        producto_id: p.id,
+        nombre: p.nombre,
+        slug: p.slug,
+        precio: p.precio,
+        categoria: p.categoria,
+        linea: p.linea,
+        genero: p.genero,
+        activo: p.activo,
+        destacado: p.destacado,
+        descripcion: p.descripcion,
+        detalles: p.detalles,
+        cuidado: p.cuidado,
+        color_id: color.id,
+        color_nombre: color.nombre,
+        color_hex: color.hex,
+        stock: stockMap,
+      })
+    }
+  }
+
+  return rows
+}

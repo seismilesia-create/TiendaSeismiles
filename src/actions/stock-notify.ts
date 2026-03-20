@@ -1,7 +1,7 @@
 'use server'
 
 import { createClient, createServiceClient } from '@/lib/supabase/server'
-import { stockNotificationConfirmEmail } from '@/lib/email/seismiles-templates'
+import { stockNotificationConfirmEmail, adminStockDigestEmail } from '@/lib/email/seismiles-templates'
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
@@ -84,7 +84,59 @@ export async function subscribeToStock(formData: FormData) {
       console.error('Error sending stock notification email:', emailError)
     }
 
-    // Admin stock requests are managed from the admin dashboard
+    // 2. Admin digest: send every 5 pending requests
+    const adminEmail = process.env.ADMIN_NOTIFICATION_EMAIL
+    if (adminEmail) {
+      const service = createServiceClient()
+      const { count } = await service
+        .from('stock_notifications')
+        .select('id', { count: 'exact', head: true })
+        .eq('notificado', false)
+
+      if (count && count % 5 === 0) {
+        // Fetch grouped demand for the digest
+        const { data: pending } = await service
+          .from('stock_notifications')
+          .select('producto_id, talle, color_id, productos(nombre), colores(nombre, hex)')
+          .eq('notificado', false)
+
+        type PJoin = { nombre: string }
+        type CJoin = { nombre: string; hex: string }
+
+        const grouped = new Map<string, { productName: string; talle: string; colorName: string; colorHex: string; count: number }>()
+        for (const row of pending ?? []) {
+          const key = `${row.producto_id}-${row.talle}-${row.color_id}`
+          const p = row.productos as unknown as PJoin
+          const c = row.colores as unknown as CJoin
+          const existing = grouped.get(key)
+          if (existing) {
+            existing.count += 1
+          } else {
+            grouped.set(key, {
+              productName: p?.nombre ?? 'Eliminado',
+              talle: row.talle,
+              colorName: c?.nombre ?? '',
+              colorHex: c?.hex ?? '#ccc',
+              count: 1,
+            })
+          }
+        }
+
+        const items = Array.from(grouped.values()).sort((a, b) => b.count - a.count).slice(0, 10)
+        const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
+
+        try {
+          await resend.emails.send({
+            from: fromEmail,
+            to: adminEmail,
+            subject: `${count} clientes esperando stock — Seismiles`,
+            html: adminStockDigestEmail({ totalPending: count, items, siteUrl }),
+          })
+        } catch (digestErr) {
+          console.error('Error sending admin stock digest:', digestErr)
+        }
+      }
+    }
   }
 
   return { success: true }

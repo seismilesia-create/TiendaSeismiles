@@ -39,6 +39,7 @@ export interface RecentOrder {
   total: number
   metodo_pago: string
   estado: string
+  numero_seguimiento: string | null
 }
 
 // ============================================================
@@ -232,7 +233,7 @@ export async function getRecentOrders(limit = 10): Promise<RecentOrder[]> {
 
   const { data, error } = await supabase
     .from('compras')
-    .select('id, created_at, cantidad, total, metodo_pago, estado, productos(nombre), profiles(email)')
+    .select('id, created_at, cantidad, total, metodo_pago, estado, numero_seguimiento, productos(nombre), profiles(email)')
     .order('created_at', { ascending: false })
     .limit(limit)
 
@@ -247,5 +248,6 @@ export async function getRecentOrders(limit = 10): Promise<RecentOrder[]> {
     total: Number(row.total),
     metodo_pago: row.metodo_pago ?? 'efectivo',
     estado: row.estado,
+    numero_seguimiento: row.numero_seguimiento ?? null,
   }))
 }

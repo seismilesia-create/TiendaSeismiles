@@ -113,7 +113,7 @@ export function MobileFilters(props: CatalogFiltersProps) {
           <select
             value={props.activeSort}
             onChange={(e) => props.onSortChange(e.target.value)}
-            className="flex-1 min-w-0 text-body-sm text-volcanic-700 bg-white px-3 py-2.5 rounded-xl border border-sand-200 focus:outline-none cursor-pointer"
+            className="flex-1 text-body-sm text-volcanic-700 bg-white px-4 py-2.5 rounded-xl border border-sand-200 focus:outline-none focus:border-terra-500/50 cursor-pointer transition-all"
           >
             {SORT_OPTIONS.map((opt) => (
               <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -219,7 +219,7 @@ export function DesktopToolbar({
         <select
           value={activeSort}
           onChange={(e) => onSortChange(e.target.value)}
-          className="text-body-sm font-medium text-volcanic-700 bg-transparent border-none focus:outline-none cursor-pointer"
+          className="text-body-sm font-medium text-volcanic-700 bg-white px-4 py-2 rounded-xl border border-sand-200 focus:outline-none focus:border-terra-500/50 cursor-pointer transition-all"
         >
           {SORT_OPTIONS.map((opt) => (
             <option key={opt.value} value={opt.value}>{opt.label}</option>

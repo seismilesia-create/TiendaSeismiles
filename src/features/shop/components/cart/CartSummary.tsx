@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { useCartStore } from '@/features/shop/stores/cart-store'
 import { createCheckout } from '@/actions/checkout'
 import { validateGiftCardCode } from '@/actions/giftcard-redeem'
+import { validateCouponCode } from '@/actions/coupons'
 
 function ShieldIcon({ className }: { className?: string }) {
   return (
@@ -33,6 +34,15 @@ function GiftIcon({ className }: { className?: string }) {
   )
 }
 
+function TagIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" className={className}>
+      <path d="M12.586 2.586A2 2 0 0 0 11.172 2H4a2 2 0 0 0-2 2v7.172a2 2 0 0 0 .586 1.414l8.704 8.704a2.426 2.426 0 0 0 3.42 0l6.58-6.58a2.426 2.426 0 0 0 0-3.42z" />
+      <circle cx="7.5" cy="7.5" r=".5" fill="currentColor" />
+    </svg>
+  )
+}
+
 function CloseIcon({ className }: { className?: string }) {
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg>
@@ -51,6 +61,9 @@ export function CartSummary({ userId }: CartSummaryProps) {
   const appliedGiftCards = useCartStore((s) => s.appliedGiftCards)
   const applyGiftCard = useCartStore((s) => s.applyGiftCard)
   const removeGiftCard = useCartStore((s) => s.removeGiftCard)
+  const appliedCoupon = useCartStore((s) => s.appliedCoupon)
+  const applyCoupon = useCartStore((s) => s.applyCoupon)
+  const removeCoupon = useCartStore((s) => s.removeCoupon)
   const clearCart = useCartStore((s) => s.clearCart)
   const router = useRouter()
 
@@ -59,21 +72,58 @@ export function CartSummary({ userId }: CartSummaryProps) {
   const [gcCode, setGcCode] = useState('')
   const [gcLoading, setGcLoading] = useState(false)
   const [gcError, setGcError] = useState<string | null>(null)
+  const [couponCode, setCouponCode] = useState('')
+  const [couponLoading, setCouponLoading] = useState(false)
+  const [couponError, setCouponError] = useState<string | null>(null)
 
   const totalItems = getTotalItems()
   const totalPrice = getTotalPrice()
 
-  // Calculate descuento for each GC in order (each one discounts from the remaining)
-  let remaining = totalPrice
+  // 1. Coupon discount (applied on subtotal)
+  const descuentoCupon = appliedCoupon
+    ? (appliedCoupon.tipo === 'porcentaje'
+        ? Math.round(totalPrice * appliedCoupon.valor / 100)
+        : Math.min(appliedCoupon.valor, totalPrice))
+    : 0
+  const subtotalDespuesCupon = totalPrice - descuentoCupon
+
+  // 2. Gift card discounts (applied on remaining after coupon)
+  let remaining = subtotalDespuesCupon
   const gcDescuentos = appliedGiftCards.map((gc) => {
     const d = Math.min(gc.saldo, remaining)
     remaining -= d
     return d
   })
-  const descuentoTotal = gcDescuentos.reduce((sum, d) => sum + d, 0)
-  const saldoSobrante = appliedGiftCards.reduce((sum, gc) => sum + gc.saldo, 0) - descuentoTotal
-  const totalFinal = totalPrice - descuentoTotal
+  const descuentoGcTotal = gcDescuentos.reduce((sum, d) => sum + d, 0)
+  const saldoSobrante = appliedGiftCards.reduce((sum, gc) => sum + gc.saldo, 0) - descuentoGcTotal
+  const totalFinal = subtotalDespuesCupon - descuentoGcTotal
   const cuotas = totalFinal > 0 ? Math.round(totalFinal / 3) : 0
+
+  async function handleApplyCoupon() {
+    const code = couponCode.trim().toUpperCase()
+    if (!code) return
+
+    setCouponLoading(true)
+    setCouponError(null)
+
+    const result = await validateCouponCode(code, totalPrice)
+
+    if (!result.valid) {
+      setCouponError(result.error ?? 'Codigo invalido')
+      setCouponLoading(false)
+      return
+    }
+
+    applyCoupon({
+      code,
+      couponId: result.couponId!,
+      tipo: result.tipo!,
+      valor: result.valor!,
+      descuento: result.descuento!,
+    })
+    setCouponCode('')
+    setCouponLoading(false)
+  }
 
   async function handleApplyGiftCard() {
     const code = gcCode.trim().toUpperCase()
@@ -126,7 +176,7 @@ export function CartSummary({ userId }: CartSummaryProps) {
       ? appliedGiftCards.map((g) => g.code)
       : undefined
 
-    const result = await createCheckout(checkoutItems, codes)
+    const result = await createCheckout(checkoutItems, codes, appliedCoupon?.code)
 
     if (result.error) {
       setError(result.error)
@@ -169,7 +219,74 @@ export function CartSummary({ userId }: CartSummaryProps) {
         </div>
       </div>
 
-      {/* Gift Card Section */}
+      {/* ─── Coupon Section ─── */}
+      <div className="border-t border-sand-200 my-4" />
+
+      {/* Applied coupon */}
+      {appliedCoupon && (
+        <div className="flex items-center justify-between p-3 bg-violet-50 border border-violet-200 rounded-xl mb-3">
+          <div className="flex items-center gap-2 min-w-0">
+            <TagIcon className="w-4 h-4 text-violet-600 shrink-0" />
+            <div className="min-w-0">
+              <p className="text-body-xs font-semibold text-violet-700 truncate">
+                {appliedCoupon.code}
+              </p>
+              <p className="text-body-xs text-violet-600">
+                {appliedCoupon.tipo === 'porcentaje'
+                  ? `${appliedCoupon.valor}% de descuento`
+                  : `$${appliedCoupon.valor.toLocaleString('es-AR')} de descuento`}
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2 shrink-0">
+            <span className="text-body-sm font-semibold text-violet-700 tabular-nums">
+              -${descuentoCupon.toLocaleString('es-AR')}
+            </span>
+            <button
+              onClick={removeCoupon}
+              className="p-1 text-violet-500 hover:text-red-500 transition-colors"
+              title="Quitar cupon"
+            >
+              <CloseIcon className="w-3.5 h-3.5" />
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Coupon input */}
+      {!appliedCoupon && (
+        <div className="mb-4">
+          <label className="flex items-center gap-1.5 text-body-xs font-medium text-volcanic-600 mb-2">
+            <TagIcon className="w-3.5 h-3.5" />
+            Codigo de descuento
+          </label>
+          <div className="flex gap-2">
+            <input
+              type="text"
+              value={couponCode}
+              onChange={(e) => {
+                setCouponCode(e.target.value.toUpperCase())
+                if (couponError) setCouponError(null)
+              }}
+              onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleApplyCoupon() } }}
+              placeholder="Ej: INVIERNO20"
+              className="flex-1 px-3 py-2.5 rounded-xl bg-white border border-sand-200 text-volcanic-900 text-body-sm uppercase tracking-wider focus:outline-none focus:border-terra-500 focus:ring-1 focus:ring-terra-500 transition-all placeholder:text-volcanic-300 placeholder:normal-case placeholder:tracking-normal"
+            />
+            <button
+              onClick={handleApplyCoupon}
+              disabled={couponLoading || !couponCode.trim()}
+              className="px-4 py-2.5 bg-volcanic-900 hover:bg-volcanic-800 disabled:bg-volcanic-300 text-white text-body-xs font-semibold rounded-xl transition-colors shrink-0"
+            >
+              {couponLoading ? '...' : 'Aplicar'}
+            </button>
+          </div>
+          {couponError && (
+            <p className="mt-1.5 text-body-xs text-red-600">{couponError}</p>
+          )}
+        </div>
+      )}
+
+      {/* ─── Gift Card Section ─── */}
       <div className="border-t border-sand-200 my-4" />
 
       {/* Applied gift cards */}
@@ -250,7 +367,7 @@ export function CartSummary({ userId }: CartSummaryProps) {
       <div className="flex items-center justify-between mb-1">
         <span className="text-body-md font-semibold text-volcanic-900">Total</span>
         <div className="text-right">
-          {descuentoTotal > 0 && (
+          {(descuentoCupon > 0 || descuentoGcTotal > 0) && (
             <span className="text-body-xs text-volcanic-500 line-through tabular-nums mr-2">
               ${totalPrice.toLocaleString('es-AR')}
             </span>
@@ -266,7 +383,9 @@ export function CartSummary({ userId }: CartSummaryProps) {
         </p>
       ) : (
         <p className="text-body-xs text-emerald-600 font-medium mb-6">
-          Cubierto con Gift Card{appliedGiftCards.length > 1 ? 's' : ''}
+          {descuentoGcTotal > 0
+            ? `Cubierto con ${appliedCoupon ? 'descuento + ' : ''}Gift Card${appliedGiftCards.length > 1 ? 's' : ''}`
+            : 'Cubierto con descuento'}
         </p>
       )}
 

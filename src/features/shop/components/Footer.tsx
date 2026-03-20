@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { shopConfig } from '../config'
+import { TopoPattern } from './TopoPattern'
 import type { ProductLineRow } from '../services/product-lines'
 
 interface FooterProps {
@@ -32,6 +33,9 @@ export function Footer({ productLines }: FooterProps) {
 
   return (
     <footer className="bg-volcanic-900 text-volcanic-300 relative overflow-hidden">
+      {/* Topographic contour lines */}
+      <TopoPattern className="text-white/[0.025]" />
+
       {/* Main footer */}
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-20">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 lg:gap-12">

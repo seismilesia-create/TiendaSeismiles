@@ -5,6 +5,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { deleteProductAction, duplicateProductAction, toggleProductActiveAction } from '@/actions/admin-products'
+import { bulkUpdateCatalogAction } from '@/actions/catalog-bulk'
 
 interface Producto {
   id: string
@@ -21,15 +22,15 @@ interface Producto {
 }
 
 const LINEA_LABELS: Record<string, string> = {
-  arista: 'Linea Arista',
-  pissis: 'Linea Pissis',
-  origen: 'Linea Origen',
-  terreno: 'Linea Terreno',
-  veta: 'Linea Veta',
-  'tres-cruces': 'Linea Tres Cruces',
-  nacimiento: 'Linea Nacimiento',
-  veladero: 'Linea Veladero',
-  'san-francisco': 'Linea San Francisco',
+  arista: 'Línea Arista',
+  pissis: 'Línea Pissis',
+  origen: 'Línea Origen',
+  terreno: 'Línea Terreno',
+  veta: 'Línea Veta',
+  'tres-cruces': 'Línea Tres Cruces',
+  nacimiento: 'Línea Nacimiento',
+  veladero: 'Línea Veladero',
+  'san-francisco': 'Línea San Francisco',
 }
 
 const GENERO_LABELS: Record<string, string> = {
@@ -38,6 +39,30 @@ const GENERO_LABELS: Record<string, string> = {
   unisex: 'Unisex',
   nino: 'Niño',
 }
+
+const CATEGORIAS = [
+  { value: 'remeras-lisas', label: 'Remeras Lisas' },
+  { value: 'estampadas', label: 'Estampadas' },
+  { value: 'buzos-camperas', label: 'Buzos y Camperas' },
+]
+
+const LINEAS_ALL = [
+  { value: 'arista', label: 'Arista' },
+  { value: 'pissis', label: 'Pissis' },
+  { value: 'origen', label: 'Origen' },
+  { value: 'terreno', label: 'Terreno' },
+  { value: 'veta', label: 'Veta' },
+  { value: 'tres-cruces', label: 'Tres Cruces' },
+  { value: 'nacimiento', label: 'Nacimiento' },
+  { value: 'veladero', label: 'Veladero' },
+  { value: 'san-francisco', label: 'San Francisco' },
+]
+
+const GENEROS = [
+  { value: 'hombres', label: 'Hombres' },
+  { value: 'mujeres', label: 'Mujeres' },
+  { value: 'ninos', label: 'Niños' },
+]
 
 function FilterIcon({ className }: { className?: string }) {
   return (
@@ -71,6 +96,16 @@ export function ProductsTable({ products }: { products: Producto[] }) {
   const [filterLinea, setFilterLinea] = useState<string>('')
   const [filterGenero, setFilterGenero] = useState<string>('')
 
+  // Bulk edit state
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
+  const [bulkApplying, setBulkApplying] = useState(false)
+  const [bulkPrecio, setBulkPrecio] = useState('')
+  const [bulkCategoria, setBulkCategoria] = useState('')
+  const [bulkLinea, setBulkLinea] = useState('')
+  const [bulkGenero, setBulkGenero] = useState('')
+  const [bulkActivo, setBulkActivo] = useState('')
+  const [bulkDestacado, setBulkDestacado] = useState('')
+
   // Derive unique values from actual products
   const lineas = [...new Set(products.map((p) => p.linea))].sort()
   const generos = [...new Set(products.map((p) => p.genero))].sort()
@@ -83,8 +118,78 @@ export function ProductsTable({ products }: { products: Producto[] }) {
 
   const hasFilters = filterLinea || filterGenero
 
+  function toggleSelect(id: string) {
+    setSelectedIds((prev) => {
+      const next = new Set(prev)
+      if (next.has(id)) next.delete(id)
+      else next.add(id)
+      return next
+    })
+  }
+
+  function toggleSelectAll() {
+    if (selectedIds.size === filtered.length) {
+      setSelectedIds(new Set())
+    } else {
+      setSelectedIds(new Set(filtered.map((p) => p.id)))
+    }
+  }
+
+  function clearSelection() {
+    setSelectedIds(new Set())
+    setBulkPrecio('')
+    setBulkCategoria('')
+    setBulkLinea('')
+    setBulkGenero('')
+    setBulkActivo('')
+    setBulkDestacado('')
+  }
+
+  async function handleBulkApply() {
+    const ids = [...selectedIds]
+    if (ids.length === 0) return
+
+    const fields: Record<string, unknown> = {}
+    if (bulkPrecio) {
+      const precio = Number(bulkPrecio)
+      if (isNaN(precio) || precio <= 0) {
+        alert('El precio debe ser un número mayor a 0')
+        return
+      }
+      fields.precio = precio
+    }
+    if (bulkCategoria) fields.categoria = bulkCategoria
+    if (bulkLinea) fields.linea = bulkLinea
+    if (bulkGenero) fields.genero = bulkGenero
+    if (bulkActivo) fields.activo = bulkActivo === 'si'
+    if (bulkDestacado) fields.destacado = bulkDestacado === 'si'
+
+    if (Object.keys(fields).length === 0) {
+      alert('Seleccioná al menos un campo para editar')
+      return
+    }
+
+    const count = ids.length
+    const fieldNames = Object.keys(fields).join(', ')
+    if (!confirm(`Aplicar cambios (${fieldNames}) a ${count} producto${count !== 1 ? 's' : ''}?`)) return
+
+    setBulkApplying(true)
+    const result = await bulkUpdateCatalogAction({
+      productChanges: ids.map((id) => ({ producto_id: id, fields })),
+      stockChanges: [],
+    })
+    setBulkApplying(false)
+
+    if (result.success) {
+      clearSelection()
+      router.refresh()
+    } else {
+      alert(`Errores: ${result.errors.join(', ')}`)
+    }
+  }
+
   async function handleDelete(id: string, nombre: string) {
-    if (!confirm(`Eliminar "${nombre}"? Esta accion no se puede deshacer.`)) return
+    if (!confirm(`Eliminar "${nombre}"? Esta acción no se puede deshacer.`)) return
     setDeleting(id)
     await deleteProductAction(id)
     setDeleting(null)
@@ -105,6 +210,9 @@ export function ProductsTable({ products }: { products: Producto[] }) {
     }
   }
 
+  const allFilteredSelected = filtered.length > 0 && selectedIds.size === filtered.length
+  const someSelected = selectedIds.size > 0
+
   return (
     <div>
       {/* Filters */}
@@ -115,7 +223,7 @@ export function ProductsTable({ products }: { products: Producto[] }) {
           onChange={(e) => setFilterLinea(e.target.value)}
           className="px-3 py-1.5 text-body-sm bg-white border border-sand-200 rounded-lg text-volcanic-700 focus:outline-none focus:ring-2 focus:ring-terra-500/30 focus:border-terra-500"
         >
-          <option value="">Todas las lineas</option>
+          <option value="">Todas las líneas</option>
           {lineas.map((l) => (
             <option key={l} value={l}>{LINEA_LABELS[l] ?? l}</option>
           ))}
@@ -125,7 +233,7 @@ export function ProductsTable({ products }: { products: Producto[] }) {
           onChange={(e) => setFilterGenero(e.target.value)}
           className="px-3 py-1.5 text-body-sm bg-white border border-sand-200 rounded-lg text-volcanic-700 focus:outline-none focus:ring-2 focus:ring-terra-500/30 focus:border-terra-500"
         >
-          <option value="">Todos los generos</option>
+          <option value="">Todos los géneros</option>
           {generos.map((g) => (
             <option key={g} value={g}>{GENERO_LABELS[g] ?? g}</option>
           ))}
@@ -138,18 +246,142 @@ export function ProductsTable({ products }: { products: Producto[] }) {
             Limpiar filtros
           </button>
         )}
-        <span className="text-body-xs text-volcanic-500 ml-auto">
+
+        {/* Select all toggle */}
+        <button
+          onClick={toggleSelectAll}
+          className={`ml-auto px-3 py-1.5 text-body-xs font-medium rounded-lg transition-colors ${
+            allFilteredSelected
+              ? 'bg-volcanic-900 text-white'
+              : 'text-volcanic-600 bg-sand-100 hover:bg-sand-200'
+          }`}
+        >
+          {allFilteredSelected ? 'Deseleccionar todos' : 'Seleccionar todos'}
+        </button>
+
+        <span className="text-body-xs text-volcanic-500">
           {filtered.length} de {products.length}
         </span>
       </div>
 
+      {/* Bulk edit bar */}
+      {someSelected && (
+        <div className="mb-5 p-4 rounded-xl bg-volcanic-900 text-white">
+          <div className="flex items-center justify-between mb-3">
+            <span className="text-body-sm font-semibold">
+              {selectedIds.size} producto{selectedIds.size !== 1 ? 's' : ''} seleccionado{selectedIds.size !== 1 ? 's' : ''}
+            </span>
+            <button
+              onClick={clearSelection}
+              className="text-body-xs text-white/60 hover:text-white transition-colors"
+            >
+              Cancelar
+            </button>
+          </div>
+          <div className="flex flex-wrap items-end gap-3">
+            {/* Precio */}
+            <div>
+              <label className="block text-[11px] text-white/60 mb-1">Precio</label>
+              <input
+                type="number"
+                min={0}
+                step={100}
+                value={bulkPrecio}
+                onChange={(e) => setBulkPrecio(e.target.value)}
+                placeholder="—"
+                className="w-28 px-3 py-1.5 rounded-lg bg-white/10 border border-white/20 text-body-sm text-white placeholder:text-white/30 focus:outline-none focus:ring-2 focus:ring-terra-500/50"
+              />
+            </div>
+            {/* Categoría */}
+            <div>
+              <label className="block text-[11px] text-white/60 mb-1">Categoría</label>
+              <select
+                value={bulkCategoria}
+                onChange={(e) => setBulkCategoria(e.target.value)}
+                className="px-3 py-1.5 rounded-lg bg-white/10 border border-white/20 text-body-sm text-white focus:outline-none focus:ring-2 focus:ring-terra-500/50"
+              >
+                <option value="">—</option>
+                {CATEGORIAS.map((c) => (
+                  <option key={c.value} value={c.value} className="text-volcanic-900">{c.label}</option>
+                ))}
+              </select>
+            </div>
+            {/* Línea */}
+            <div>
+              <label className="block text-[11px] text-white/60 mb-1">Línea</label>
+              <select
+                value={bulkLinea}
+                onChange={(e) => setBulkLinea(e.target.value)}
+                className="px-3 py-1.5 rounded-lg bg-white/10 border border-white/20 text-body-sm text-white focus:outline-none focus:ring-2 focus:ring-terra-500/50"
+              >
+                <option value="">—</option>
+                {LINEAS_ALL.map((l) => (
+                  <option key={l.value} value={l.value} className="text-volcanic-900">{l.label}</option>
+                ))}
+              </select>
+            </div>
+            {/* Género */}
+            <div>
+              <label className="block text-[11px] text-white/60 mb-1">Género</label>
+              <select
+                value={bulkGenero}
+                onChange={(e) => setBulkGenero(e.target.value)}
+                className="px-3 py-1.5 rounded-lg bg-white/10 border border-white/20 text-body-sm text-white focus:outline-none focus:ring-2 focus:ring-terra-500/50"
+              >
+                <option value="">—</option>
+                {GENEROS.map((g) => (
+                  <option key={g.value} value={g.value} className="text-volcanic-900">{g.label}</option>
+                ))}
+              </select>
+            </div>
+            {/* Activo */}
+            <div>
+              <label className="block text-[11px] text-white/60 mb-1">Activo</label>
+              <select
+                value={bulkActivo}
+                onChange={(e) => setBulkActivo(e.target.value)}
+                className="px-3 py-1.5 rounded-lg bg-white/10 border border-white/20 text-body-sm text-white focus:outline-none focus:ring-2 focus:ring-terra-500/50"
+              >
+                <option value="">—</option>
+                <option value="si" className="text-volcanic-900">Sí</option>
+                <option value="no" className="text-volcanic-900">No</option>
+              </select>
+            </div>
+            {/* Destacado */}
+            <div>
+              <label className="block text-[11px] text-white/60 mb-1">Destacado</label>
+              <select
+                value={bulkDestacado}
+                onChange={(e) => setBulkDestacado(e.target.value)}
+                className="px-3 py-1.5 rounded-lg bg-white/10 border border-white/20 text-body-sm text-white focus:outline-none focus:ring-2 focus:ring-terra-500/50"
+              >
+                <option value="">—</option>
+                <option value="si" className="text-volcanic-900">Sí</option>
+                <option value="no" className="text-volcanic-900">No</option>
+              </select>
+            </div>
+            {/* Apply button */}
+            <button
+              onClick={handleBulkApply}
+              disabled={bulkApplying}
+              className="px-5 py-1.5 bg-terra-500 hover:bg-terra-600 disabled:opacity-50 text-white text-body-sm font-semibold rounded-lg transition-colors"
+            >
+              {bulkApplying ? 'Aplicando...' : 'Aplicar'}
+            </button>
+          </div>
+        </div>
+      )}
+
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
       {filtered.map((product) => {
         const firstColor = product.colores[0]
+        const isSelected = selectedIds.has(product.id)
         return (
           <div
             key={product.id}
-            className="rounded-xl bg-white border border-sand-200/60 overflow-hidden hover:shadow-card transition-shadow duration-300"
+            className={`rounded-xl bg-white border overflow-hidden hover:shadow-card transition-all duration-300 ${
+              isSelected ? 'border-terra-500 ring-2 ring-terra-500/20' : 'border-sand-200/60'
+            }`}
           >
             {/* Image */}
             <div className="relative aspect-[4/3] bg-sand-100">
@@ -188,6 +420,21 @@ export function ProductsTable({ products }: { products: Producto[] }) {
                   </span>
                 )}
               </div>
+              {/* Checkbox */}
+              <button
+                onClick={() => toggleSelect(product.id)}
+                className={`absolute top-2 right-2 w-6 h-6 rounded-md border-2 flex items-center justify-center transition-all ${
+                  isSelected
+                    ? 'bg-terra-500 border-terra-500 text-white'
+                    : 'bg-white/80 border-sand-300 hover:border-volcanic-400'
+                }`}
+              >
+                {isSelected && (
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={3} strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5">
+                    <polyline points="20 6 9 17 4 12" />
+                  </svg>
+                )}
+              </button>
             </div>
 
             {/* Info */}

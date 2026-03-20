@@ -154,19 +154,18 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // If confirmed, deduct gift card balances and send email
+    // If confirmed, deduct gift card balances, register coupon usage, and send email
     if (newEstado === 'confirmado') {
-      // Read gift_cards_applied JSONB from the first order (all share the same data)
-      const { data: orderWithGc } = await service
+      // Read gift_cards_applied and coupon info from the first order
+      const { data: orderWithData } = await service
         .from('compras')
-        .select('gift_cards_applied')
+        .select('gift_cards_applied, cupon_id, cupon_descuento, user_id')
         .in('numero_pedido', orderNumbers)
-        .not('gift_cards_applied', 'is', null)
         .limit(1)
         .single()
 
-      if (orderWithGc?.gift_cards_applied) {
-        const gcList = orderWithGc.gift_cards_applied as { id: string; descuento: number }[]
+      if (orderWithData?.gift_cards_applied) {
+        const gcList = orderWithData.gift_cards_applied as { id: string; descuento: number }[]
         for (const gc of gcList) {
           const { data: current } = await service
             .from('gift_cards')
@@ -180,6 +179,31 @@ export async function POST(request: NextRequest) {
               .update({ saldo_restante: Math.max(0, (current.saldo_restante ?? 0) - gc.descuento) })
               .eq('id', gc.id)
           }
+        }
+      }
+
+      // Register coupon usage on payment confirmation
+      if (orderWithData?.cupon_id && orderWithData?.user_id) {
+        await service
+          .from('cupon_usos')
+          .insert({
+            cupon_id: orderWithData.cupon_id,
+            user_id: orderWithData.user_id,
+            compra_ids: orderNumbers,
+            descuento_aplicado: Number(orderWithData.cupon_descuento) || 0,
+          })
+
+        const { data: couponCurrent } = await service
+          .from('cupones')
+          .select('usos_actuales')
+          .eq('id', orderWithData.cupon_id)
+          .single()
+
+        if (couponCurrent) {
+          await service
+            .from('cupones')
+            .update({ usos_actuales: (couponCurrent.usos_actuales ?? 0) + 1 })
+            .eq('id', orderWithData.cupon_id)
         }
       }
 

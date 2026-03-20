@@ -3,6 +3,8 @@
 import { revalidatePath } from 'next/cache'
 import { requireAdmin } from '@/lib/auth/admin'
 import { createServiceClient } from '@/lib/supabase/server'
+import { getResend, EMAIL_CONFIG } from '@/lib/email/resend'
+import { orderStatusUpdateEmail } from '@/lib/email/seismiles-templates'
 
 const VALID_STATUSES = [
   'pendiente_pago',
@@ -16,9 +18,24 @@ const VALID_STATUSES = [
 
 type OrderStatus = (typeof VALID_STATUSES)[number]
 
+const STATUSES_WITH_EMAIL = new Set<string>([
+  'en_preparacion',
+  'enviado',
+  'entregado',
+  'cancelada',
+])
+
+const STATUS_SUBJECTS: Record<string, string> = {
+  en_preparacion: 'Tu pedido esta siendo preparado',
+  enviado: 'Tu pedido fue enviado',
+  entregado: 'Tu pedido fue entregado',
+  cancelada: 'Tu pedido fue cancelado',
+}
+
 export async function updateOrderStatusAction(
   orderId: string,
-  newStatus: string
+  newStatus: string,
+  trackingNumber?: string
 ): Promise<{ error?: string }> {
   const admin = await requireAdmin()
   if (!admin) return { error: 'No autorizado' }
@@ -29,10 +46,10 @@ export async function updateOrderStatusAction(
 
   const service = createServiceClient()
 
-  // Get current order
+  // Get current order with product and user info for email
   const { data: order, error: fetchErr } = await service
     .from('compras')
-    .select('id, estado, variante_id, cantidad')
+    .select('id, estado, variante_id, cantidad, numero_pedido, producto_id, user_id, productos(nombre), profiles(email, full_name)')
     .eq('id', orderId)
     .single()
 
@@ -61,12 +78,51 @@ export async function updateOrderStatusAction(
     }
   }
 
+  // Build update payload
+  const updatePayload: Record<string, unknown> = { estado: newStatus }
+  if (trackingNumber !== undefined && newStatus === 'enviado') {
+    updatePayload.numero_seguimiento = trackingNumber || null
+  }
+
   const { error } = await service
     .from('compras')
-    .update({ estado: newStatus })
+    .update(updatePayload)
     .eq('id', orderId)
 
   if (error) return { error: 'Error al actualizar el estado' }
+
+  // Send email notification (fire-and-forget)
+  if (STATUSES_WITH_EMAIL.has(newStatus) && oldStatus !== newStatus) {
+    const userEmail = (order.profiles as unknown as { email: string; full_name: string | null })?.email
+    const userName = (order.profiles as unknown as { email: string; full_name: string | null })?.full_name
+    const productName = (order.productos as unknown as { nombre: string })?.nombre ?? 'Producto'
+
+    if (userEmail) {
+      const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://seismiles.com'
+      const html = orderStatusUpdateEmail({
+        customerName: userName,
+        numeroPedido: order.numero_pedido,
+        productName,
+        newStatus,
+        trackingNumber: newStatus === 'enviado' ? trackingNumber : null,
+        siteUrl,
+      })
+
+      if (html) {
+        getResend()
+          .emails.send({
+            from: EMAIL_CONFIG.from,
+            replyTo: EMAIL_CONFIG.replyTo,
+            to: userEmail,
+            subject: `${STATUS_SUBJECTS[newStatus]} — Seismiles`,
+            html,
+          })
+          .catch((err) => {
+            console.error('[order-status-email] Error sending email:', err)
+          })
+      }
+    }
+  }
 
   revalidatePath('/admin/dashboard')
   revalidatePath('/admin/pedidos')

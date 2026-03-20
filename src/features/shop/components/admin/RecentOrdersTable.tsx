@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo, useTransition } from 'react'
+import { useState, useMemo, useTransition, useRef, useEffect } from 'react'
 import { updateOrderStatusAction } from '@/actions/admin-orders'
 import type { RecentOrder } from '@/features/shop/services/analytics'
 
@@ -44,6 +44,16 @@ export function RecentOrdersTable({ orders: initialOrders }: Props) {
   const [filterPago, setFilterPago] = useState('')
   const [searchQuery, setSearchQuery] = useState('')
 
+  // Tracking number popover state
+  const [trackingPopover, setTrackingPopover] = useState<{ orderId: string; tracking: string } | null>(null)
+  const trackingInputRef = useRef<HTMLInputElement>(null)
+
+  useEffect(() => {
+    if (trackingPopover && trackingInputRef.current) {
+      trackingInputRef.current.focus()
+    }
+  }, [trackingPopover])
+
   // Collect unique payment methods from actual data
   const paymentMethods = useMemo(() => {
     const methods = new Set(orders.map((o) => o.metodo_pago))
@@ -73,23 +83,66 @@ export function RecentOrdersTable({ orders: initialOrders }: Props) {
     const oldOrder = orders.find((o) => o.id === orderId)
     if (!oldOrder || oldOrder.estado === newStatus) return
 
+    // If changing to "enviado", show tracking popover instead of immediate action
+    if (newStatus === 'enviado') {
+      setTrackingPopover({ orderId, tracking: oldOrder.numero_seguimiento ?? '' })
+      // Optimistic update of the select value
+      setOrders((prev) =>
+        prev.map((o) => (o.id === orderId ? { ...o, estado: newStatus } : o))
+      )
+      return
+    }
+
+    executeStatusChange(orderId, newStatus, oldOrder.estado)
+  }
+
+  function executeStatusChange(orderId: string, newStatus: string, oldStatus: string, trackingNumber?: string) {
     setUpdatingId(orderId)
 
     // Optimistic update
     setOrders((prev) =>
-      prev.map((o) => (o.id === orderId ? { ...o, estado: newStatus } : o))
+      prev.map((o) => {
+        if (o.id !== orderId) return o
+        return {
+          ...o,
+          estado: newStatus,
+          numero_seguimiento: trackingNumber !== undefined ? (trackingNumber || null) : o.numero_seguimiento,
+        }
+      })
     )
 
     startTransition(async () => {
-      const result = await updateOrderStatusAction(orderId, newStatus)
+      const result = await updateOrderStatusAction(orderId, newStatus, trackingNumber)
       if (result.error) {
         // Revert on error
         setOrders((prev) =>
-          prev.map((o) => (o.id === orderId ? { ...o, estado: oldOrder.estado } : o))
+          prev.map((o) => (o.id === orderId ? { ...o, estado: oldStatus } : o))
         )
       }
       setUpdatingId(null)
     })
+  }
+
+  function confirmTracking() {
+    if (!trackingPopover) return
+    const order = orders.find((o) => o.id === trackingPopover.orderId)
+    if (!order) return
+
+    const oldStatus = initialOrders.find((o) => o.id === trackingPopover.orderId)?.estado ?? order.estado
+    executeStatusChange(trackingPopover.orderId, 'enviado', oldStatus, trackingPopover.tracking)
+    setTrackingPopover(null)
+  }
+
+  function cancelTracking() {
+    if (!trackingPopover) return
+    // Revert the optimistic status change
+    const original = initialOrders.find((o) => o.id === trackingPopover.orderId)
+    if (original) {
+      setOrders((prev) =>
+        prev.map((o) => (o.id === trackingPopover.orderId ? { ...o, estado: original.estado } : o))
+      )
+    }
+    setTrackingPopover(null)
   }
 
   if (orders.length === 0) {
@@ -169,6 +222,7 @@ export function RecentOrdersTable({ orders: initialOrders }: Props) {
               filteredOrders.map((order) => {
                 const status = getStatusStyle(order.estado)
                 const isUpdating = updatingId === order.id
+                const isTrackingOpen = trackingPopover?.orderId === order.id
                 return (
                   <tr key={order.id} className="border-b border-sand-200/30 last:border-0 hover:bg-sand-100/30 transition-colors">
                     <td className="px-5 lg:px-6 py-3.5 text-body-xs text-volcanic-500 whitespace-nowrap">
@@ -190,24 +244,66 @@ export function RecentOrdersTable({ orders: initialOrders }: Props) {
                       {getPaymentLabel(order.metodo_pago)}
                     </td>
                     <td className="px-5 lg:px-6 py-3.5">
-                      <select
-                        value={order.estado}
-                        onChange={(e) => handleStatusChange(order.id, e.target.value)}
-                        disabled={isUpdating}
-                        className={`appearance-none cursor-pointer px-2.5 py-1 pr-6 rounded-full text-[11px] font-semibold border-0 focus:outline-none focus:ring-2 focus:ring-terra-500/30 transition-colors ${status.className} ${isUpdating ? 'opacity-50 cursor-wait' : ''}`}
-                        style={{
-                          backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E")`,
-                          backgroundRepeat: 'no-repeat',
-                          backgroundPosition: 'right 6px center',
-                          backgroundSize: '12px',
-                        }}
-                      >
-                        {STATUS_OPTIONS.map((opt) => (
-                          <option key={opt.value} value={opt.value}>
-                            {opt.label}
-                          </option>
-                        ))}
-                      </select>
+                      <div className="relative">
+                        <select
+                          value={order.estado}
+                          onChange={(e) => handleStatusChange(order.id, e.target.value)}
+                          disabled={isUpdating || isTrackingOpen}
+                          className={`appearance-none cursor-pointer px-2.5 py-1 pr-6 rounded-full text-[11px] font-semibold border-0 focus:outline-none focus:ring-2 focus:ring-terra-500/30 transition-colors ${status.className} ${isUpdating ? 'opacity-50 cursor-wait' : ''}`}
+                          style={{
+                            backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E")`,
+                            backgroundRepeat: 'no-repeat',
+                            backgroundPosition: 'right 6px center',
+                            backgroundSize: '12px',
+                          }}
+                        >
+                          {STATUS_OPTIONS.map((opt) => (
+                            <option key={opt.value} value={opt.value}>
+                              {opt.label}
+                            </option>
+                          ))}
+                        </select>
+
+                        {/* Tracking number display for shipped orders */}
+                        {order.estado === 'enviado' && order.numero_seguimiento && !isTrackingOpen && (
+                          <p className="text-[10px] text-sky-600 mt-1 truncate max-w-[120px]" title={order.numero_seguimiento}>
+                            #{order.numero_seguimiento}
+                          </p>
+                        )}
+
+                        {/* Tracking popover */}
+                        {isTrackingOpen && (
+                          <div className="absolute right-0 top-full mt-2 z-20 bg-white rounded-xl border border-sand-200 shadow-lg p-3 w-64">
+                            <p className="text-body-xs font-semibold text-volcanic-900 mb-2">Confirmar envio</p>
+                            <input
+                              ref={trackingInputRef}
+                              type="text"
+                              value={trackingPopover.tracking}
+                              onChange={(e) => setTrackingPopover((prev) => prev ? { ...prev, tracking: e.target.value } : null)}
+                              onKeyDown={(e) => {
+                                if (e.key === 'Enter') confirmTracking()
+                                if (e.key === 'Escape') cancelTracking()
+                              }}
+                              placeholder="N° de seguimiento (opcional)"
+                              className="w-full px-3 py-1.5 rounded-lg border border-sand-200 text-body-xs text-volcanic-700 placeholder:text-volcanic-400 focus:outline-none focus:ring-2 focus:ring-terra-500/30 mb-2"
+                            />
+                            <div className="flex gap-2">
+                              <button
+                                onClick={confirmTracking}
+                                className="flex-1 px-3 py-1.5 rounded-lg bg-sky-600 text-white text-body-xs font-semibold hover:bg-sky-700 transition-colors"
+                              >
+                                Confirmar
+                              </button>
+                              <button
+                                onClick={cancelTracking}
+                                className="px-3 py-1.5 rounded-lg border border-sand-200 text-body-xs text-volcanic-600 hover:bg-sand-50 transition-colors"
+                              >
+                                Cancelar
+                              </button>
+                            </div>
+                          </div>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 )

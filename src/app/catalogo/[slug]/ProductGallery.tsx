@@ -160,6 +160,9 @@ function PinchZoomImage({
 
   const isZoomed = scale > 1
 
+  // Allow normal vertical scroll when not zoomed/pinching
+  const touchAction = isZoomed || pinching.current ? 'none' : 'pan-y'
+
   return (
     <div
       ref={containerRef}
@@ -167,7 +170,8 @@ function PinchZoomImage({
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
       onClick={isZoomed ? () => { setScale(1); setTranslate({ x: 0, y: 0 }) } : onClick}
-      className="relative aspect-[3/4] overflow-hidden bg-sand-100 touch-none"
+      className="relative aspect-[3/4] overflow-hidden bg-sand-100"
+      style={{ touchAction }}
     >
       <Image
         src={src}
@@ -183,7 +187,7 @@ function PinchZoomImage({
         draggable={false}
       />
       {destacado && (
-        <span className="absolute top-4 left-4 z-10 bg-terra-500 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.15em] text-white rounded-lg pointer-events-none">
+        <span className="absolute top-4 left-4 z-10 bg-terra-500 px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest text-white rounded-lg pointer-events-none">
           Destacado
         </span>
       )}
@@ -215,7 +219,7 @@ function DesktopGrid({ images, productName, colorName, destacado, onImageClick }
 
   // Badge overlay (rendered inside ZoomableImage)
   const destacadoBadge = destacado ? (
-    <span className="absolute top-4 left-4 z-10 bg-terra-500 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.15em] text-white rounded-lg pointer-events-none">
+    <span className="absolute top-4 left-4 z-10 bg-terra-500 px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest text-white rounded-lg pointer-events-none">
       Destacado
     </span>
   ) : null
