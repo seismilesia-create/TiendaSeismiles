@@ -60,8 +60,25 @@ interface ExistingColor {
   id: string
   nombre: string
   hex: string
+  color_base: string | null
+  color_base_hex: string | null
   imagenes: ExistingImage[]
 }
+
+const COLOR_BASES: { value: string; label: string; hex: string }[] = [
+  { value: 'blanco',   label: 'Blanco',   hex: '#F5F5F5' },
+  { value: 'negro',    label: 'Negro',    hex: '#1A1A1A' },
+  { value: 'gris',     label: 'Gris',     hex: '#808080' },
+  { value: 'celeste',  label: 'Celeste',  hex: '#87CEEB' },
+  { value: 'azul',     label: 'Azul',     hex: '#2255AA' },
+  { value: 'rojo',     label: 'Rojo',     hex: '#CC3333' },
+  { value: 'verde',    label: 'Verde',    hex: '#336633' },
+  { value: 'amarillo', label: 'Amarillo', hex: '#DDCC00' },
+  { value: 'naranja',  label: 'Naranja',  hex: '#EE6622' },
+  { value: 'marron',   label: 'Marrón',   hex: '#7B4F2A' },
+  { value: 'rosa',     label: 'Rosa',     hex: '#E8A0B0' },
+  { value: 'violeta',  label: 'Violeta',  hex: '#8855AA' },
+]
 
 interface ExistingVariante {
   color_id: string
@@ -138,6 +155,8 @@ export function ProductForm({ product }: ProductFormProps) {
   const [colorId, setColorId] = useState<string | null>(existingColor?.id ?? null)
   const [colorNombre, setColorNombre] = useState(existingColor?.nombre ?? '')
   const [colorHex, setColorHex] = useState(existingColor?.hex ?? '#000000')
+  const [colorBase, setColorBase] = useState(existingColor?.color_base ?? '')
+  const [colorBaseHex, setColorBaseHex] = useState(existingColor?.color_base_hex ?? '')
 
   // Images state
   const [imagenes, setImagenes] = useState<ExistingImage[]>(existingColor?.imagenes ?? [])
@@ -244,10 +263,10 @@ export function ProductForm({ product }: ProductFormProps) {
 
         // Update or create color
         if (currentColorId) {
-          const colorResult = await updateColorAction(currentColorId, colorNombre.trim(), colorHex)
+          const colorResult = await updateColorAction(currentColorId, colorNombre.trim(), colorHex, colorBase || undefined, colorBaseHex || undefined)
           if (colorResult.error) { setError(colorResult.error); setSaving(false); return }
         } else {
-          const colorResult = await addColorAction(currentProductId, colorNombre.trim(), colorHex)
+          const colorResult = await addColorAction(currentProductId, colorNombre.trim(), colorHex, colorBase || undefined, colorBaseHex || undefined)
           if (colorResult.error) { setError(colorResult.error); setSaving(false); return }
           if (colorResult.color) {
             currentColorId = colorResult.color.id
@@ -262,7 +281,7 @@ export function ProductForm({ product }: ProductFormProps) {
         setProductId(currentProductId)
 
         // Auto-create the single color
-        const colorResult = await addColorAction(currentProductId, colorNombre.trim(), colorHex)
+        const colorResult = await addColorAction(currentProductId, colorNombre.trim(), colorHex, colorBase || undefined, colorBaseHex || undefined)
         if (colorResult.error) { setError(colorResult.error); setSaving(false); return }
         if (colorResult.color) {
           currentColorId = colorResult.color.id
@@ -414,19 +433,39 @@ export function ProductForm({ product }: ProductFormProps) {
           Cada producto tiene un unico color. Ej: &quot;Remera Arista Negro&quot; → color Negro.
         </p>
 
-        <div className="flex items-end gap-4">
-          <div className="flex-1">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+          <div>
             <label className="block text-body-sm font-medium text-volcanic-700 mb-1.5">Nombre del color *</label>
             <input
               type="text"
               value={colorNombre}
               onChange={(e) => setColorNombre(e.target.value)}
-              placeholder="Ej: Negro, Blanco, Terracotta"
+              placeholder="Ej: Batón Rouge, Azul Marino, Manteca"
               className="w-full px-4 py-3 rounded-xl bg-white border border-sand-200 text-volcanic-900 text-body-md focus:outline-none focus:border-terra-500 transition-all"
             />
           </div>
+          <div>
+            <label className="block text-body-sm font-medium text-volcanic-700 mb-1.5">Color base (para filtros) *</label>
+            <select
+              value={colorBase}
+              onChange={(e) => {
+                const base = COLOR_BASES.find((c) => c.value === e.target.value)
+                setColorBase(e.target.value)
+                setColorBaseHex(base?.hex ?? '')
+              }}
+              className="w-full px-4 py-3 rounded-xl bg-white border border-sand-200 text-volcanic-900 text-body-md focus:outline-none focus:border-terra-500 transition-all"
+            >
+              <option value="">— Elegir color base —</option>
+              {COLOR_BASES.map((c) => (
+                <option key={c.value} value={c.value}>{c.label}</option>
+              ))}
+            </select>
+          </div>
+        </div>
+
+        <div className="flex items-end gap-4">
           <div className="w-24">
-            <label className="block text-body-sm font-medium text-volcanic-700 mb-1.5">Color</label>
+            <label className="block text-body-sm font-medium text-volcanic-700 mb-1.5">Hex exacto</label>
             <input
               type="color"
               value={colorHex}
@@ -434,10 +473,18 @@ export function ProductForm({ product }: ProductFormProps) {
               className="w-full h-[48px] rounded-xl border border-sand-200 cursor-pointer"
             />
           </div>
-          {colorNombre && (
+          {colorNombre && colorBase && (
             <div className="flex items-center gap-2.5 pb-1">
               <span className="w-8 h-8 rounded-full border border-sand-300 flex-shrink-0" style={{ backgroundColor: colorHex }} />
-              <span className="text-body-sm text-volcanic-600">{colorNombre}</span>
+              <div>
+                <p className="text-body-sm font-medium text-volcanic-700">{colorNombre}</p>
+                <p className="text-body-xs text-volcanic-400">
+                  Filtra como: <span className="font-medium">{COLOR_BASES.find((c) => c.value === colorBase)?.label}</span>
+                  {colorBaseHex && (
+                    <span className="inline-block w-3 h-3 rounded-full ml-1.5 align-middle border border-sand-300" style={{ backgroundColor: colorBaseHex }} />
+                  )}
+                </p>
+              </div>
             </div>
           )}
         </div>

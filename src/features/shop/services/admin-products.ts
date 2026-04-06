@@ -26,6 +26,8 @@ export interface ColorRow {
   producto_id: string
   nombre: string
   hex: string
+  color_base: string | null
+  color_base_hex: string | null
   imagen_url: string | null
   orden: number
 }
@@ -72,6 +74,8 @@ export interface CreateProductoDTO {
 export interface ColorInput {
   nombre: string
   hex: string
+  color_base?: string | null
+  color_base_hex?: string | null
   imagen_url?: string | null
   orden?: number
 }
@@ -149,7 +153,7 @@ export async function duplicateProduct(sourceId: string): Promise<string> {
 
   if (prodError) throw prodError
 
-  // 3. Duplicate colors (with imagen_url), images, and map old color IDs to new ones
+  // 3. Duplicate colors, copying actual storage files to new paths
   const colorMap = new Map<string, string>() // oldId → newId
   for (const color of source.colores) {
     const { data: newColor, error: colorError } = await supabase
@@ -158,7 +162,9 @@ export async function duplicateProduct(sourceId: string): Promise<string> {
         producto_id: newProduct.id,
         nombre: color.nombre,
         hex: color.hex,
-        imagen_url: color.imagen_url,
+        color_base: color.color_base,
+        color_base_hex: color.color_base_hex,
+        imagen_url: null, // Will be set after copying files
         orden: color.orden,
       })
       .select()
@@ -167,17 +173,21 @@ export async function duplicateProduct(sourceId: string): Promise<string> {
     if (colorError) throw colorError
     colorMap.set(color.id, newColor.id)
 
-    // Duplicate images for this color
+    // Duplicate images for this color — copy actual storage files
+    let newCoverUrl: string | null = null
     if (color.imagenes && color.imagenes.length > 0) {
-      const imageRows = color.imagenes.map((img: { url: string; orden: number }) => ({
-        color_id: newColor.id,
-        url: img.url,
-        orden: img.orden,
-      }))
-      const { error: imgError } = await supabase
-        .from('imagenes')
-        .insert(imageRows)
-      if (imgError) throw imgError
+      for (const img of color.imagenes) {
+        const newUrl = await copyStorageFile(supabase, img.url, newProduct.id, newColor.id, img.orden)
+        if (newUrl) {
+          await supabase.from('imagenes').insert({ color_id: newColor.id, url: newUrl, orden: img.orden })
+          if (img.orden === 0) newCoverUrl = newUrl
+        }
+      }
+    }
+
+    // Set colores.imagen_url to the copied cover image
+    if (newCoverUrl) {
+      await supabase.from('colores').update({ imagen_url: newCoverUrl }).eq('id', newColor.id)
     }
   }
 
@@ -200,6 +210,47 @@ export async function duplicateProduct(sourceId: string): Promise<string> {
   }
 
   return newProduct.id
+}
+
+/** Copy a storage file to a new path for the duplicated product */
+async function copyStorageFile(
+  supabase: ReturnType<typeof createServiceClient>,
+  sourceUrl: string,
+  newProductId: string,
+  newColorId: string,
+  orden: number,
+): Promise<string | null> {
+  try {
+    const match = sourceUrl.match(/product-images\/(.+)$/)
+    if (!match) return null
+
+    const sourcePath = match[1]
+    const ext = sourcePath.split('.').pop() || 'webp'
+    const destPath = `products/${newProductId}/${newColorId}-${Date.now()}-${orden}.${ext}`
+
+    // Download from source
+    const { data: fileData, error: downloadError } = await supabase.storage
+      .from('product-images')
+      .download(sourcePath)
+
+    if (downloadError || !fileData) return null
+
+    // Upload to new path
+    const buffer = await fileData.arrayBuffer()
+    const { error: uploadError } = await supabase.storage
+      .from('product-images')
+      .upload(destPath, buffer, { contentType: fileData.type || 'image/webp', upsert: false })
+
+    if (uploadError) return null
+
+    const { data: urlData } = supabase.storage
+      .from('product-images')
+      .getPublicUrl(destPath)
+
+    return urlData.publicUrl
+  } catch {
+    return null
+  }
 }
 
 // ============================================================
@@ -234,27 +285,44 @@ export async function updateProduct(id: string, dto: Partial<CreateProductoDTO>)
 export async function deleteProduct(id: string) {
   const supabase = createServiceClient()
 
-  // Get color images to delete from storage
+  // Get ALL image URLs to delete from storage (both colores.imagen_url and imagenes.url)
   const { data: colores } = await supabase
     .from('colores')
-    .select('imagen_url')
+    .select('id, imagen_url')
     .eq('producto_id', id)
 
-  if (colores?.length) {
-    const paths = colores
-      .map((c) => {
-        if (!c.imagen_url) return null
-        const match = c.imagen_url.match(/product-images\/(.+)$/)
-        return match ? match[1] : null
-      })
-      .filter(Boolean) as string[]
+  const storagePaths = new Set<string>()
 
-    if (paths.length) {
-      await supabase.storage.from('product-images').remove(paths)
+  if (colores?.length) {
+    // Collect colores.imagen_url paths
+    for (const c of colores) {
+      if (c.imagen_url) {
+        const match = c.imagen_url.match(/product-images\/(.+)$/)
+        if (match) storagePaths.add(match[1])
+      }
+    }
+
+    // Collect imagenes.url paths for all colors of this product
+    const colorIds = colores.map((c) => c.id)
+    const { data: imagenes } = await supabase
+      .from('imagenes')
+      .select('url')
+      .in('color_id', colorIds)
+
+    if (imagenes?.length) {
+      for (const img of imagenes) {
+        const match = img.url.match(/product-images\/(.+)$/)
+        if (match) storagePaths.add(match[1])
+      }
     }
   }
 
-  // Cascade deletes colores + variantes
+  // Delete all storage files
+  if (storagePaths.size > 0) {
+    await supabase.storage.from('product-images').remove([...storagePaths])
+  }
+
+  // Cascade deletes colores + variantes + imagenes
   const { error } = await supabase.from('productos').delete().eq('id', id)
   if (error) throw error
 }
@@ -271,6 +339,8 @@ export async function addColor(productoId: string, input: ColorInput): Promise<C
       producto_id: productoId,
       nombre: input.nombre,
       hex: input.hex,
+      color_base: input.color_base ?? null,
+      color_base_hex: input.color_base_hex ?? null,
       imagen_url: input.imagen_url ?? null,
       orden: input.orden ?? 0,
     })
@@ -494,7 +564,10 @@ export async function saveVariants(productoId: string, variantes: VarianteInput[
     stock: v.stock,
   }))
 
-  const { error } = await supabase.from('variantes').insert(rows)
+  // Use upsert to handle race conditions where delete hasn't fully propagated
+  const { error } = await supabase.from('variantes').upsert(rows, {
+    onConflict: 'producto_id,color_id,talle',
+  })
   if (error) throw error
 }
 

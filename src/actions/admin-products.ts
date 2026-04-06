@@ -127,12 +127,12 @@ export async function deleteProductAction(productoId: string) {
   }
 }
 
-export async function addColorAction(productoId: string, nombre: string, hex: string) {
+export async function addColorAction(productoId: string, nombre: string, hex: string, color_base?: string, color_base_hex?: string) {
   const admin = await requireAdmin()
   if (!admin) return { error: 'No autorizado' }
 
   try {
-    const color = await addColor(productoId, { nombre, hex })
+    const color = await addColor(productoId, { nombre, hex, color_base: color_base ?? null, color_base_hex: color_base_hex ?? null })
     revalidatePath(`/admin/productos/${productoId}`)
     return { success: true, color }
   } catch (err) {
@@ -140,12 +140,12 @@ export async function addColorAction(productoId: string, nombre: string, hex: st
   }
 }
 
-export async function updateColorAction(colorId: string, nombre: string, hex: string) {
+export async function updateColorAction(colorId: string, nombre: string, hex: string, color_base?: string, color_base_hex?: string) {
   const admin = await requireAdmin()
   if (!admin) return { error: 'No autorizado' }
 
   try {
-    const color = await updateColor(colorId, { nombre, hex })
+    const color = await updateColor(colorId, { nombre, hex, color_base: color_base ?? null, color_base_hex: color_base_hex ?? null })
     return { success: true, color }
   } catch (err) {
     return { error: (err as Error).message }

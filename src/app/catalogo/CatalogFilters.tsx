@@ -178,7 +178,7 @@ export function MobileFilters(props: CatalogFiltersProps) {
 export function DesktopFilters(props: CatalogFiltersProps) {
   return (
     <div className="hidden lg:block">
-      <div className="sticky top-28 bg-white rounded-2xl shadow-card p-5 space-y-1">
+      <div className="sticky top-28 bg-white rounded-2xl shadow-card p-5 space-y-1 max-h-[calc(100vh-8rem)] overflow-y-auto">
         <div className="flex items-center justify-between pb-4 border-b border-sand-200">
           <h2 className="text-body-lg font-semibold text-volcanic-900">Filtros</h2>
           {hasActiveFilters(props) && (

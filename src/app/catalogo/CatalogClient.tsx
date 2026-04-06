@@ -13,15 +13,17 @@ import type { CatalogProductFromDB } from '@/features/shop/services/product-line
 const TALLE_ORDER = ['XS', 'S', 'M', 'L', 'XL', '2XL', '3XL', '4XL']
 
 function deriveColors(products: CatalogProductFromDB[]): FilterColor[] {
-  const map = new Map<string, string>()
+  // Group by color_base. Each entry: base slug → { hex: color_base_hex, label: capitalized }
+  const map = new Map<string, { hex: string; label: string }>()
   for (const p of products) {
     for (const c of p.colores) {
-      if (!map.has(c.hex)) {
-        map.set(c.hex, c.nombre)
+      if (c.color_base && c.color_base_hex && !map.has(c.color_base)) {
+        const label = c.color_base.charAt(0).toUpperCase() + c.color_base.slice(1)
+        map.set(c.color_base, { hex: c.color_base_hex, label })
       }
     }
   }
-  return Array.from(map.entries()).map(([hex, label]) => ({ hex, label }))
+  return Array.from(map.entries()).map(([, { hex, label }]) => ({ hex, label }))
 }
 
 function deriveSizes(products: CatalogProductFromDB[]): string[] {
@@ -52,7 +54,7 @@ function filterProducts(
     if (type !== 'todos' && p.categoria !== type) return false
     if (line !== 'todos' && p.linea !== line) return false
     if (audience !== 'todos' && p.genero !== audience) return false
-    if (colors.length > 0 && !p.colores.some((c) => colors.includes(c.hex))) return false
+    if (colors.length > 0 && !p.colores.some((c) => c.color_base_hex && colors.includes(c.color_base_hex))) return false
     if (sizes.length > 0 && !p.variantes.some((v) => sizes.includes(v.talle))) return false
     return true
   })
