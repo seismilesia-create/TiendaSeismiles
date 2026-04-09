@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import { FaqItemForm } from '@/features/shop/components/admin/FaqItemForm'
 
-export const metadata: Metadata = { title: 'Nueva FAQ | Admin Seismiles' }
+export const metadata: Metadata = { title: 'Nueva FAQ | Admin SEISMILES' }
 
 export default function AdminFaqNewPage() {
   return (

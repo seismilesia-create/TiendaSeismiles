@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import { CampaignForm } from '@/features/shop/components/admin/CampaignForm'
 
-export const metadata: Metadata = { title: 'Nueva Campana | Admin Seismiles' }
+export const metadata: Metadata = { title: 'Nueva Campana | Admin SEISMILES' }
 
 export default function NuevaCampanaPage() {
   return (

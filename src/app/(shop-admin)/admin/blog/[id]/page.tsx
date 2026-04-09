@@ -3,7 +3,7 @@ import { notFound } from 'next/navigation'
 import { getAdminPost } from '@/features/shop/services/blog'
 import { BlogPostForm } from '@/features/shop/components/admin/BlogPostForm'
 
-export const metadata: Metadata = { title: 'Editar articulo | Admin Seismiles' }
+export const metadata: Metadata = { title: 'Editar articulo | Admin SEISMILES' }
 
 interface Props {
   params: Promise<{ id: string }>

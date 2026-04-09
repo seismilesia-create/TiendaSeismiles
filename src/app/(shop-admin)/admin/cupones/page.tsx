@@ -3,7 +3,7 @@ import Link from 'next/link'
 import { getCoupons } from '@/features/shop/services/admin-coupons'
 import { CouponsTable } from '@/features/shop/components/admin/CouponsTable'
 
-export const metadata: Metadata = { title: 'Cupones | Admin Seismiles' }
+export const metadata: Metadata = { title: 'Cupones | Admin SEISMILES' }
 
 function PlusIcon({ className }: { className?: string }) {
   return (

@@ -3,7 +3,7 @@ import Link from 'next/link'
 import { getAllSubscribers } from '@/features/shop/services/newsletter'
 import { SubscribersTable } from '@/features/shop/components/admin/SubscribersTable'
 
-export const metadata: Metadata = { title: 'Suscriptores | Admin Seismiles' }
+export const metadata: Metadata = { title: 'Suscriptores | Admin SEISMILES' }
 
 function ArrowLeftIcon({ className }: { className?: string }) {
   return (

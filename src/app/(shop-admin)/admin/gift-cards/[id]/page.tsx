@@ -4,7 +4,7 @@ import { notFound } from 'next/navigation'
 import { getGiftCardDefinition } from '@/features/shop/services/admin-gift-cards'
 import { GiftCardDefForm } from '@/features/shop/components/admin/GiftCardDefForm'
 
-export const metadata: Metadata = { title: 'Editar Gift Card | Admin Seismiles' }
+export const metadata: Metadata = { title: 'Editar Gift Card | Admin SEISMILES' }
 
 export default async function EditGiftCardPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params

@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { shopConfig } from '../config'
 
 // ── Size data ──
@@ -35,6 +35,8 @@ const CATEGORIES = [
   { id: 'buzos', label: 'Buzos y Camperas', data: BUZOS },
 ] as const
 
+type CategoryId = (typeof CATEGORIES)[number]['id']
+
 // ── Icons ──
 
 function CloseIcon({ className }: { className?: string }) {
@@ -54,44 +56,63 @@ function RulerIcon({ className }: { className?: string }) {
   )
 }
 
-// ── Body diagram ──
+// ── Professional torso diagram ──
 
-function BodyDiagram() {
+function TorsoDiagram() {
   return (
-    <div className="relative w-full max-w-[200px] mx-auto">
-      <svg viewBox="0 0 200 280" fill="none" className="w-full text-volcanic-300">
-        {/* Head */}
-        <circle cx="100" cy="30" r="20" stroke="currentColor" strokeWidth={1.5} />
-        {/* Body */}
-        <path d="M100 50 V 160" stroke="currentColor" strokeWidth={1.5} />
-        {/* Arms */}
-        <path d="M100 80 L 50 120" stroke="currentColor" strokeWidth={1.5} />
-        <path d="M100 80 L 150 120" stroke="currentColor" strokeWidth={1.5} />
-        {/* Legs */}
-        <path d="M100 160 L 70 240" stroke="currentColor" strokeWidth={1.5} />
-        <path d="M100 160 L 130 240" stroke="currentColor" strokeWidth={1.5} />
+    <div className="relative w-full max-w-[240px] mx-auto py-2">
+      <svg viewBox="0 0 240 260" fill="none" className="w-full">
+        {/* T-shirt silhouette */}
+        <path
+          d="M120 12 C112 12 108 16 104 22 L98 22 C88 22 72 28 60 36 L42 50 C38 53 38 58 42 60 L62 72 C64 73 67 72 68 70 L74 58 L74 100 C74 104 74 108 74 112 L74 220 C74 226 78 230 84 230 L156 230 C162 230 166 226 166 220 L166 112 C166 108 166 104 166 100 L166 58 L172 70 C173 72 176 73 178 72 L198 60 C202 58 202 53 198 50 L180 36 C168 28 152 22 142 22 L136 22 C132 16 128 12 120 12 Z"
+          fill="#FAF8F4"
+          stroke="#D4CFC7"
+          strokeWidth={1.5}
+        />
 
-        {/* Measurement lines */}
-        {/* Chest (pecho) */}
-        <line x1="50" y1="85" x2="150" y2="85" stroke="#C75B39" strokeWidth={1.5} strokeDasharray="4 2" />
-        <circle cx="50" cy="85" r="3" fill="#C75B39" />
-        <circle cx="150" cy="85" r="3" fill="#C75B39" />
+        {/* Collar */}
+        <path
+          d="M108 22 C108 32 112 38 120 38 C128 38 132 32 132 22"
+          fill="none"
+          stroke="#D4CFC7"
+          strokeWidth={1.5}
+        />
 
-        {/* Shoulders (hombros) */}
-        <line x1="55" y1="70" x2="145" y2="70" stroke="#8B7355" strokeWidth={1.5} strokeDasharray="4 2" />
-        <circle cx="55" cy="70" r="3" fill="#8B7355" />
-        <circle cx="145" cy="70" r="3" fill="#8B7355" />
+        {/* ── Measurement lines ── */}
 
-        {/* Length (largo) */}
-        <line x1="165" y1="55" x2="165" y2="160" stroke="#5C5347" strokeWidth={1.5} strokeDasharray="4 2" />
-        <circle cx="165" cy="55" r="3" fill="#5C5347" />
-        <circle cx="165" cy="160" r="3" fill="#5C5347" />
+        {/* Shoulders — across the top */}
+        <line x1="62" y1="44" x2="178" y2="44" stroke="#8B7355" strokeWidth={2} strokeDasharray="6 3" />
+        <circle cx="62" cy="44" r="4" fill="#8B7355" />
+        <circle cx="178" cy="44" r="4" fill="#8B7355" />
+
+        {/* Chest — across the mid torso */}
+        <line x1="74" y1="100" x2="166" y2="100" stroke="#C75B39" strokeWidth={2} strokeDasharray="6 3" />
+        <circle cx="74" cy="100" r="4" fill="#C75B39" />
+        <circle cx="166" cy="100" r="4" fill="#C75B39" />
+
+        {/* Length — vertical right side */}
+        <line x1="190" y1="22" x2="190" y2="230" stroke="#5C5347" strokeWidth={2} strokeDasharray="6 3" />
+        <circle cx="190" cy="22" r="4" fill="#5C5347" />
+        <circle cx="190" cy="230" r="4" fill="#5C5347" />
+
+        {/* Arrow tips for length */}
+        <path d="M186 28 L190 18 L194 28" fill="none" stroke="#5C5347" strokeWidth={1.5} />
+        <path d="M186 224 L190 234 L194 224" fill="none" stroke="#5C5347" strokeWidth={1.5} />
       </svg>
 
-      {/* Labels */}
-      <div className="absolute top-[28%] left-0 text-[10px] font-semibold text-terra-500">Pecho</div>
-      <div className="absolute top-[22%] left-0 text-[10px] font-semibold text-[#8B7355]">Hombros</div>
-      <div className="absolute top-[38%] right-0 text-[10px] font-semibold text-volcanic-500">Largo</div>
+      {/* Labels positioned around the diagram */}
+      <div className="absolute left-1 flex items-center gap-1.5" style={{ top: '14%' }}>
+        <span className="w-2.5 h-2.5 rounded-full bg-[#8B7355]" />
+        <span className="text-[11px] font-semibold text-[#8B7355] tracking-wide">Hombros</span>
+      </div>
+      <div className="absolute left-1 flex items-center gap-1.5" style={{ top: '36%' }}>
+        <span className="w-2.5 h-2.5 rounded-full bg-terra-500" />
+        <span className="text-[11px] font-semibold text-terra-500 tracking-wide">Pecho</span>
+      </div>
+      <div className="absolute flex items-center gap-1.5" style={{ top: '46%', right: '-2px' }}>
+        <span className="text-[11px] font-semibold text-volcanic-500 tracking-wide">Largo</span>
+        <span className="w-2.5 h-2.5 rounded-full bg-volcanic-500" />
+      </div>
     </div>
   )
 }
@@ -106,6 +127,13 @@ interface SizeGuideDrawerProps {
 }
 
 export function SizeGuideDrawer({ open, onClose, defaultCategory = 'remeras' }: SizeGuideDrawerProps) {
+  const [activeId, setActiveId] = useState<CategoryId>(defaultCategory)
+
+  // Sync with prop changes
+  useEffect(() => {
+    setActiveId(defaultCategory)
+  }, [defaultCategory])
+
   // Lock body scroll when open
   useEffect(() => {
     if (open) {
@@ -124,7 +152,7 @@ export function SizeGuideDrawer({ open, onClose, defaultCategory = 'remeras' }: 
     return () => document.removeEventListener('keydown', handleKey)
   }, [open, onClose])
 
-  const activeCategory = CATEGORIES.find((c) => c.id === defaultCategory) ?? CATEGORIES[0]
+  const activeCategory = CATEGORIES.find((c) => c.id === activeId) ?? CATEGORIES[0]
 
   return (
     <>
@@ -144,9 +172,11 @@ export function SizeGuideDrawer({ open, onClose, defaultCategory = 'remeras' }: 
       >
         <div className="h-full overflow-y-auto">
           {/* Header */}
-          <div className="sticky top-0 bg-white z-10 flex items-center justify-between px-6 py-5 border-b border-sand-200">
+          <div className="sticky top-0 bg-white/95 backdrop-blur-sm z-10 flex items-center justify-between px-6 py-5 border-b border-sand-200">
             <div className="flex items-center gap-3">
-              <RulerIcon className="w-5 h-5 text-terra-500" />
+              <div className="w-9 h-9 rounded-full bg-terra-500/10 flex items-center justify-center">
+                <RulerIcon className="w-[18px] h-[18px] text-terra-500" />
+              </div>
               <h2 className="font-heading text-lg text-volcanic-900">Guia de talles</h2>
             </div>
             <button
@@ -160,11 +190,16 @@ export function SizeGuideDrawer({ open, onClose, defaultCategory = 'remeras' }: 
           <div className="px-6 py-8 space-y-10">
             {/* How to measure */}
             <div>
-              <h3 className="text-body-xs font-semibold uppercase tracking-widest text-volcanic-700 mb-5">
-                Como medir
+              <h3 className="text-body-xs font-semibold uppercase tracking-widest text-volcanic-400 mb-1">
+                Paso 1
               </h3>
-              <BodyDiagram />
-              <div className="mt-5 space-y-3">
+              <p className="text-body-base font-semibold text-volcanic-900 mb-5">
+                Como tomar las medidas
+              </p>
+              <div className="rounded-2xl bg-sand-50 border border-sand-200 p-6">
+                <TorsoDiagram />
+              </div>
+              <div className="mt-6 space-y-4">
                 <div className="flex items-start gap-3">
                   <span className="w-3 h-3 rounded-full bg-[#8B7355] flex-shrink-0 mt-1" />
                   <div>
@@ -189,25 +224,29 @@ export function SizeGuideDrawer({ open, onClose, defaultCategory = 'remeras' }: 
               </div>
             </div>
 
-            {/* Category tabs */}
+            {/* Size table */}
             <div>
-              <h3 className="text-body-xs font-semibold uppercase tracking-widest text-volcanic-700 mb-4">
-                Medidas en cm
+              <h3 className="text-body-xs font-semibold uppercase tracking-widest text-volcanic-400 mb-1">
+                Paso 2
               </h3>
+              <p className="text-body-base font-semibold text-volcanic-900 mb-5">
+                Encontra tu talle
+              </p>
 
-              {/* Tabs — visual only since we auto-detect from product */}
+              {/* Interactive tabs */}
               <div className="flex gap-2 mb-5">
                 {CATEGORIES.map((cat) => (
-                  <span
+                  <button
                     key={cat.id}
-                    className={`px-4 py-2 rounded-lg text-body-xs font-semibold transition-colors ${
-                      cat.id === activeCategory.id
-                        ? 'bg-volcanic-900 text-white'
-                        : 'bg-sand-100 text-volcanic-500'
+                    onClick={() => setActiveId(cat.id)}
+                    className={`px-4 py-2 rounded-full text-body-xs font-semibold transition-all duration-200 ${
+                      cat.id === activeId
+                        ? 'bg-volcanic-900 text-white shadow-sm'
+                        : 'bg-sand-100 text-volcanic-500 hover:bg-sand-200'
                     }`}
                   >
                     {cat.label}
-                  </span>
+                  </button>
                 ))}
               </div>
 
@@ -217,23 +256,51 @@ export function SizeGuideDrawer({ open, onClose, defaultCategory = 'remeras' }: 
                   <thead>
                     <tr className="bg-sand-50">
                       <th className="text-left px-4 py-3 font-semibold text-volcanic-900 text-body-xs uppercase tracking-wider">Talle</th>
-                      <th className="text-center px-4 py-3 font-semibold text-volcanic-900 text-body-xs uppercase tracking-wider">Pecho</th>
-                      <th className="text-center px-4 py-3 font-semibold text-volcanic-900 text-body-xs uppercase tracking-wider">Largo</th>
-                      <th className="text-center px-4 py-3 font-semibold text-volcanic-900 text-body-xs uppercase tracking-wider">Hombros</th>
+                      <th className="text-center px-4 py-3 font-semibold text-volcanic-900 text-body-xs uppercase tracking-wider">
+                        <span className="inline-flex items-center gap-1.5">
+                          <span className="w-2 h-2 rounded-full bg-terra-500" />
+                          Pecho
+                        </span>
+                      </th>
+                      <th className="text-center px-4 py-3 font-semibold text-volcanic-900 text-body-xs uppercase tracking-wider">
+                        <span className="inline-flex items-center gap-1.5">
+                          <span className="w-2 h-2 rounded-full bg-volcanic-500" />
+                          Largo
+                        </span>
+                      </th>
+                      <th className="text-center px-4 py-3 font-semibold text-volcanic-900 text-body-xs uppercase tracking-wider">
+                        <span className="inline-flex items-center gap-1.5">
+                          <span className="w-2 h-2 rounded-full bg-[#8B7355]" />
+                          Hombros
+                        </span>
+                      </th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-sand-100">
                     {activeCategory.data.map((row) => (
                       <tr key={row.talle} className="hover:bg-sand-50/50 transition-colors">
-                        <td className="px-4 py-3 font-semibold text-volcanic-900">{row.talle}</td>
-                        <td className="px-4 py-3 text-center text-volcanic-600">{row.pecho}</td>
-                        <td className="px-4 py-3 text-center text-volcanic-600">{row.largo}</td>
-                        <td className="px-4 py-3 text-center text-volcanic-600">{row.hombros}</td>
+                        <td className="px-4 py-3.5 font-semibold text-volcanic-900">{row.talle}</td>
+                        <td className="px-4 py-3.5 text-center text-volcanic-600">{row.pecho}</td>
+                        <td className="px-4 py-3.5 text-center text-volcanic-600">{row.largo}</td>
+                        <td className="px-4 py-3.5 text-center text-volcanic-600">{row.hombros}</td>
                       </tr>
                     ))}
                   </tbody>
                 </table>
               </div>
+
+              {/* Unit note */}
+              <p className="text-body-xs text-volcanic-400 mt-3 text-center">
+                Todas las medidas estan expresadas en centimetros (cm)
+              </p>
+            </div>
+
+            {/* Tip */}
+            <div className="flex items-start gap-3 rounded-xl bg-terra-500/5 border border-terra-500/15 p-4">
+              <span className="text-lg leading-none mt-0.5">&#128161;</span>
+              <p className="text-body-sm text-volcanic-700 leading-relaxed">
+                <span className="font-semibold">Tip:</span> Si estas entre dos talles, te recomendamos elegir el mas grande para un calce mas comodo.
+              </p>
             </div>
 
             {/* Help note */}

@@ -72,7 +72,7 @@ export async function sendOrderConfirmationEmails(orderNumbers: string[]): Promi
       await resend.emails.send({
         from: EMAIL_CONFIG.from,
         to: profile.email,
-        subject: `Pedido ${order.numero_pedido} confirmado — Seismiles Textil`,
+        subject: `Pedido ${order.numero_pedido} confirmado — SEISMILES Textil`,
         html,
       })
     }

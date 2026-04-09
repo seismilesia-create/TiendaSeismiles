@@ -36,7 +36,7 @@ export async function sendGiftcardEmail(
     await resend.emails.send({
       from: EMAIL_CONFIG.from,
       to: profile.email,
-      subject: `Tu Gift Card Seismiles — ${codigo}`,
+      subject: `Tu Gift Card SEISMILES — ${codigo}`,
       html,
     })
   } catch (err) {

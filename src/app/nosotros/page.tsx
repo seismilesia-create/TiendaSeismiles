@@ -6,8 +6,8 @@ import { getProductLines } from '@/features/shop/services/product-lines'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
 
 export const metadata: Metadata = {
-  title: 'Nosotros | Seismiles Textil',
-  description: 'Nacidos en la inmensidad del altiplano catamarqueño. Conoce la historia de Seismiles Textil, nuestra esencia y la ruta que nos inspira.',
+  title: 'Nosotros | SEISMILES Textil',
+  description: 'Nacidos en la inmensidad del altiplano catamarqueño. Conoce la historia de SEISMILES Textil, nuestra esencia y la ruta que nos inspira.',
 }
 
 function MountainIcon({ className }: { className?: string }) {
@@ -62,7 +62,7 @@ export default async function NosotrosPage() {
               El Horizonte que nos Guía
             </h1>
             <p className="text-body-lg text-white/60 max-w-2xl leading-relaxed">
-              En SEISMILES, nuestra identidad nace de la contemplación de los gigantes que definen el cielo de Catamarca. Los "Seismiles" —esos colosos que desafían los 6.000 metros de altura— no son solo parte de nuestro paisaje; son el estándar de solidez, resistencia y presencia que buscamos en cada prenda que fabricamos.
+              En SEISMILES, nuestra identidad nace de la contemplación de los gigantes que definen el cielo de Catamarca. Los "SEISMILES" —esos colosos que desafían los 6.000 metros de altura— no son solo parte de nuestro paisaje; son el estándar de solidez, resistencia y presencia que buscamos en cada prenda que fabricamos.
             </p>
           </div>
         </section>
@@ -154,7 +154,7 @@ export default async function NosotrosPage() {
                 {
                   number: '05',
                   title: 'Confianza genuina',
-                  description: 'Vestir Seismiles es vestir confianza. Sabemos que cuando te sentis bien con lo que llevas puesto, todo cambia. Ese es nuestro compromiso.',
+                  description: 'Vestir SEISMILES es vestir confianza. Sabemos que cuando te sentis bien con lo que llevas puesto, todo cambia. Ese es nuestro compromiso.',
                 },
                 {
                   number: '06',
@@ -185,7 +185,7 @@ export default async function NosotrosPage() {
         <section className="relative h-[50vh] lg:h-[60vh] overflow-hidden">
           <Image
             src="/images/Siesmiles_Secretaría de Turismo de Catamarca_03.jpg"
-            alt="Volcanes nevados de la Ruta de los Seismiles, Catamarca"
+            alt="Volcanes nevados de la Ruta de los SEISMILES, Catamarca"
             fill
             className="object-cover"
             sizes="100vw"
@@ -206,7 +206,7 @@ export default async function NosotrosPage() {
         <section className="py-20 lg:py-28 bg-background">
           <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
             <span className="text-body-xs uppercase tracking-widest text-terra-500 font-semibold mb-4 block">
-              Unite a Seismiles
+              Unite a SEISMILES
             </span>
             <h2 className="font-heading text-display-sm sm:text-display-md text-volcanic-900 mb-6">
               Conoce nuestra coleccion

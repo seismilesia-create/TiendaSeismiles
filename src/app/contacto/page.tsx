@@ -6,7 +6,7 @@ import { createClient, createServiceClient } from '@/lib/supabase/server'
 import { shopConfig } from '@/features/shop/config'
 
 export const metadata: Metadata = {
-  title: 'Contacto | Seismiles Textil',
+  title: 'Contacto | SEISMILES Textil',
   description: 'Contactanos para consultas, pedidos mayoristas o personalizacion empresarial. Estamos en Catamarca, Argentina.',
 }
 

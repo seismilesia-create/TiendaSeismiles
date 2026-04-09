@@ -16,7 +16,7 @@ export async function createBlogPost(formData: FormData) {
   const content = (formData.get('content') as string)?.trim()
   const cover_image_url = (formData.get('cover_image_url') as string)?.trim() || null
   const category = (formData.get('category') as string)?.trim() || 'general'
-  const author_name = (formData.get('author_name') as string)?.trim() || 'Seismiles'
+  const author_name = (formData.get('author_name') as string)?.trim() || 'SEISMILES'
 
   if (!title || !slug || !excerpt || !content) {
     return { error: 'Titulo, slug, extracto y contenido son obligatorios.' }
@@ -53,7 +53,7 @@ export async function updateBlogPost(id: string, formData: FormData) {
   const content = (formData.get('content') as string)?.trim()
   const cover_image_url = (formData.get('cover_image_url') as string)?.trim() || null
   const category = (formData.get('category') as string)?.trim() || 'general'
-  const author_name = (formData.get('author_name') as string)?.trim() || 'Seismiles'
+  const author_name = (formData.get('author_name') as string)?.trim() || 'SEISMILES'
   const is_published = formData.get('is_published') === 'true'
 
   if (!title || !slug || !excerpt || !content) {

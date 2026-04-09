@@ -104,7 +104,7 @@ export async function replyToQuestion(questionId: string, reply: string) {
     await resend.emails.send({
       from: EMAIL_CONFIG.from,
       to: question.user_email,
-      subject: 'Respondimos tu consulta — Seismiles Textil',
+      subject: 'Respondimos tu consulta — SEISMILES Textil',
       html: faqReplyEmail({
         customerName: question.user_name,
         originalQuestion: question.message,

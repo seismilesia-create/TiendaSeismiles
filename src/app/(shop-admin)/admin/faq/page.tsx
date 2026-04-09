@@ -4,7 +4,7 @@ import { getAdminQuestions, getAdminFaqs } from '@/features/shop/services/faq'
 import { FaqQuestionsTable } from '@/features/shop/components/admin/FaqQuestionsTable'
 import { FaqItemsTable } from '@/features/shop/components/admin/FaqItemsTable'
 
-export const metadata: Metadata = { title: 'FAQ | Admin Seismiles' }
+export const metadata: Metadata = { title: 'FAQ | Admin SEISMILES' }
 
 function PlusIcon({ className }: { className?: string }) {
   return (

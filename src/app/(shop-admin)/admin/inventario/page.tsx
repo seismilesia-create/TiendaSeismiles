@@ -12,7 +12,7 @@ import { StockHealthTable } from '@/features/shop/components/admin/StockHealthTa
 import { InventoryAlertsBanner } from '@/features/shop/components/admin/InventoryAlertsBanner'
 import { StockRequestsCard } from '@/features/shop/components/admin/StockRequestsCard'
 
-export const metadata: Metadata = { title: 'Inventario | Admin Seismiles' }
+export const metadata: Metadata = { title: 'Inventario | Admin SEISMILES' }
 
 export default async function AdminInventarioPage() {
   const [overview, variants, notifications, stockHealth, alerts] =

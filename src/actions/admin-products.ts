@@ -270,7 +270,7 @@ async function notifyBackInStock(
     if (process.env.RESEND_API_KEY) {
       const { Resend } = await import('resend')
       const resend = new Resend(process.env.RESEND_API_KEY)
-      const fromEmail = process.env.RESEND_FROM_EMAIL || 'Seismiles Textil <onboarding@resend.dev>'
+      const fromEmail = process.env.RESEND_FROM_EMAIL || 'SEISMILES Textil <onboarding@resend.dev>'
 
       const html = backInStockEmail({
         productName: product.nombre,

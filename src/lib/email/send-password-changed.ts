@@ -28,7 +28,7 @@ export async function sendPasswordChangedEmail(userId: string): Promise<void> {
     await resend.emails.send({
       from: EMAIL_CONFIG.from,
       to: profile.email,
-      subject: 'Contraseña actualizada — Seismiles Textil',
+      subject: 'Contraseña actualizada — SEISMILES Textil',
       html,
     })
   } catch (err) {

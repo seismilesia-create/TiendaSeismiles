@@ -4,7 +4,7 @@ import { notFound } from 'next/navigation'
 import { getAdminProduct } from '@/features/shop/services/admin-products'
 import { ProductForm } from '@/features/shop/components/admin/ProductForm'
 
-export const metadata: Metadata = { title: 'Editar Producto | Admin Seismiles' }
+export const metadata: Metadata = { title: 'Editar Producto | Admin SEISMILES' }
 
 export default async function EditProductPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -45,6 +45,8 @@ export default async function EditProductPage({ params }: { params: Promise<{ id
             id: c.id,
             nombre: c.nombre,
             hex: c.hex,
+            color_base: c.color_base,
+            color_base_hex: c.color_base_hex,
             imagenes: (c.imagenes ?? []).map((img) => ({
               id: img.id,
               url: img.url,

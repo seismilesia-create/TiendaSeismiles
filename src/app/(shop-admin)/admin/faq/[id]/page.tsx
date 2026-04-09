@@ -3,7 +3,7 @@ import { notFound } from 'next/navigation'
 import { getAdminFaq } from '@/features/shop/services/faq'
 import { FaqItemForm } from '@/features/shop/components/admin/FaqItemForm'
 
-export const metadata: Metadata = { title: 'Editar FAQ | Admin Seismiles' }
+export const metadata: Metadata = { title: 'Editar FAQ | Admin SEISMILES' }
 
 interface Props {
   params: Promise<{ id: string }>

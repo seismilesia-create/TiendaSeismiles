@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 import { createGiftcardCheckout } from '@/actions/giftcard-checkout'
+import { MagneticButton } from '@/features/shop/components/MagneticButton'
 
 function GiftIcon({ className }: { className?: string }) {
   return (
@@ -65,8 +66,8 @@ export function GiftCardGrid({ cards, userId }: GiftCardGridProps) {
       )}
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8">
-        {cards.map((card) => (
-          <div key={card.id} className="group flex flex-col rounded-2xl overflow-hidden bg-white border border-sand-200/60 hover:shadow-warm-lg transition-all duration-500">
+        {cards.map((card, index) => (
+          <div key={card.id} data-stagger={index} className="group flex flex-col rounded-2xl overflow-hidden bg-white border border-sand-200/60 hover:shadow-warm-lg transition-all duration-500">
             {/* Card visual */}
             <div
               className="relative aspect-[4/3] p-6 flex flex-col justify-between"
@@ -112,23 +113,25 @@ export function GiftCardGrid({ cards, userId }: GiftCardGridProps) {
               <p className="text-body-sm text-volcanic-500 leading-relaxed mb-6 flex-1">
                 {card.descripcion}
               </p>
-              <button
-                onClick={() => handleBuy(card.id)}
-                disabled={loadingId !== null}
-                className="w-full py-3 px-4 bg-volcanic-900 hover:bg-volcanic-800 disabled:bg-volcanic-400 text-white text-body-sm font-semibold rounded-xl transition-all duration-300 hover:shadow-warm flex items-center justify-center gap-2"
-              >
-                {loadingId === card.id ? (
-                  <>
-                    <svg className="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-                    </svg>
-                    Procesando...
-                  </>
-                ) : (
-                  'Comprar'
-                )}
-              </button>
+              <MagneticButton strength={4}>
+                <button
+                  onClick={() => handleBuy(card.id)}
+                  disabled={loadingId !== null}
+                  className="w-full py-3 px-4 bg-volcanic-900 hover:bg-volcanic-800 disabled:bg-volcanic-400 text-white text-body-sm font-semibold rounded-xl transition-all duration-300 hover:shadow-warm flex items-center justify-center gap-2"
+                >
+                  {loadingId === card.id ? (
+                    <>
+                      <svg className="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                      </svg>
+                      Procesando...
+                    </>
+                  ) : (
+                    'Comprar'
+                  )}
+                </button>
+              </MagneticButton>
             </div>
           </div>
         ))}

@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { ProductForm } from '@/features/shop/components/admin/ProductForm'
 
-export const metadata: Metadata = { title: 'Nuevo Producto | Admin Seismiles' }
+export const metadata: Metadata = { title: 'Nuevo Producto | Admin SEISMILES' }
 
 export default function NewProductPage() {
   return (

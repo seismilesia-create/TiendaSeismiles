@@ -1,8 +1,8 @@
-// Seismiles Textil — Branded email templates
+// SEISMILES Textil — Branded email templates
 // Colors: volcanic-900 (#1C1917), terra-500 (#C75B39), sand-100 (#F5F0EB)
 
 const BRAND = {
-  name: 'Seismiles Textil',
+  name: 'SEISMILES Textil',
   tagline: 'Nacidos a 6000 metros',
   volcanic: '#1C1917',
   terra: '#C75B39',
@@ -245,7 +245,7 @@ export function adminNewQuestionEmail(data: AdminNewQuestionData): string {
       </tr>
     </table>
   `
-  return baseLayout(content, 'Recibis este email porque sos administrador de Seismiles Textil.')
+  return baseLayout(content, 'Recibis este email porque sos administrador de SEISMILES Textil.')
 }
 
 // ── FAQ reply email to user ──
@@ -300,7 +300,7 @@ export function faqReplyEmail(data: FaqReplyData): string {
       </tr>
     </table>
   `
-  return baseLayout(content, 'Recibis este email porque enviaste una consulta en Seismiles Textil.')
+  return baseLayout(content, 'Recibis este email porque enviaste una consulta en SEISMILES Textil.')
 }
 
 // ── Order confirmation email to customer ──
@@ -434,7 +434,7 @@ export function orderConfirmationEmail(data: OrderConfirmationData): string {
       Podes seguir el estado de tu pedido desde tu perfil.
     </p>
   `
-  return baseLayout(content, 'Recibis este email porque realizaste una compra en Seismiles Textil.')
+  return baseLayout(content, 'Recibis este email porque realizaste una compra en SEISMILES Textil.')
 }
 
 // ── Gift card delivery email ──
@@ -456,7 +456,7 @@ export function giftCardEmail(data: GiftCardEmailData): string {
       ¡Tu Gift Card esta lista${data.customerName ? `, ${data.customerName}` : ''}!
     </h1>
     <p style="margin:0 0 28px;font-size:14px;color:${BRAND.textSecondary};line-height:1.6;">
-      Gracias por tu compra. Aca tenes tu tarjeta de regalo Seismiles.
+      Gracias por tu compra. Aca tenes tu tarjeta de regalo SEISMILES.
     </p>
 
     <!-- Gift card visual -->
@@ -507,7 +507,7 @@ export function giftCardEmail(data: GiftCardEmailData): string {
       </tr>
     </table>
   `
-  return baseLayout(content, 'Recibis este email porque compraste una Gift Card en Seismiles Textil.')
+  return baseLayout(content, 'Recibis este email porque compraste una Gift Card en SEISMILES Textil.')
 }
 
 // ── Admin digest: stock demand summary ──
@@ -584,7 +584,7 @@ export function adminStockDigestEmail(data: AdminStockDigestData): string {
       </tr>
     </table>
   `
-  return baseLayout(content, 'Recibis este email porque sos administrador de Seismiles Textil.')
+  return baseLayout(content, 'Recibis este email porque sos administrador de SEISMILES Textil.')
 }
 
 // ── Password changed confirmation email ──
@@ -644,7 +644,7 @@ export function passwordChangedEmail(data: PasswordChangedData): string {
       </tr>
     </table>
   `
-  return baseLayout(content, 'Recibis este email porque se actualizo la contraseña de tu cuenta en Seismiles Textil.')
+  return baseLayout(content, 'Recibis este email porque se actualizo la contraseña de tu cuenta en SEISMILES Textil.')
 }
 
 // ── Order status update email ──
@@ -771,7 +771,7 @@ export function orderStatusUpdateEmail(data: OrderStatusUpdateData): string {
       Podes seguir el estado de tu pedido desde tu perfil.
     </p>
   `
-  return baseLayout(content, 'Recibis este email porque realizaste una compra en Seismiles Textil.')
+  return baseLayout(content, 'Recibis este email porque realizaste una compra en SEISMILES Textil.')
 }
 
 // ── Newsletter email helpers ──
@@ -813,7 +813,7 @@ export function welcomeNewsletterEmail(data: WelcomeNewsletterData): string {
       Bienvenido/a a la expedicion
     </p>
     <h1 style="margin:0 0 8px;font-size:20px;font-weight:700;color:${BRAND.textPrimary};">
-      ¡Ya sos parte de Seismiles!
+      ¡Ya sos parte de SEISMILES!
     </h1>
     <p style="margin:0 0 28px;font-size:14px;color:${BRAND.textSecondary};line-height:1.6;">
       Gracias por suscribirte. Aca tenes tu cupon de descuento del 10% para tu primera compra.
@@ -861,7 +861,7 @@ export function welcomeNewsletterEmail(data: WelcomeNewsletterData): string {
       </tr>
     </table>
   `
-  return baseLayout(content, `Recibis este email porque te suscribiste al newsletter de Seismiles Textil.<br/><a href="${data.unsubscribeUrl}" style="color:${BRAND.textSecondary};text-decoration:underline;">Desuscribirse</a>`)
+  return baseLayout(content, `Recibis este email porque te suscribiste al newsletter de SEISMILES Textil.<br/><a href="${data.unsubscribeUrl}" style="color:${BRAND.textSecondary};text-decoration:underline;">Desuscribirse</a>`)
 }
 
 // ── Campaign newsletter email ──
@@ -879,5 +879,5 @@ export function campaignEmail(data: CampaignEmailData): string {
       ${htmlContent}
     </div>
   `
-  return baseLayout(content, `Recibis este email porque te suscribiste al newsletter de Seismiles Textil.<br/><a href="${data.unsubscribeUrl}" style="color:${BRAND.textSecondary};text-decoration:underline;">Desuscribirse</a>`)
+  return baseLayout(content, `Recibis este email porque te suscribiste al newsletter de SEISMILES Textil.<br/><a href="${data.unsubscribeUrl}" style="color:${BRAND.textSecondary};text-decoration:underline;">Desuscribirse</a>`)
 }

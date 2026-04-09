@@ -11,7 +11,7 @@ import { RevenueChart } from '@/features/shop/components/admin/RevenueChart'
 import { TopProductsTable } from '@/features/shop/components/admin/TopProductsTable'
 import { RecentOrdersTable } from '@/features/shop/components/admin/RecentOrdersTable'
 
-export const metadata: Metadata = { title: 'Dashboard | Admin Seismiles' }
+export const metadata: Metadata = { title: 'Dashboard | Admin SEISMILES' }
 
 function formatARS(value: number): string {
   if (value >= 1_000_000) return `$${(value / 1_000_000).toFixed(1)}M`

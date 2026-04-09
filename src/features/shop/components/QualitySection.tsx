@@ -86,7 +86,7 @@ export function QualitySection() {
             <div className="relative aspect-[3/4] rounded-2xl overflow-hidden">
               <Image
                 src={quality.imageUrl}
-                alt="Detalle de calidad Seismiles"
+                alt="Detalle de calidad SEISMILES"
                 fill
                 className="object-cover"
                 sizes="(max-width: 1024px) 100vw, 50vw"

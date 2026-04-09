@@ -8,8 +8,8 @@ import { createClient, createServiceClient } from '@/lib/supabase/server'
 import { BlogCategoryFilter } from './BlogCategoryFilter'
 
 export const metadata: Metadata = {
-  title: 'Blog | Seismiles Textil',
-  description: 'Articulos sobre cuidados de tela, materiales premium, estilo y la historia detras de Seismiles. Aprende a cuidar tu ropa y conoce nuestros procesos.',
+  title: 'Blog | SEISMILES Textil',
+  description: 'Articulos sobre cuidados de tela, materiales premium, estilo y la historia detras de SEISMILES. Aprende a cuidar tu ropa y conoce nuestros procesos.',
 }
 
 interface Props {

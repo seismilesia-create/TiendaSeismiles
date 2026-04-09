@@ -3,7 +3,7 @@ import Link from 'next/link'
 import { getAdminPosts } from '@/features/shop/services/blog'
 import { BlogPostsTable } from '@/features/shop/components/admin/BlogPostsTable'
 
-export const metadata: Metadata = { title: 'Blog | Admin Seismiles' }
+export const metadata: Metadata = { title: 'Blog | Admin SEISMILES' }
 
 function PlusIcon({ className }: { className?: string }) {
   return (

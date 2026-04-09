@@ -6,9 +6,11 @@ interface ScrollRevealProps {
   children: ReactNode
   className?: string
   delay?: number
+  /** When true, parent stays visible and children with data-stagger animate individually */
+  stagger?: boolean
 }
 
-export function ScrollReveal({ children, className = '', delay = 0 }: ScrollRevealProps) {
+export function ScrollReveal({ children, className = '', delay = 0, stagger = false }: ScrollRevealProps) {
   const ref = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -31,8 +33,12 @@ export function ScrollReveal({ children, className = '', delay = 0 }: ScrollReve
     return () => observer.disconnect()
   }, [delay])
 
+  const classes = stagger
+    ? `scroll-reveal scroll-reveal--stagger ${className}`
+    : `scroll-reveal ${className}`
+
   return (
-    <div ref={ref} className={`scroll-reveal ${className}`}>
+    <div ref={ref} className={classes}>
       {children}
     </div>
   )

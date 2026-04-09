@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { GiftCardDefForm } from '@/features/shop/components/admin/GiftCardDefForm'
 
-export const metadata: Metadata = { title: 'Nueva Gift Card | Admin Seismiles' }
+export const metadata: Metadata = { title: 'Nueva Gift Card | Admin SEISMILES' }
 
 export default function NewGiftCardPage() {
   return (

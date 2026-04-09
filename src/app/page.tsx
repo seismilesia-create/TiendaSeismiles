@@ -1,6 +1,6 @@
 import {
   MarqueeBanner, Navbar, HeroSection, FeaturedProducts,
-  CategoriesGrid, QualitySection, BenefitsBar,
+  LookbookSection, CategoriesGrid, QualitySection, BenefitsBar,
   InstagramSection, NewsletterSection, Footer, ScrollReveal,
 } from '@/features/shop/components'
 import { getProductLines, getSeasonalFeaturedProducts } from '@/features/shop/services/product-lines'
@@ -35,16 +35,19 @@ export default async function HomePage() {
 
       <main>
         <HeroSection />
-        <ScrollReveal>
+        <ScrollReveal stagger>
           <FeaturedProducts dbProducts={seasonalProducts} seasonSubtitle={getSeasonSubtitle(season)} />
         </ScrollReveal>
         <ScrollReveal>
+          <LookbookSection />
+        </ScrollReveal>
+        <ScrollReveal stagger>
           <CategoriesGrid defaultTab={getSeasonDefaultTab(season)} />
         </ScrollReveal>
         <ScrollReveal delay={100}>
           <QualitySection />
         </ScrollReveal>
-        <ScrollReveal>
+        <ScrollReveal stagger>
           <BenefitsBar />
         </ScrollReveal>
         <ScrollReveal>

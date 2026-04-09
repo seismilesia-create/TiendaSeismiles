@@ -1,5 +1,5 @@
 // ============================================================
-// SEASON UTILITY - Seismiles Textil
+// SEASON UTILITY - SEISMILES Textil
 // Determina la temporada actual (hemisferio sur)
 // y la prioridad de categorías para el home
 // ============================================================

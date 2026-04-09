@@ -1,6 +1,7 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import { shopConfig } from '../config'
+import { MagneticButton } from './MagneticButton'
 import type { CatalogProductFromDB } from '../services/product-lines'
 
 function ArrowRightIcon({ className }: { className?: string }) {
@@ -73,10 +74,11 @@ export function FeaturedProducts({ dbProducts, seasonSubtitle }: FeaturedProduct
 
         {/* Product Grid */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 lg:gap-8">
-          {products.map((product) => (
+          {products.map((product, index) => (
             <Link
               key={product.slug}
               href={product.href}
+              data-stagger={index}
               className="group flex flex-col"
             >
               {/* Image */}
@@ -125,14 +127,16 @@ export function FeaturedProducts({ dbProducts, seasonSubtitle }: FeaturedProduct
         </div>
 
         {/* CTA */}
-        <div className="text-center mt-12">
-          <Link
-            href={featuredProducts.cta.href}
-            className="group inline-flex items-center gap-2 px-8 py-4 bg-volcanic-900 hover:bg-volcanic-800 text-white text-body-md font-semibold rounded-xl transition-all duration-300 hover:shadow-warm-lg"
-          >
-            {featuredProducts.cta.text}
-            <ArrowRightIcon className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-300" />
-          </Link>
+        <div className="text-center mt-12 flex justify-center">
+          <MagneticButton>
+            <Link
+              href={featuredProducts.cta.href}
+              className="group inline-flex items-center gap-2 px-8 py-4 bg-volcanic-900 hover:bg-volcanic-800 text-white text-body-md font-semibold rounded-xl transition-all duration-300 hover:shadow-warm-lg"
+            >
+              {featuredProducts.cta.text}
+              <ArrowRightIcon className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-300" />
+            </Link>
+          </MagneticButton>
         </div>
       </div>
     </section>

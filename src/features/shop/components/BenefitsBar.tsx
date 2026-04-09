@@ -55,11 +55,12 @@ export function BenefitsBar() {
     <section className="py-12 lg:py-16 bg-sand-50 border-y border-sand-200/60">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-6">
-          {benefits.map((benefit) => {
+          {benefits.map((benefit, index) => {
             const Icon = iconMap[benefit.icon]
             return (
               <div
                 key={benefit.title}
+                data-stagger={index}
                 className="flex items-start gap-4 group"
               >
                 {/* Icon container */}

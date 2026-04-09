@@ -4,7 +4,7 @@ import { getAdminProducts, getProductsForExport } from '@/features/shop/services
 import { ProductsTable } from '@/features/shop/components/admin/ProductsTable'
 import { CatalogBulkActions } from '@/features/shop/components/admin/CatalogBulkActions'
 
-export const metadata: Metadata = { title: 'Productos | Admin Seismiles' }
+export const metadata: Metadata = { title: 'Productos | Admin SEISMILES' }
 
 function PlusIcon({ className }: { className?: string }) {
   return (

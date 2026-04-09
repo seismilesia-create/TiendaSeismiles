@@ -5,8 +5,8 @@ import { getProductLines } from '@/features/shop/services/product-lines'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
 
 export const metadata: Metadata = {
-  title: 'Cambios y Devoluciones | Seismiles Textil',
-  description: 'Politica de cambios y devoluciones de Seismiles Textil. Proceso simple, transparente y sin complicaciones.',
+  title: 'Cambios y Devoluciones | SEISMILES Textil',
+  description: 'Politica de cambios y devoluciones de SEISMILES Textil. Proceso simple, transparente y sin complicaciones.',
 }
 
 function RefreshIcon({ className }: { className?: string }) {

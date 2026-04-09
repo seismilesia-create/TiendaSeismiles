@@ -8,8 +8,8 @@ import { ProfileNav } from '../ProfileNav'
 import { signout } from '@/actions/auth'
 
 export const metadata: Metadata = {
-  title: 'Mis favoritos | Seismiles Textil',
-  description: 'Tus productos favoritos en Seismiles Textil.',
+  title: 'Mis favoritos | SEISMILES Textil',
+  description: 'Tus productos favoritos en SEISMILES Textil.',
 }
 
 function LogoutIcon({ className }: { className?: string }) {

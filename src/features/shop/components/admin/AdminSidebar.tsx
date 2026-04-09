@@ -139,7 +139,7 @@ export function AdminSidebar() {
         <Link href="/admin/dashboard" className="block" onClick={() => setMobileOpen(false)}>
           <Image
             src="/images/logo-seismiles.png"
-            alt="Seismiles"
+            alt="SEISMILES"
             width={120}
             height={48}
             className="h-8 w-auto brightness-0 invert opacity-80"
@@ -204,7 +204,7 @@ export function AdminSidebar() {
         <Link href="/admin/dashboard">
           <Image
             src="/images/logo-seismiles.png"
-            alt="Seismiles"
+            alt="SEISMILES"
             width={100}
             height={40}
             className="h-7 w-auto brightness-0 invert opacity-80"

@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import { ResultadoGiftcard } from './ResultadoGiftcard'
 
 export const metadata: Metadata = {
-  title: 'Resultado Gift Card | Seismiles Textil',
+  title: 'Resultado Gift Card | SEISMILES Textil',
 }
 
 export default async function ResultadoGiftcardPage({

@@ -57,7 +57,7 @@ export async function subscribeNewsletter(email: string): Promise<{ error?: stri
       from: EMAIL_CONFIG.from,
       replyTo: EMAIL_CONFIG.replyTo,
       to: trimmed,
-      subject: 'Bienvenido/a a Seismiles — Tu cupon del 10%',
+      subject: 'Bienvenido/a a SEISMILES — Tu cupon del 10%',
       html: welcomeNewsletterEmail({ couponCode, siteUrl, unsubscribeUrl: unsubUrl }),
     })
   } catch (err) {

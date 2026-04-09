@@ -3,7 +3,7 @@ import { notFound } from 'next/navigation'
 import { getCoupon } from '@/features/shop/services/admin-coupons'
 import { CouponForm } from '@/features/shop/components/admin/CouponForm'
 
-export const metadata: Metadata = { title: 'Editar Cupon | Admin Seismiles' }
+export const metadata: Metadata = { title: 'Editar Cupon | Admin SEISMILES' }
 
 export default async function EditCouponPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params

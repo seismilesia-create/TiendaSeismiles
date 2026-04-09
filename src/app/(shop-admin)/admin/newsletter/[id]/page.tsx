@@ -3,7 +3,7 @@ import { notFound } from 'next/navigation'
 import { getCampaign } from '@/features/shop/services/newsletter'
 import { CampaignForm } from '@/features/shop/components/admin/CampaignForm'
 
-export const metadata: Metadata = { title: 'Editar Campana | Admin Seismiles' }
+export const metadata: Metadata = { title: 'Editar Campana | Admin SEISMILES' }
 
 export default async function EditCampaignPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params

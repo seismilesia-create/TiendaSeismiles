@@ -114,7 +114,7 @@ export async function updateOrderStatusAction(
             from: EMAIL_CONFIG.from,
             replyTo: EMAIL_CONFIG.replyTo,
             to: userEmail,
-            subject: `${STATUS_SUBJECTS[newStatus]} — Seismiles`,
+            subject: `${STATUS_SUBJECTS[newStatus]} — SEISMILES`,
             html,
           })
           .catch((err) => {

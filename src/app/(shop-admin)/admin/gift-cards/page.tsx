@@ -3,7 +3,7 @@ import Link from 'next/link'
 import { getGiftCardDefinitions } from '@/features/shop/services/admin-gift-cards'
 import { GiftCardDefsTable } from '@/features/shop/components/admin/GiftCardDefsTable'
 
-export const metadata: Metadata = { title: 'Gift Cards | Admin Seismiles' }
+export const metadata: Metadata = { title: 'Gift Cards | Admin SEISMILES' }
 
 function PlusIcon({ className }: { className?: string }) {
   return (

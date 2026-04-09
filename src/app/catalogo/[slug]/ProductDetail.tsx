@@ -7,6 +7,7 @@ import { useAuth } from '@/hooks/useAuth'
 import { useCartStore } from '@/features/shop/stores/cart-store'
 import { trackProductView } from '@/actions/track-view'
 import { ProductCard } from '@/features/shop/components/ProductCard'
+import { MagneticButton } from '@/features/shop/components/MagneticButton'
 import { HeartButton } from '@/features/shop/components/HeartButton'
 import { ReviewSection } from '@/features/shop/components/ReviewSection'
 import { SizeGuideDrawer } from '@/features/shop/components/SizeGuideDrawer'
@@ -422,14 +423,16 @@ export function ProductDetail({ product, mostViewedProducts, reviews, reviewSumm
 
             {/* Add to cart — desktop */}
             <div className="hidden lg:block mb-8">
-              <button
-                disabled={!canAddToCart}
-                onClick={handleAddToCart}
-                className="w-full flex items-center justify-center gap-3 py-4 bg-volcanic-900 hover:bg-volcanic-800 disabled:bg-volcanic-400 disabled:cursor-not-allowed text-white text-body-md font-semibold rounded-xl transition-all duration-300"
-              >
-                <ShoppingBagIcon className="w-5 h-5" />
-                {!selectedSize ? 'Selecciona un talle' : 'Agregar al carrito'}
-              </button>
+              <MagneticButton strength={4}>
+                <button
+                  disabled={!canAddToCart}
+                  onClick={handleAddToCart}
+                  className="w-full flex items-center justify-center gap-3 py-4 bg-volcanic-900 hover:bg-volcanic-800 disabled:bg-volcanic-400 disabled:cursor-not-allowed text-white text-body-md font-semibold rounded-xl transition-all duration-300"
+                >
+                  <ShoppingBagIcon className="w-5 h-5" />
+                  {!selectedSize ? 'Selecciona un talle' : 'Agregar al carrito'}
+                </button>
+              </MagneticButton>
             </div>
 
             {/* Trust badges */}

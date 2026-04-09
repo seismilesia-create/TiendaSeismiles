@@ -1,13 +1,13 @@
 import type { ShopConfig } from './types'
 
 // ============================================================
-// SHOP CONFIG - Seismiles Textil
+// SHOP CONFIG - SEISMILES Textil
 // Indumentaria urbana premium con alma de montaña
 // ============================================================
 
 export const shopConfig: ShopConfig = {
   brand: {
-    name: 'Seismiles',
+    name: 'SEISMILES',
     tagline: 'Ruta Nacional 60',
     subtitle: 'Nacidas a 6000 metros de altura',
     description:
@@ -21,7 +21,7 @@ export const shopConfig: ShopConfig = {
     badge: 'Catamarca, Argentina',
     headline: 'Calidad de Altura',
     subheadline:
-      'Desde el corazón de Catamarca, diseñamos y confeccionamos ropa de alta gama. Inspirados en la solidez de nuestros Seismiles, creamos prendas que honran nuestra tierra y están hechas para durar.',
+      'Desde el corazón de Catamarca, diseñamos y confeccionamos ropa de alta gama. Inspirados en la solidez de nuestros SEISMILES, creamos prendas que honran nuestra tierra y están hechas para durar.',
     ctaPrimary: { text: 'Ver coleccion', href: '/catalogo' },
     ctaSecondary: { text: 'Nuestro origen', href: '/nosotros' },
   },
@@ -104,7 +104,7 @@ export const shopConfig: ShopConfig = {
           slug: 'linea-arista',
           gradientFrom: '#2C2420',
           gradientTo: '#4A3D35',
-          imageUrl: '/images/Nahuel Piqué.webp',
+          imageUrl: '/images/Arista.webp',
         },
         {
           title: 'Linea Pissis',
@@ -112,7 +112,7 @@ export const shopConfig: ShopConfig = {
           slug: 'linea-pissis',
           gradientFrom: '#C75B39',
           gradientTo: '#A04830',
-          imageUrl: 'https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?w=800&h=600&fit=crop&crop=center',
+          imageUrl: '/images/Pissis.webp',
         },
         {
           title: 'Linea Origen',
@@ -120,15 +120,7 @@ export const shopConfig: ShopConfig = {
           slug: 'linea-origen',
           gradientFrom: '#8B7355',
           gradientTo: '#6B5B45',
-          imageUrl: 'https://images.unsplash.com/photo-1576566588028-4147f3842f27?w=800&h=600&fit=crop&crop=center',
-        },
-        {
-          title: 'Linea Terreno',
-          subtitle: 'Resistencia para el dia a dia',
-          slug: 'linea-terreno',
-          gradientFrom: '#5C5347',
-          gradientTo: '#3D372E',
-          imageUrl: 'https://images.unsplash.com/photo-1503341504253-dff4f0783dc8?w=800&h=600&fit=crop&crop=center',
+          imageUrl: '/images/Origen.webp',
         },
       ],
     },
@@ -191,7 +183,7 @@ export const shopConfig: ShopConfig = {
     location: 'Paso de San Francisco',
     heading: 'Donde nace nuestro nombre',
     paragraphs: [
-      'La Ruta de los Seismiles recorre la Ruta Nacional 60 entre Tinogasta y el Paso de San Francisco, en Catamarca. Un camino rodeado de volcanes de mas de 6.000 metros, paisajes aridos y la majestuosidad del altiplano andino.',
+      'La Ruta de los SEISMILES recorre la Ruta Nacional 60 entre Tinogasta y el Paso de San Francisco, en Catamarca. Un camino rodeado de volcanes de mas de 6.000 metros, paisajes aridos y la majestuosidad del altiplano andino.',
       'Esa grandeza nos inspira. Cada prenda lleva la fuerza de la tierra, la resistencia de la roca volcanica y la calidez del desierto que nos vio nacer. Somos de la montaña, para la ciudad.',
     ],
     stats: [
@@ -230,8 +222,8 @@ export const shopConfig: ShopConfig = {
   },
 
   giftCards: {
-    heading: 'Gift Cards Seismiles',
-    subtitle: 'Regala calidad. Que elijan lo que mas les guste con una tarjeta de regalo Seismiles.',
+    heading: 'Gift Cards SEISMILES',
+    subtitle: 'Regala calidad. Que elijan lo que mas les guste con una tarjeta de regalo SEISMILES.',
   },
 
   benefits: [
@@ -259,7 +251,7 @@ export const shopConfig: ShopConfig = {
 
   faq: {
     heading: 'Preguntas Frecuentes',
-    subtitle: 'Todo lo que necesitas saber sobre Seismiles. Si no encontras tu respuesta, escribinos y te ayudamos.',
+    subtitle: 'Todo lo que necesitas saber sobre SEISMILES. Si no encontras tu respuesta, escribinos y te ayudamos.',
     contactPrompt: 'No encontraste lo que buscabas? Escribinos tu consulta y te respondemos a la brevedad.',
     items: [
       {
@@ -312,7 +304,7 @@ export const shopConfig: ShopConfig = {
       'Seguinos y se parte de la comunidad que se anima a ir mas alto.',
     photos: [
       {
-        alt: 'Look urbano con remera Seismiles',
+        alt: 'Look urbano con remera SEISMILES',
         gradientFrom: '#8B7355',
         gradientTo: '#C75B39',
       },
@@ -334,7 +326,7 @@ export const shopConfig: ShopConfig = {
   },
 
   blog: {
-    heading: 'Blog Seismiles',
+    heading: 'Blog SEISMILES',
     subtitle:
       'Cuidados de tela, materiales premium y la historia detras de cada prenda. Conoce lo que nos diferencia.',
     categories: [
@@ -391,6 +383,6 @@ export const shopConfig: ShopConfig = {
       { name: 'Mercado Pago', slug: 'mercadopago' },
       { name: 'Transferencia', slug: 'transferencia' },
     ],
-    copyright: '2026 Seismiles Textil. Nacidas a 6000 metros. Todos los derechos reservados.',
+    copyright: '2026 SEISMILES Textil. Nacidas a 6000 metros. Todos los derechos reservados.',
   },
 }

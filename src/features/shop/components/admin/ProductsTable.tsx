@@ -105,6 +105,9 @@ export function ProductsTable({ products }: { products: Producto[] }) {
   const [bulkGenero, setBulkGenero] = useState('')
   const [bulkActivo, setBulkActivo] = useState('')
   const [bulkDestacado, setBulkDestacado] = useState('')
+  const [bulkDescripcion, setBulkDescripcion] = useState('')
+  const [bulkDetalles, setBulkDetalles] = useState('')
+  const [bulkCuidado, setBulkCuidado] = useState('')
 
   // Derive unique values from actual products
   const lineas = [...new Set(products.map((p) => p.linea))].sort()
@@ -143,6 +146,9 @@ export function ProductsTable({ products }: { products: Producto[] }) {
     setBulkGenero('')
     setBulkActivo('')
     setBulkDestacado('')
+    setBulkDescripcion('')
+    setBulkDetalles('')
+    setBulkCuidado('')
   }
 
   async function handleBulkApply() {
@@ -163,6 +169,9 @@ export function ProductsTable({ products }: { products: Producto[] }) {
     if (bulkGenero) fields.genero = bulkGenero
     if (bulkActivo) fields.activo = bulkActivo === 'si'
     if (bulkDestacado) fields.destacado = bulkDestacado === 'si'
+    if (bulkDescripcion.trim()) fields.descripcion = bulkDescripcion.trim()
+    if (bulkDetalles.trim()) fields.detalles = bulkDetalles.trim()
+    if (bulkCuidado.trim()) fields.cuidado = bulkCuidado.trim()
 
     if (Object.keys(fields).length === 0) {
       alert('Seleccioná al menos un campo para editar')
@@ -360,11 +369,46 @@ export function ProductsTable({ products }: { products: Producto[] }) {
                 <option value="no" className="text-volcanic-900">No</option>
               </select>
             </div>
-            {/* Apply button */}
+          </div>
+          {/* Long text fields */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mt-3">
+            <div>
+              <label className="block text-[11px] text-white/60 mb-1">Descripción</label>
+              <textarea
+                value={bulkDescripcion}
+                onChange={(e) => setBulkDescripcion(e.target.value)}
+                rows={3}
+                placeholder="— (dejar vacío para no modificar)"
+                className="w-full px-3 py-1.5 rounded-lg bg-white/10 border border-white/20 text-body-sm text-white placeholder:text-white/30 focus:outline-none focus:ring-2 focus:ring-terra-500/50 resize-y"
+              />
+            </div>
+            <div>
+              <label className="block text-[11px] text-white/60 mb-1">Detalles (composición)</label>
+              <textarea
+                value={bulkDetalles}
+                onChange={(e) => setBulkDetalles(e.target.value)}
+                rows={3}
+                placeholder="— (dejar vacío para no modificar)"
+                className="w-full px-3 py-1.5 rounded-lg bg-white/10 border border-white/20 text-body-sm text-white placeholder:text-white/30 focus:outline-none focus:ring-2 focus:ring-terra-500/50 resize-y"
+              />
+            </div>
+            <div>
+              <label className="block text-[11px] text-white/60 mb-1">Cuidado</label>
+              <textarea
+                value={bulkCuidado}
+                onChange={(e) => setBulkCuidado(e.target.value)}
+                rows={3}
+                placeholder="— (dejar vacío para no modificar)"
+                className="w-full px-3 py-1.5 rounded-lg bg-white/10 border border-white/20 text-body-sm text-white placeholder:text-white/30 focus:outline-none focus:ring-2 focus:ring-terra-500/50 resize-y"
+              />
+            </div>
+          </div>
+          {/* Apply button */}
+          <div className="flex justify-end mt-3">
             <button
               onClick={handleBulkApply}
               disabled={bulkApplying}
-              className="px-5 py-1.5 bg-terra-500 hover:bg-terra-600 disabled:opacity-50 text-white text-body-sm font-semibold rounded-lg transition-colors"
+              className="px-5 py-2 bg-terra-500 hover:bg-terra-600 disabled:opacity-50 text-white text-body-sm font-semibold rounded-lg transition-colors"
             >
               {bulkApplying ? 'Aplicando...' : 'Aplicar'}
             </button>

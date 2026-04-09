@@ -3,7 +3,7 @@ import Link from 'next/link'
 import { getCampaigns, getSubscriberStats } from '@/features/shop/services/newsletter'
 import { CampaignsTable } from '@/features/shop/components/admin/CampaignsTable'
 
-export const metadata: Metadata = { title: 'Newsletter | Admin Seismiles' }
+export const metadata: Metadata = { title: 'Newsletter | Admin SEISMILES' }
 
 function PlusIcon({ className }: { className?: string }) {
   return (

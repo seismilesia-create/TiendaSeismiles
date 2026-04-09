@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 import { shopConfig } from '@/features/shop/config'
-import { MarqueeBanner, Navbar, Footer } from '@/features/shop/components'
+import { MarqueeBanner, Navbar, Footer, ScrollReveal } from '@/features/shop/components'
 import { getProductLines } from '@/features/shop/services/product-lines'
 import { getActiveGiftCardDefinitions } from '@/features/shop/services/admin-gift-cards'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
@@ -8,7 +8,7 @@ import { GiftCardGrid } from './GiftCardGrid'
 
 export const metadata: Metadata = {
   title: 'Gift Cards',
-  description: 'Regala calidad Seismiles. Tarjetas de regalo con distintos montos para que elijan lo que mas les guste.',
+  description: 'Regala calidad SEISMILES. Tarjetas de regalo con distintos montos para que elijan lo que mas les guste.',
 }
 
 function GiftIcon({ className }: { className?: string }) {
@@ -76,7 +76,9 @@ export default async function GiftCardsPage() {
         {/* Gift Cards Grid */}
         <section className="py-16 lg:py-24 bg-background">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <GiftCardGrid cards={cardDefs} userId={navUser ? user!.id : null} />
+            <ScrollReveal stagger>
+              <GiftCardGrid cards={cardDefs} userId={navUser ? user!.id : null} />
+            </ScrollReveal>
 
             {/* Info section */}
             <div className="mt-16 lg:mt-20 max-w-3xl mx-auto">

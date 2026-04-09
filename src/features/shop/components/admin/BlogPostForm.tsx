@@ -36,7 +36,7 @@ export function BlogPostForm({ post }: Props) {
   const [content, setContent] = useState(post?.content ?? '')
   const [coverImageUrl, setCoverImageUrl] = useState(post?.cover_image_url ?? '')
   const [category, setCategory] = useState(post?.category ?? 'general')
-  const [authorName, setAuthorName] = useState(post?.author_name ?? 'Seismiles')
+  const [authorName, setAuthorName] = useState(post?.author_name ?? 'SEISMILES')
   const [isPublished, setIsPublished] = useState(post?.is_published ?? false)
   const [autoSlug, setAutoSlug] = useState(!isEdit)
   const [showPreview, setShowPreview] = useState(false)
@@ -220,7 +220,7 @@ export function BlogPostForm({ post }: Props) {
               value={authorName}
               onChange={(e) => setAuthorName(e.target.value)}
               className="w-full px-4 py-3 rounded-xl bg-sand-100/50 border border-sand-200 text-volcanic-900 text-body-sm focus:outline-none focus:border-terra-500/50 transition-all"
-              placeholder="Seismiles"
+              placeholder="SEISMILES"
             />
           </div>
         </div>

@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import { CouponForm } from '@/features/shop/components/admin/CouponForm'
 
-export const metadata: Metadata = { title: 'Nuevo Cupon | Admin Seismiles' }
+export const metadata: Metadata = { title: 'Nuevo Cupon | Admin SEISMILES' }
 
 export default function NuevoCuponPage() {
   return (

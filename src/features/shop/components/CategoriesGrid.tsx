@@ -55,16 +55,19 @@ export function CategoriesGrid({ defaultTab }: CategoriesGridProps) {
         </div>
 
         {/* Grid */}
-        <div className={`grid gap-4 lg:gap-6 ${
-          currentTab.categories.length === 1
-            ? 'grid-cols-1 max-w-lg mx-auto'
-            : 'grid-cols-1 sm:grid-cols-2'
+        <div className={`flex flex-wrap justify-center gap-4 lg:gap-6 ${
+          currentTab.categories.length === 1 ? 'max-w-lg mx-auto' : ''
         }`}>
           {currentTab.categories.map((category, index) => (
             <Link
               key={category.slug}
               href={`/tienda/${category.slug}`}
-              className="group relative aspect-[4/3] sm:aspect-[3/2] rounded-2xl overflow-hidden"
+              data-stagger={index}
+              className={`group relative aspect-[4/3] sm:aspect-[3/2] rounded-2xl overflow-hidden ${
+                currentTab.categories.length === 1
+                  ? 'w-full'
+                  : 'w-full sm:w-[calc(50%_-_0.5rem)] lg:w-[calc(50%_-_0.75rem)]'
+              }`}
             >
               {/* Background: image or gradient */}
               {category.imageUrl ? (

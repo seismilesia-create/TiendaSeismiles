@@ -1,5 +1,5 @@
 // ============================================================
-// SHOP TYPES - Seismiles Textil
+// SHOP TYPES - SEISMILES Textil
 // Tipos para la landing page y futuro catalogo de productos
 // ============================================================
 
@@ -109,7 +109,7 @@ export interface FeaturedProduct {
   tag?: string
 }
 
-/** Configuracion de la tienda Seismiles */
+/** Configuracion de la tienda SEISMILES */
 export interface ShopConfig {
   brand: {
     name: string
