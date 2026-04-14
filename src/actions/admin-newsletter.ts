@@ -54,7 +54,7 @@ export async function updateCampaignAction(id: string, formData: FormData) {
     .eq('id', id)
     .single()
 
-  if (!existing) return { error: 'Campana no encontrada.' }
+  if (!existing) return { error: 'Campaña no encontrada.' }
   if (existing.status !== 'draft') return { error: 'Solo se pueden editar borradores.' }
 
   const { error } = await service
@@ -102,7 +102,7 @@ export async function sendCampaignAction(id: string): Promise<{ error?: string }
     .eq('id', id)
     .single()
 
-  if (!campaign) return { error: 'Campana no encontrada.' }
+  if (!campaign) return { error: 'Campaña no encontrada.' }
   if (campaign.status !== 'draft') return { error: 'Esta campana ya fue enviada.' }
 
   // 2. Get active subscribers

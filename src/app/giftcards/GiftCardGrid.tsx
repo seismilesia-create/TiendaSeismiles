@@ -85,7 +85,7 @@ export function GiftCardGrid({ cards, userId }: GiftCardGridProps) {
               )}
               <div className="relative z-10 flex items-start justify-between">
                 <Image
-                  src="/images/logo-seismiles.png"
+                  src="/images/logo-seismiles-v2.png"
                   alt=""
                   width={80}
                   height={35}

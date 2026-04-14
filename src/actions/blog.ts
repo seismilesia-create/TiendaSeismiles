@@ -124,7 +124,7 @@ export async function togglePublishPost(id: string) {
     .eq('id', id)
     .single()
 
-  if (!post) return { error: 'Articulo no encontrado.' }
+  if (!post) return { error: 'Artículo no encontrado.' }
 
   const is_published = !post.is_published
   const published_at = is_published && !post.published_at

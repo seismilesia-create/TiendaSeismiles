@@ -60,14 +60,14 @@ export function FaqContactForm({ user }: FaqContactFormProps) {
     return (
       <div className="text-center py-6">
         <p className="text-body-md text-white/50 mb-6">
-          Para enviarnos tu consulta, necesitas tener una cuenta.
+          Para enviarnos tu consulta, necesitás tener una cuenta.
         </p>
         <div className="flex items-center justify-center gap-4">
           <Link
             href="/login"
             className="px-6 py-3 bg-terra-500 hover:bg-terra-600 text-white text-body-sm font-semibold rounded-xl transition-all duration-300"
           >
-            Iniciar sesion
+            Iniciar sesión
           </Link>
           <Link
             href="/signup"
@@ -94,7 +94,7 @@ export function FaqContactForm({ user }: FaqContactFormProps) {
       )}
 
       <textarea
-        placeholder="Escribi tu pregunta..."
+        placeholder="Escribí tu pregunta..."
         value={message}
         onChange={(e) => setMessage(e.target.value)}
         required

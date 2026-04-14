@@ -37,16 +37,16 @@ function EmptyCart() {
     <div className="text-center py-16 lg:py-24">
       <ShoppingBagIcon className="w-16 h-16 mx-auto text-volcanic-300 mb-6" />
       <h2 className="font-heading text-display-xs text-volcanic-900 mb-3">
-        Tu carrito esta vacio
+        Tu carrito está vacío
       </h2>
       <p className="text-body-md text-volcanic-500 mb-8 max-w-md mx-auto">
-        Explora nuestro catalogo y encontra las prendas que te representan.
+        Explorá nuestro catálogo y encontrá las prendas que te representan.
       </p>
       <Link
         href="/catalogo"
         className="inline-flex items-center gap-2 px-8 py-3.5 bg-volcanic-900 hover:bg-volcanic-800 text-white text-body-md font-semibold rounded-xl transition-colors"
       >
-        Ver catalogo
+        Ver catálogo
       </Link>
     </div>
   )
@@ -108,7 +108,7 @@ export function CartContent({ allProducts, userId }: CartContentProps) {
       {hydrated && recommendations.length > 0 && (
         <section className="mt-16 lg:mt-24">
           <h2 className="font-heading text-display-xs text-volcanic-900 mb-8">
-            Tambien te podria interesar
+            También te podría interesar
           </h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
             {recommendations.map((p) => (

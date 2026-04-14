@@ -73,10 +73,10 @@ export function ResultadoContent({ status, paymentId, externalReference }: Props
             <CheckCircleIcon className="w-10 h-10 text-emerald-600" />
           </div>
           <h1 className="font-heading text-display-sm text-volcanic-900 mb-3">
-            Pago confirmado!
+            ¡Pago confirmado!
           </h1>
           <p className="text-body-md text-volcanic-500 mb-8">
-            Tu pedido fue procesado correctamente. Podes ver el estado en tu perfil.
+            Tu pedido fue procesado correctamente. Podés ver el estado en tu perfil.
           </p>
           <Link
             href="/perfil"
@@ -96,7 +96,7 @@ export function ResultadoContent({ status, paymentId, externalReference }: Props
             Pago pendiente
           </h1>
           <p className="text-body-md text-volcanic-500 mb-8">
-            Tu pago esta siendo procesado. Te notificaremos cuando se confirme.
+            Tu pago está siendo procesado. Te notificaremos cuando se confirme.
           </p>
           <Link
             href="/perfil"
@@ -116,7 +116,7 @@ export function ResultadoContent({ status, paymentId, externalReference }: Props
             El pago no fue aprobado
           </h1>
           <p className="text-body-md text-volcanic-500 mb-8">
-            Hubo un problema con tu pago. Podes intentar de nuevo desde el carrito.
+            Hubo un problema con tu pago. Podés intentar de nuevo desde el carrito.
           </p>
           <Link
             href="/carrito"

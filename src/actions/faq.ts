@@ -5,6 +5,8 @@ import { createClient, createServiceClient } from '@/lib/supabase/server'
 import { requireAdmin } from '@/lib/auth/admin'
 import { getResend, EMAIL_CONFIG } from '@/lib/email/resend'
 import { adminNewQuestionEmail, faqReplyEmail } from '@/lib/email/seismiles-templates'
+import { sanitizeHeader } from '@/lib/email/escape'
+import { checkRateLimit } from '@/lib/rate-limit'
 
 // ── User action: submit a question ──
 
@@ -13,7 +15,17 @@ export async function submitFaqQuestion(formData: FormData) {
   const { data: { user } } = await supabase.auth.getUser()
 
   if (!user) {
-    return { error: 'Debes iniciar sesion para enviar una pregunta.' }
+    return { error: 'Debés iniciar sesión para enviar una pregunta.' }
+  }
+
+  // Per-authenticated-user limit. Users are auth'd so we key on user.id
+  // instead of IP — one user flooding from N devices is still one user.
+  // 5 per hour is plenty for genuine questions; anything more is noise.
+  const rlimit = await checkRateLimit(`faq:user:${user.id}`, 5, 3600)
+  if (!rlimit.allowed) {
+    return {
+      error: 'Ya enviaste varias preguntas en la última hora. Te respondemos pronto.',
+    }
   }
 
   const message = (formData.get('message') as string)?.trim()
@@ -44,7 +56,7 @@ export async function submitFaqQuestion(formData: FormData) {
     })
 
   if (error) {
-    return { error: 'No se pudo enviar tu pregunta. Intenta de nuevo.' }
+    return { error: 'No se pudo enviar tu pregunta. Intentá de nuevo.' }
   }
 
   // Send admin notification email
@@ -53,10 +65,12 @@ export async function submitFaqQuestion(formData: FormData) {
     try {
       const resend = getResend()
       const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://seismiles.com'
+      // Subject is a header — strip CRLF (header injection) and cap length.
+      const subject = sanitizeHeader(`Nueva pregunta de ${userName || userEmail}`).slice(0, 200)
       await resend.emails.send({
         from: EMAIL_CONFIG.from,
         to: adminEmail,
-        subject: `Nueva pregunta de ${userName || userEmail}`,
+        subject,
         html: adminNewQuestionEmail({ customerEmail: userEmail, customerName: userName, message, siteUrl }),
       })
     } catch (emailErr) {

@@ -7,34 +7,22 @@ import { useState } from 'react'
 const PRODUCT_TYPES = [
   { value: 'todos', label: 'Todos' },
   { value: 'remeras-lisas', label: 'Remeras Lisas' },
-  { value: 'estampadas', label: 'Estampadas' },
-  { value: 'buzos-camperas', label: 'Buzos y Camperas' },
+  { value: 'buzos', label: 'Buzos' },
 ]
 
 const PRODUCT_LINES = [
-  { value: 'arista', label: 'Linea Arista', type: 'remeras-lisas' },
-  { value: 'pissis', label: 'Linea Pissis', type: 'remeras-lisas' },
-  { value: 'origen', label: 'Linea Origen', type: 'remeras-lisas' },
-  { value: 'terreno', label: 'Linea Terreno', type: 'remeras-lisas' },
-  { value: 'veta', label: 'Linea Veta', type: 'estampadas' },
-  { value: 'tres-cruces', label: 'Linea Tres Cruces', type: 'buzos-camperas' },
-  { value: 'nacimiento', label: 'Linea Nacimiento', type: 'buzos-camperas' },
-  { value: 'veladero', label: 'Linea Veladero', type: 'buzos-camperas' },
-  { value: 'san-francisco', label: 'Linea San Francisco', type: 'buzos-camperas' },
-]
-
-const AUDIENCES = [
-  { value: 'todos', label: 'Todos' },
-  { value: 'hombres', label: 'Hombres' },
-  { value: 'mujeres', label: 'Mujeres' },
-  { value: 'ninos', label: 'Niños' },
+  { value: 'arista', label: 'Línea Arista', type: 'remeras-lisas' },
+  { value: 'pissis', label: 'Línea Pissis', type: 'remeras-lisas' },
+  { value: 'origen', label: 'Línea Origen', type: 'remeras-lisas' },
+  { value: 'terreno', label: 'Línea Terreno', type: 'remeras-lisas' },
+  { value: 'tres-cruces', label: 'Línea Tres Cruces', type: 'buzos' },
 ]
 
 const SORT_OPTIONS = [
   { value: 'destacados', label: 'Destacados' },
   { value: 'precio-asc', label: 'Precio: menor a mayor' },
   { value: 'precio-desc', label: 'Precio: mayor a menor' },
-  { value: 'nuevos', label: 'Mas recientes' },
+  { value: 'nuevos', label: 'Más recientes' },
 ]
 
 /* ─── Icons ─── */
@@ -75,12 +63,10 @@ export interface CatalogFiltersProps {
   onTypeChange: (type: string) => void
   activeLine: string
   onLineChange: (line: string) => void
-  activeAudience: string
-  onAudienceChange: (aud: string) => void
   activeSort: string
   onSortChange: (sort: string) => void
-  activeColors: string[]
-  onColorToggle: (color: string) => void
+  activeColor: string | null
+  onColorChange: (color: string) => void
   activeSizes: string[]
   onSizeToggle: (size: string) => void
   totalProducts: number
@@ -97,8 +83,7 @@ export function MobileFilters(props: CatalogFiltersProps) {
   const activeFilterCount =
     (props.activeType !== 'todos' ? 1 : 0) +
     (props.activeLine !== 'todos' ? 1 : 0) +
-    (props.activeAudience !== 'todos' ? 1 : 0) +
-    props.activeColors.length +
+    (props.activeColor ? 1 : 0) +
     props.activeSizes.length
 
   return (
@@ -149,8 +134,7 @@ export function MobileFilters(props: CatalogFiltersProps) {
           <div className="px-4 py-6 space-y-6 overflow-y-auto max-h-[calc(100vh-140px)]">
             <TypeFilter activeType={props.activeType} onChange={props.onTypeChange} />
             <LineFilter activeType={props.activeType} activeLine={props.activeLine} onChange={props.onLineChange} />
-            <AudienceFilter activeAudience={props.activeAudience} onChange={props.onAudienceChange} />
-            <ColorFilter activeColors={props.activeColors} onToggle={props.onColorToggle} colors={props.availableColors} />
+            <ColorFilter activeColor={props.activeColor} onChange={props.onColorChange} colors={props.availableColors} />
             <SizeFilter activeSizes={props.activeSizes} onToggle={props.onSizeToggle} sizes={props.availableSizes} />
           </div>
           <div className="absolute bottom-0 inset-x-0 px-4 py-4 border-t border-sand-200 bg-white flex gap-3">
@@ -193,8 +177,7 @@ export function DesktopFilters(props: CatalogFiltersProps) {
 
         <TypeFilter activeType={props.activeType} onChange={props.onTypeChange} />
         <LineFilter activeType={props.activeType} activeLine={props.activeLine} onChange={props.onLineChange} />
-        <AudienceFilter activeAudience={props.activeAudience} onChange={props.onAudienceChange} />
-        <ColorFilter activeColors={props.activeColors} onToggle={props.onColorToggle} colors={props.availableColors} />
+        <ColorFilter activeColor={props.activeColor} onChange={props.onColorChange} colors={props.availableColors} />
         <SizeFilter activeSizes={props.activeSizes} onToggle={props.onSizeToggle} sizes={props.availableSizes} />
       </div>
     </div>
@@ -243,14 +226,10 @@ function ActiveFilterPills(props: CatalogFiltersProps) {
     const l = PRODUCT_LINES.find((l) => l.value === props.activeLine)
     if (l) pills.push({ label: l.label, onRemove: () => props.onLineChange('todos') })
   }
-  if (props.activeAudience !== 'todos') {
-    const a = AUDIENCES.find((a) => a.value === props.activeAudience)
-    if (a) pills.push({ label: a.label, onRemove: () => props.onAudienceChange('todos') })
+  if (props.activeColor) {
+    const c = props.availableColors.find((c) => c.hex === props.activeColor)
+    if (c) pills.push({ label: c.label, onRemove: () => props.onColorChange(props.activeColor!) })
   }
-  props.activeColors.forEach((hex) => {
-    const c = props.availableColors.find((c) => c.hex === hex)
-    if (c) pills.push({ label: c.label, onRemove: () => props.onColorToggle(hex) })
-  })
   props.activeSizes.forEach((size) => {
     pills.push({ label: `Talle ${size}`, onRemove: () => props.onSizeToggle(size) })
   })
@@ -340,7 +319,7 @@ function LineFilter({ activeType, activeLine, onChange }: { activeType: string; 
   if (visibleLines.length === 0) return null
 
   return (
-    <FilterSection title="Linea">
+    <FilterSection title="Línea">
       <div className="space-y-0.5">
         <button
           onClick={() => onChange('todos')}
@@ -349,7 +328,7 @@ function LineFilter({ activeType, activeLine, onChange }: { activeType: string; 
             : 'text-volcanic-600 hover:bg-sand-50 hover:text-volcanic-900'
             }`}
         >
-          Todas las lineas
+          Todas las líneas
           {activeLine === 'todos' && <span className="w-1.5 h-1.5 rounded-full bg-terra-500" />}
         </button>
         {visibleLines.map((line) => (
@@ -370,40 +349,19 @@ function LineFilter({ activeType, activeLine, onChange }: { activeType: string; 
   )
 }
 
-function AudienceFilter({ activeAudience, onChange }: { activeAudience: string; onChange: (v: string) => void }) {
-  return (
-    <FilterSection title="Genero">
-      <div className="flex flex-wrap gap-2">
-        {AUDIENCES.map((aud) => (
-          <button
-            key={aud.value}
-            onClick={() => onChange(aud.value)}
-            className={`px-4 py-2 rounded-lg text-body-sm font-medium transition-colors ${activeAudience === aud.value
-              ? 'bg-volcanic-900 text-white'
-              : 'bg-sand-100 text-volcanic-600 hover:bg-sand-200'
-              }`}
-          >
-            {aud.label}
-          </button>
-        ))}
-      </div>
-    </FilterSection>
-  )
-}
-
-function ColorFilter({ activeColors, onToggle, colors }: { activeColors: string[]; onToggle: (c: string) => void; colors: FilterColor[] }) {
+function ColorFilter({ activeColor, onChange, colors }: { activeColor: string | null; onChange: (c: string) => void; colors: FilterColor[] }) {
   if (colors.length === 0) return null
 
   return (
     <FilterSection title="Color">
       <div className="grid grid-cols-4 gap-3">
         {colors.map((c) => {
-          const isActive = activeColors.includes(c.hex)
+          const isActive = activeColor === c.hex
           const isLight = isLightColor(c.hex)
           return (
             <button
               key={c.hex}
-              onClick={() => onToggle(c.hex)}
+              onClick={() => onChange(c.hex)}
               className="flex flex-col items-center gap-1.5 group"
               title={c.label}
             >
@@ -456,8 +414,7 @@ function hasActiveFilters(props: CatalogFiltersProps): boolean {
   return (
     props.activeType !== 'todos' ||
     props.activeLine !== 'todos' ||
-    props.activeAudience !== 'todos' ||
-    props.activeColors.length > 0 ||
+    props.activeColor !== null ||
     props.activeSizes.length > 0
   )
 }

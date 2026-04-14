@@ -75,7 +75,7 @@ export function ShopLoginForm() {
       <div className="text-center py-4">
         <MailIcon className="w-14 h-14 mx-auto text-terra-500 mb-5" />
         <h2 className="font-heading text-display-xs text-volcanic-900 mb-3">
-          Revisa tu email
+          Revisá tu email
         </h2>
         <p className="text-body-md text-volcanic-500 mb-2">
           Enviamos un link para restablecer tu contraseña a:
@@ -84,13 +84,13 @@ export function ShopLoginForm() {
           {resetEmail}
         </p>
         <p className="text-body-sm text-volcanic-500 mb-8">
-          Hace click en el link del email para elegir una nueva contraseña. Si no lo ves, revisa la carpeta de spam.
+          Hacé click en el link del email para elegir una nueva contraseña. Si no lo ves, revisá la carpeta de spam.
         </p>
         <button
           onClick={() => { setMode('login'); setError(null) }}
           className="text-body-sm font-medium text-volcanic-600 hover:text-volcanic-900 transition-colors"
         >
-          Volver al inicio de sesion
+          Volver al inicio de sesión
         </button>
       </div>
     )
@@ -104,7 +104,7 @@ export function ShopLoginForm() {
             Recuperar contraseña
           </h2>
           <p className="text-body-sm text-volcanic-500">
-            Ingresa tu email y te enviaremos un link para restablecer tu contraseña.
+            Ingresá tu email y te enviaremos un link para restablecer tu contraseña.
           </p>
         </div>
 
@@ -134,7 +134,7 @@ export function ShopLoginForm() {
             disabled={loading}
             className="w-full py-3.5 px-4 bg-volcanic-900 hover:bg-volcanic-800 disabled:opacity-50 text-white text-body-md font-semibold rounded-xl transition-all duration-300"
           >
-            {loading ? 'Enviando...' : 'Enviar link de recuperacion'}
+            {loading ? 'Enviando...' : 'Enviar link de recuperación'}
           </button>
         </form>
 
@@ -142,7 +142,7 @@ export function ShopLoginForm() {
           onClick={() => { setMode('login'); setError(null) }}
           className="w-full text-center text-body-sm font-medium text-volcanic-500 hover:text-volcanic-900 transition-colors"
         >
-          Volver al inicio de sesion
+          Volver al inicio de sesión
         </button>
       </div>
     )
@@ -151,8 +151,8 @@ export function ShopLoginForm() {
   return (
     <div className="space-y-5">
       <div className="text-center mb-3">
-        <h1 className="font-heading text-display-sm text-volcanic-900">Iniciar sesion</h1>
-        <p className="mt-2 text-body-md text-volcanic-500">Ingresa a tu cuenta para continuar</p>
+        <h1 className="font-heading text-display-sm text-volcanic-900">Iniciar sesión</h1>
+        <p className="mt-2 text-body-md text-volcanic-500">Ingresá a tu cuenta para continuar</p>
       </div>
 
       <form action={handleSubmit} className="space-y-5">
@@ -224,7 +224,7 @@ export function ShopLoginForm() {
       </button>
 
       <p className="text-center text-body-sm text-volcanic-500">
-        No tenes cuenta?{' '}
+        ¿No tenés cuenta?{' '}
         <a href="/registro" className="font-semibold text-terra-500 hover:text-terra-600 hover:underline">
           Registrate
         </a>

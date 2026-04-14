@@ -8,7 +8,7 @@ export async function toggleFavorite(productId: string, productSlug: string) {
   const { data: { user } } = await supabase.auth.getUser()
 
   if (!user) {
-    return { error: 'Debes iniciar sesion para guardar favoritos.' }
+    return { error: 'Debés iniciar sesión para guardar favoritos.' }
   }
 
   // Check if already favorited

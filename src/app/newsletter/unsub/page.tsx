@@ -1,20 +1,20 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 
-export const metadata: Metadata = { title: 'Desuscripcion | SEISMILES Textil' }
+export const metadata: Metadata = { title: 'Desuscripción | SEISMILES Textil' }
 
 const MESSAGES: Record<string, { heading: string; body: string }> = {
   success: {
     heading: 'Te desuscribiste exitosamente',
-    body: 'No vas a recibir mas emails de nuestro newsletter. Si fue un error, podes volver a suscribirte desde nuestra pagina.',
+    body: 'No vas a recibir más emails de nuestro newsletter. Si fue un error, podés volver a suscribirte desde nuestra página.',
   },
   already: {
     heading: 'Ya estabas desuscrito',
     body: 'Tu email ya no recibe emails de nuestro newsletter.',
   },
   invalid: {
-    heading: 'Enlace invalido',
-    body: 'El enlace de desuscripcion es invalido o ya expiro.',
+    heading: 'Enlace inválido',
+    body: 'El enlace de desuscripción es inválido o ya expiró.',
   },
 }
 

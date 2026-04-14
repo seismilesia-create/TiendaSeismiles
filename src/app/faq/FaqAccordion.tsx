@@ -64,7 +64,7 @@ function AnswerText({ text }: { text: string }) {
       {parts.map((part, i) =>
         part.startsWith('/') ? (
           <Link key={i} href={part} className="text-terra-500 hover:text-terra-600 underline underline-offset-2 transition-colors">
-            Ver politica completa
+            Ver política completa
           </Link>
         ) : (
           <span key={i}>{part}</span>

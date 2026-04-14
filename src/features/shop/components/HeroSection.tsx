@@ -56,9 +56,8 @@ export function HeroSection() {
 
       {/* ── SLIDE 0: Fullscreen landscape (light theme) ── */}
       <div
-        className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${
-          active === 0 ? 'opacity-100' : 'opacity-0 pointer-events-none'
-        }`}
+        className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${active === 0 ? 'opacity-100' : 'opacity-0 pointer-events-none'
+          }`}
         aria-hidden={active !== 0}
       >
         <Image
@@ -83,7 +82,7 @@ export function HeroSection() {
             <h1 className="font-display text-[2.5rem] sm:text-[3.75rem] md:text-[5rem] lg:text-[7rem] leading-[0.95] tracking-[0.04em] uppercase text-volcanic-900 mb-4 lg:mb-6">
               {hero.headline}
             </h1>
-            <p className="text-body-md lg:text-xl leading-relaxed text-volcanic-500 max-w-2xl mb-6 lg:mb-10">
+            <p className="text-body-md lg:text-xl leading-relaxed text-volcanic-700 max-w-2xl mb-6 lg:mb-10">
               {hero.subheadline}
             </p>
             <div className="flex flex-col sm:flex-row items-center lg:items-start justify-center lg:justify-start gap-3 lg:gap-4">
@@ -112,9 +111,8 @@ export function HeroSection() {
 
       {/* ── SLIDE 1: Split layout (dark theme) ── */}
       <div
-        className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${
-          active === 1 ? 'opacity-100' : 'opacity-0 pointer-events-none'
-        }`}
+        className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${active === 1 ? 'opacity-100' : 'opacity-0 pointer-events-none'
+          }`}
         aria-hidden={active !== 1}
       >
         <div className="absolute inset-0 bg-volcanic-900" />
@@ -136,31 +134,22 @@ export function HeroSection() {
               <div className="inline-flex items-center gap-2 px-3 py-1.5 lg:px-4 lg:py-2 rounded-full bg-white/10 backdrop-blur-sm border border-white/10 mb-5 lg:mb-8">
                 <MountainIcon className="w-4 h-4 text-terra-400" />
                 <span className="text-body-xs uppercase tracking-widest font-semibold text-white/70">
-                  {hero.badge}
+                  Línea Origen
                 </span>
               </div>
               <h1 className="font-display text-[2.25rem] sm:text-[3.5rem] lg:text-[4.5rem] xl:text-[5.5rem] leading-[0.95] tracking-[0.04em] uppercase text-white mb-4 lg:mb-6">
-                {hero.headline}
+                Donde empieza todo
               </h1>
               <p className="text-body-md lg:text-xl leading-relaxed text-white/60 max-w-lg mb-6 lg:mb-10">
-                {hero.subheadline}
+                Suavidad, frescura y equilibrio. Algodón premium pensado para acompañarte en cada movimiento, todos los días.
               </p>
               <div className="flex flex-col sm:flex-row items-start gap-3 lg:gap-4">
                 <MagneticButton>
                   <Link
-                    href={hero.ctaPrimary.href}
+                    href="/catalogo?linea=origen"
                     className="group flex items-center gap-2 px-6 py-3 lg:px-8 lg:py-4 text-body-sm lg:text-body-md font-semibold rounded-xl bg-white hover:bg-sand-100 text-volcanic-900 transition-all duration-300 hover:shadow-warm-lg"
                   >
-                    {hero.ctaPrimary.text}
-                    <ArrowRightIcon className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-300" />
-                  </Link>
-                </MagneticButton>
-                <MagneticButton>
-                  <Link
-                    href={hero.ctaSecondary.href}
-                    className="group flex items-center gap-2 px-6 py-3 lg:px-8 lg:py-4 text-body-sm lg:text-body-md font-semibold rounded-xl bg-white/10 backdrop-blur-sm hover:bg-white/20 text-white border border-white/15 transition-all duration-300"
-                  >
-                    {hero.ctaSecondary.text}
+                    Ver Colección
                     <ArrowRightIcon className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-300" />
                   </Link>
                 </MagneticButton>
@@ -172,14 +161,13 @@ export function HeroSection() {
 
       {/* ── SLIDE 2: Seasonal collection (Arista line) ── */}
       <div
-        className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${
-          active === 2 ? 'opacity-100' : 'opacity-0 pointer-events-none'
-        }`}
+        className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${active === 2 ? 'opacity-100' : 'opacity-0 pointer-events-none'
+          }`}
         aria-hidden={active !== 2}
       >
         <Image
           src="/images/Temporada.jpg"
-          alt="Ropa de temporada — linea Arista"
+          alt="Ropa de temporada — línea Arista"
           fill
           className="object-cover"
         />
@@ -199,7 +187,7 @@ export function HeroSection() {
               Lo mejor para<br />esta temporada
             </h1>
             <p className="text-body-md lg:text-xl leading-relaxed text-white/70 max-w-xl mb-6 lg:mb-10">
-              Descubri la linea Arista. Piezas pensadas para acompañarte en cada aventura.
+              Descubrí la Línea Arista. Piezas pensadas para acompañarte en cada aventura.
             </p>
             <div className="flex flex-col sm:flex-row items-start gap-3 lg:gap-4">
               <MagneticButton>
@@ -207,16 +195,7 @@ export function HeroSection() {
                   href="/catalogo?linea=arista"
                   className="group flex items-center gap-2 px-6 py-3 lg:px-8 lg:py-4 text-body-sm lg:text-body-md font-semibold rounded-xl bg-white hover:bg-sand-100 text-volcanic-900 transition-all duration-300 hover:shadow-warm-lg"
                 >
-                  Ver coleccion
-                  <ArrowRightIcon className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-300" />
-                </Link>
-              </MagneticButton>
-              <MagneticButton>
-                <Link
-                  href={hero.ctaSecondary.href}
-                  className="group flex items-center gap-2 px-6 py-3 lg:px-8 lg:py-4 text-body-sm lg:text-body-md font-semibold rounded-xl bg-white/10 backdrop-blur-sm hover:bg-white/20 text-white border border-white/15 transition-all duration-300"
-                >
-                  {hero.ctaSecondary.text}
+                  Ver colección
                   <ArrowRightIcon className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-300" />
                 </Link>
               </MagneticButton>
@@ -234,13 +213,11 @@ export function HeroSection() {
             className="group relative h-[3px] w-[60px] cursor-pointer"
             aria-label={`Slide ${i + 1}`}
           >
-            <div className={`absolute inset-0 rounded-full transition-colors duration-700 ${
-              active === 0 ? 'bg-volcanic-900/20' : 'bg-white/25'
-            }`} />
+            <div className={`absolute inset-0 rounded-full transition-colors duration-700 ${active === 0 ? 'bg-volcanic-900/20' : 'bg-white/25'
+              }`} />
             <div
-              className={`absolute inset-y-0 left-0 rounded-full transition-colors duration-700 ${
-                active === 0 ? 'bg-volcanic-900' : 'bg-white'
-              }`}
+              className={`absolute inset-y-0 left-0 rounded-full transition-colors duration-700 ${active === 0 ? 'bg-volcanic-900' : 'bg-white'
+                }`}
               style={{
                 width: i === active ? `${progress * 100}%` : i < active ? '100%' : '0%',
               }}

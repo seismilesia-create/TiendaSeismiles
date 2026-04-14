@@ -19,7 +19,7 @@ import {
 const CATEGORIAS = [
   { value: 'remeras-lisas', label: 'Remeras Lisas' },
   { value: 'estampadas', label: 'Estampadas' },
-  { value: 'buzos-camperas', label: 'Buzos y Camperas' },
+  { value: 'buzos', label: 'Buzos' },
 ]
 
 const LINEAS: Record<string, { value: string; label: string }[]> = {
@@ -32,7 +32,7 @@ const LINEAS: Record<string, { value: string; label: string }[]> = {
   estampadas: [
     { value: 'veta', label: 'Linea Veta' },
   ],
-  'buzos-camperas': [
+  buzos: [
     { value: 'tres-cruces', label: 'Linea Tres Cruces' },
     { value: 'nacimiento', label: 'Linea Nacimiento' },
     { value: 'veladero', label: 'Linea Veladero' },
@@ -43,7 +43,6 @@ const LINEAS: Record<string, { value: string; label: string }[]> = {
 const GENEROS = [
   { value: 'hombres', label: 'Hombres' },
   { value: 'mujeres', label: 'Mujeres' },
-  { value: 'ninos', label: 'Niños' },
 ]
 
 const TALLES = ['XS', 'S', 'M', 'L', 'XL', '2XL', '3XL', '4XL']
@@ -105,6 +104,10 @@ interface ExistingProduct {
 
 export interface ProductFormProps {
   product?: ExistingProduct
+  /** How many products are currently flagged as destacado in the DB. */
+  featuredCount: number
+  /** Hard cap on simultaneous destacados. */
+  featuredLimit: number
 }
 
 // ── Helpers ──
@@ -138,7 +141,7 @@ function StarIcon({ className, filled }: { className?: string; filled?: boolean 
 
 // ── Main Component ──
 
-export function ProductForm({ product }: ProductFormProps) {
+export function ProductForm({ product, featuredCount, featuredLimit }: ProductFormProps) {
   const router = useRouter()
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -146,6 +149,14 @@ export function ProductForm({ product }: ProductFormProps) {
   const [slug, setSlug] = useState(product?.slug ?? '')
   const [categoria, setCategoria] = useState(product?.categoria ?? '')
   const [linea, setLinea] = useState(product?.linea ?? '')
+  const [destacado, setDestacado] = useState(product?.destacado ?? false)
+
+  // Slot accounting: if this product is already destacado, it's part of the count.
+  const wasFeatured = product?.destacado ?? false
+  const othersFeatured = wasFeatured ? Math.max(0, featuredCount - 1) : featuredCount
+  const slotsTaken = othersFeatured + (destacado ? 1 : 0)
+  const featuredSlotsFull = othersFeatured >= featuredLimit
+  const canToggleFeatured = !featuredSlotsFull || destacado
 
   // Product ID (from prop or after creation)
   const [productId, setProductId] = useState<string | null>(product?.id ?? null)
@@ -411,17 +422,39 @@ export function ProductForm({ product }: ProductFormProps) {
               placeholder="Ej: Lavar a mano, no usar lavandina" />
           </div>
 
-          <div className="sm:col-span-2 flex gap-6">
-            <label className="flex items-center gap-2.5 cursor-pointer">
-              <input type="checkbox" name="activo" defaultChecked={product?.activo ?? true}
-                className="w-4 h-4 rounded border-sand-300 text-terra-500 focus:ring-terra-500" />
-              <span className="text-body-sm text-volcanic-700">Activo</span>
-            </label>
-            <label className="flex items-center gap-2.5 cursor-pointer">
-              <input type="checkbox" name="destacado" defaultChecked={product?.destacado ?? false}
-                className="w-4 h-4 rounded border-sand-300 text-terra-500 focus:ring-terra-500" />
-              <span className="text-body-sm text-volcanic-700">Destacado (aparece en la landing)</span>
-            </label>
+          <div className="sm:col-span-2 flex flex-col gap-3">
+            <div className="flex flex-wrap gap-x-6 gap-y-3">
+              <label className="flex items-center gap-2.5 cursor-pointer">
+                <input type="checkbox" name="activo" defaultChecked={product?.activo ?? true}
+                  className="w-4 h-4 rounded border-sand-300 text-terra-500 focus:ring-terra-500" />
+                <span className="text-body-sm text-volcanic-700">Activo</span>
+              </label>
+              <label className={`flex items-center gap-2.5 ${canToggleFeatured ? 'cursor-pointer' : 'cursor-not-allowed opacity-60'}`}>
+                <input
+                  type="checkbox"
+                  name="destacado"
+                  checked={destacado}
+                  disabled={!canToggleFeatured}
+                  onChange={(e) => setDestacado(e.target.checked)}
+                  className="w-4 h-4 rounded border-sand-300 text-terra-500 focus:ring-terra-500 disabled:cursor-not-allowed"
+                />
+                <span className="text-body-sm text-volcanic-700">
+                  Destacado (aparece en la landing)
+                </span>
+                <span className={`text-body-xs font-mono px-2 py-0.5 rounded-md ${
+                  slotsTaken >= featuredLimit
+                    ? 'bg-terra-50 text-terra-600 border border-terra-200'
+                    : 'bg-sand-100 text-volcanic-500'
+                }`}>
+                  {slotsTaken} / {featuredLimit}
+                </span>
+              </label>
+            </div>
+            {!canToggleFeatured && (
+              <p className="text-body-xs text-volcanic-500 ml-6">
+                Límite de {featuredLimit} destacados alcanzado. Para añadir éste, primero quitá uno desde la <a href="/admin/productos" className="text-terra-500 hover:underline">lista de productos</a>.
+              </p>
+            )}
           </div>
         </div>
       </section>

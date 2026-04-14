@@ -9,7 +9,7 @@ import { ProfileNav } from './ProfileNav'
 
 export const metadata: Metadata = {
   title: 'Mi perfil | SEISMILES Textil',
-  description: 'Gestiona tu cuenta y revisa tus pedidos en SEISMILES Textil.',
+  description: 'Gestioná tu cuenta y revisá tus pedidos en SEISMILES Textil.',
 }
 
 function UserIcon({ className }: { className?: string }) {
@@ -52,7 +52,7 @@ export default async function PerfilPage() {
         <form action={signout}>
           <button className="flex items-center gap-2 px-4 py-2 rounded-xl text-body-sm text-volcanic-500 hover:text-red-500 hover:bg-red-50 border border-sand-200 transition-all">
             <LogoutIcon className="w-4 h-4" />
-            Cerrar sesion
+            Cerrar sesión
           </button>
         </form>
       </div>

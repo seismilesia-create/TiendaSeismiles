@@ -108,11 +108,10 @@ export async function deleteGiftCardDefinition(id: string) {
 export async function uploadGiftCardImage(
   defId: string,
   fileBuffer: ArrayBuffer,
-  fileName: string,
+  ext: string,
   contentType: string,
 ): Promise<{ url: string }> {
   const service = createServiceClient()
-  const ext = fileName.split('.').pop() || 'jpg'
   const storagePath = `gift-cards/${defId}-${Date.now()}.${ext}`
 
   const { error: uploadError } = await service.storage

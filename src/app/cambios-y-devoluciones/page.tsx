@@ -6,7 +6,7 @@ import { createClient, createServiceClient } from '@/lib/supabase/server'
 
 export const metadata: Metadata = {
   title: 'Cambios y Devoluciones | SEISMILES Textil',
-  description: 'Politica de cambios y devoluciones de SEISMILES Textil. Proceso simple, transparente y sin complicaciones.',
+  description: 'Política de cambios y devoluciones de SEISMILES Textil. Proceso simple, transparente y sin complicaciones.',
 }
 
 function RefreshIcon({ className }: { className?: string }) {
@@ -65,7 +65,7 @@ export default async function CambiosDevolucionesPage() {
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/60 backdrop-blur-sm border border-volcanic-900/5 mb-8">
               <RefreshIcon className="w-4 h-4 text-terra-500" />
               <span className="text-body-xs uppercase tracking-widest text-volcanic-600 font-semibold">
-                Politica oficial
+                Política oficial
               </span>
             </div>
 
@@ -74,7 +74,7 @@ export default async function CambiosDevolucionesPage() {
             </h1>
             <p className="text-body-lg text-volcanic-500 max-w-2xl mx-auto leading-relaxed">
               En SEISMILES trabajamos para que cada pieza que elijas te brinde la solidez y el confort de la montaña.
-              Si necesitas realizar un cambio o devolucion, queremos que el proceso sea simple y transparente.
+              Si necesitas realizar un cambio o devolución, queremos que el proceso sea simple y transparente.
             </p>
           </div>
         </section>
@@ -94,7 +94,7 @@ export default async function CambiosDevolucionesPage() {
 
               <div className="space-y-5 text-body-md text-volcanic-600 leading-relaxed">
                 <p>
-                  Podes realizar el cambio de cualquier articulo dentro de los <strong className="text-volcanic-900">30 dias corridos</strong> posteriores a la recepcion de tu compra.
+                  Podes realizar el cambio de cualquier artículo dentro de los <strong className="text-volcanic-900">30 días corridos</strong> posteriores a la recepcion de tu compra.
                 </p>
 
                 <div className="rounded-xl bg-sand-50 border border-sand-200 p-4">
@@ -124,7 +124,7 @@ export default async function CambiosDevolucionesPage() {
                   <div className="border-l-2 border-terra-500 pl-4">
                     <p className="text-body-sm font-semibold text-volcanic-900">Cambio por Correo</p>
                     <p className="text-body-sm text-volcanic-500 mt-1">
-                      Si sos de otra provincia o preferis el envio, te indicaremos los pasos a seguir.
+                      Si sos de otra provincia o preferís el envío, te indicaremos los pasos a seguir.
                     </p>
                   </div>
                 </div>
@@ -133,14 +133,14 @@ export default async function CambiosDevolucionesPage() {
                   <div className="rounded-xl bg-sand-50 border border-sand-200 p-4">
                     <p className="text-body-sm font-semibold text-volcanic-900 mb-1">Costos</p>
                     <p className="text-body-sm text-volcanic-500">
-                      En cambios por talle o color, el envio de la prenda hacia nosotros queda a cargo del cliente, y SEISMILES se hace cargo del re-envio del nuevo talle.
+                      En cambios por talle o color, el envío de la prenda hacia nosotros queda a cargo del cliente, y SEISMILES se hace cargo del re-envío del nuevo talle.
                     </p>
                   </div>
 
                   <div className="rounded-xl bg-sand-50 border border-sand-200 p-4">
                     <p className="text-body-sm font-semibold text-volcanic-900 mb-1">Fallas</p>
                     <p className="text-body-sm text-volcanic-500">
-                      Si el cambio es por una falla de fabricacion, nosotros asumimos todos los gastos logisticos.
+                      Si el cambio es por una falla de fabricación, nosotros asumimos todos los gastos logísticos.
                     </p>
                   </div>
                 </div>
@@ -160,21 +160,21 @@ export default async function CambiosDevolucionesPage() {
                 <div className="rounded-xl bg-volcanic-900 text-white p-5">
                   <p className="text-body-xs uppercase tracking-widest text-terra-400 font-semibold mb-2">Derecho de Arrepentimiento</p>
                   <p className="text-body-sm text-white/70">
-                    De acuerdo a la normativa vigente, tenes <strong className="text-white">10 dias corridos</strong> desde que recibis el producto para solicitar la devolucion si no estas conforme.
+                    De acuerdo a la normativa vigente, tenés <strong className="text-white">10 días corridos</strong> desde que recibís el producto para solicitar la devolución si no estás conforme.
                   </p>
                 </div>
 
                 <div className="rounded-xl bg-sand-50 border border-sand-200 p-4">
                   <p className="text-body-sm font-semibold text-volcanic-900 mb-1">Procedimiento</p>
                   <p className="text-body-sm text-volcanic-500">
-                    Contactanos al WhatsApp <strong>3834243614</strong> indicando tu numero de pedido.
+                    Contactanos al WhatsApp <strong>3834243614</strong> indicando tu número de pedido.
                   </p>
                 </div>
 
                 <div className="rounded-xl bg-sand-50 border border-sand-200 p-4">
                   <p className="text-body-sm font-semibold text-volcanic-900 mb-1">Reembolso</p>
                   <p className="text-body-sm text-volcanic-500">
-                    El reintegro se realizara por el mismo medio de pago original una vez que hayamos recibido y verificado el estado de la prenda en nuestro taller.
+                    El reintegro se realizará por el mismo medio de pago original una vez que hayamos recibido y verificado el estado de la prenda en nuestro taller.
                   </p>
                 </div>
               </div>
@@ -186,19 +186,19 @@ export default async function CambiosDevolucionesPage() {
                 <div className="w-10 h-10 rounded-xl bg-terra-500/10 flex items-center justify-center">
                   <TagIcon className="w-5 h-5 text-terra-500" />
                 </div>
-                <h2 className="font-heading text-display-xs text-volcanic-900">3. Productos en Promocion o Liquidacion</h2>
+                <h2 className="font-heading text-display-xs text-volcanic-900">3. Productos en Promoción o Liquidación</h2>
               </div>
 
               <div className="text-body-md text-volcanic-600 leading-relaxed">
-                <p className="mb-4">Para aquellas prendas adquiridas con descuentos especiales o en eventos de liquidacion:</p>
+                <p className="mb-4">Para aquellas prendas adquiridas con descuentos especiales o en eventos de liquidación:</p>
                 <ul className="space-y-3">
                   <li className="flex items-start gap-3">
                     <span className="mt-1.5 h-1.5 w-1.5 rounded-full bg-terra-500 shrink-0" />
-                    <span>Los cambios estan sujetos a disponibilidad de stock.</span>
+                    <span>Los cambios están sujetos a disponibilidad de stock.</span>
                   </li>
                   <li className="flex items-start gap-3">
                     <span className="mt-1.5 h-1.5 w-1.5 rounded-full bg-terra-500 shrink-0" />
-                    <span>Los gastos de envio por cambio o devolucion en estos productos corren por cuenta del cliente.</span>
+                    <span>Los gastos de envío por cambio o devolución en estos productos corren por cuenta del cliente.</span>
                   </li>
                 </ul>
               </div>
@@ -210,10 +210,10 @@ export default async function CambiosDevolucionesPage() {
 
               <div className="relative">
                 <h3 className="font-heading text-xl lg:text-2xl text-white mb-3">
-                  Necesitas hacer un cambio o devolucion?
+                  Necesitas hacer un cambio o devolución?
                 </h3>
                 <p className="text-body-md text-white/50 mb-6 max-w-lg mx-auto">
-                  Escribinos por WhatsApp y te guiamos en el proceso. Respuesta rapida y personalizada.
+                  Escribinos por WhatsApp y te guiamos en el proceso. Respuesta rápida y personalizada.
                 </p>
                 <a
                   href={`https://wa.me/${WHATSAPP_NUMBER}?text=Hola%20SEISMILES!%20Quiero%20consultar%20sobre%20un%20cambio%2Fdevolucion.`}

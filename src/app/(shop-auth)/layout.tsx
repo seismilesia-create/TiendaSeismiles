@@ -20,7 +20,7 @@ export default function ShopAuthLayout({ children }: { children: React.ReactNode
         <div className="relative z-10 flex flex-col justify-between p-12 w-full">
           <Link href="/">
             <Image
-              src="/images/logo-seismiles.png"
+              src="/images/logo-seismiles-v2.png"
               alt="SEISMILES Textil"
               width={160}
               height={68}
@@ -49,7 +49,7 @@ export default function ShopAuthLayout({ children }: { children: React.ReactNode
         <header className="py-6 px-6 lg:hidden">
           <Link href="/">
             <Image
-              src="/images/logo-seismiles.png"
+              src="/images/logo-seismiles-v2.png"
               alt="SEISMILES Textil"
               width={140}
               height={60}

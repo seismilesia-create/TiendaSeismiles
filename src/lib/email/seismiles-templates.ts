@@ -1,9 +1,25 @@
 // SEISMILES Textil — Branded email templates
 // Colors: volcanic-900 (#1C1917), terra-500 (#C75B39), sand-100 (#F5F0EB)
+//
+// SECURITY: every interpolation of `data.*` string fields below goes through
+// `escapeHtml()`. Adding a new template? Do the same. The trust boundary for
+// these templates is INSIDE the function — callers can pass user input freely.
+
+import { escapeHtml } from './escape'
+
+/**
+ * Returns a CSS color value only if it looks like a hex color (#RGB, #RRGGBB
+ * or #RRGGBBAA). Anything else falls back to a neutral grey, so an attacker
+ * can't break out of a `style="background-color:..."` attribute.
+ */
+function safeColor(hex: string | null | undefined, fallback = '#999999'): string {
+  if (!hex) return fallback
+  return /^#[0-9A-Fa-f]{3,8}$/.test(hex) ? hex : fallback
+}
 
 const BRAND = {
   name: 'SEISMILES Textil',
-  tagline: 'Nacidos a 6000 metros',
+  tagline: 'Calidad de altura',
   volcanic: '#1C1917',
   terra: '#C75B39',
   sand: '#F5F0EB',
@@ -13,7 +29,7 @@ const BRAND = {
 }
 
 function baseLayout(content: string, footerNote?: string): string {
-  const footerText = footerNote ?? 'Recibis este email porque te suscribiste a una notificacion de stock.'
+  const footerText = footerNote ?? 'Recibís este email porque te suscribiste a una notificación de stock.'
   return `<!DOCTYPE html>
 <html lang="es">
 <head>
@@ -55,7 +71,7 @@ function baseLayout(content: string, footerNote?: string): string {
               </p>
               <p style="margin:0;font-size:11px;color:${BRAND.textSecondary};">
                 ${footerText}
-                <br/>Si no fuiste vos, podes ignorar este mensaje.
+                <br/>Si no fuiste vos, podés ignorar este mensaje.
               </p>
             </td>
           </tr>
@@ -78,6 +94,11 @@ interface StockConfirmData {
 }
 
 export function stockNotificationConfirmEmail(data: StockConfirmData): string {
+  const productName = escapeHtml(data.productName)
+  const talle = escapeHtml(data.talle)
+  const colorName = escapeHtml(data.colorName)
+  const colorHex = safeColor(data.colorHex)
+
   const content = `
     <h1 style="margin:0 0 8px;font-size:20px;font-weight:700;color:${BRAND.textPrimary};">
       Te vamos a avisar
@@ -94,14 +115,14 @@ export function stockNotificationConfirmEmail(data: StockConfirmData): string {
             Producto
           </p>
           <p style="margin:0 0 16px;font-size:16px;font-weight:700;color:${BRAND.textPrimary};">
-            ${data.productName}
+            ${productName}
           </p>
           <table cellpadding="0" cellspacing="0">
             <tr>
               <td style="padding-right:20px;">
                 <p style="margin:0 0 4px;font-size:11px;color:${BRAND.textSecondary};text-transform:uppercase;letter-spacing:0.08em;">Talle</p>
                 <span style="display:inline-block;background-color:${BRAND.volcanic};color:white;font-size:13px;font-weight:700;padding:6px 14px;border-radius:8px;">
-                  ${data.talle}
+                  ${talle}
                 </span>
               </td>
               <td>
@@ -109,10 +130,10 @@ export function stockNotificationConfirmEmail(data: StockConfirmData): string {
                 <table cellpadding="0" cellspacing="0">
                   <tr>
                     <td style="vertical-align:middle;padding-right:8px;">
-                      <span style="display:inline-block;width:20px;height:20px;border-radius:50%;background-color:${data.colorHex};border:1px solid ${BRAND.sandDark};"></span>
+                      <span style="display:inline-block;width:20px;height:20px;border-radius:50%;background-color:${colorHex};border:1px solid ${BRAND.sandDark};"></span>
                     </td>
                     <td style="vertical-align:middle;">
-                      <span style="font-size:13px;font-weight:600;color:${BRAND.textPrimary};">${data.colorName}</span>
+                      <span style="font-size:13px;font-weight:600;color:${BRAND.textPrimary};">${colorName}</span>
                     </td>
                   </tr>
                 </table>
@@ -124,7 +145,7 @@ export function stockNotificationConfirmEmail(data: StockConfirmData): string {
     </table>
 
     <p style="margin:0;font-size:13px;color:${BRAND.textSecondary};line-height:1.6;">
-      Mientras tanto, podes seguir explorando nuestra coleccion.
+      Mientras tanto, podés seguir explorando nuestra colección.
     </p>
   `
   return baseLayout(content)
@@ -142,7 +163,13 @@ interface BackInStockData {
 }
 
 export function backInStockEmail(data: BackInStockData): string {
-  const productUrl = `${data.siteUrl}/catalogo/${data.productSlug}`
+  const productName = escapeHtml(data.productName)
+  const talle = escapeHtml(data.talle)
+  const colorName = escapeHtml(data.colorName)
+  const colorHex = safeColor(data.colorHex)
+  // productSlug came from slugify() server-side, but encode anyway as defense in depth.
+  const productUrl = `${data.siteUrl}/catalogo/${encodeURIComponent(data.productSlug)}`
+
   const content = `
     <h1 style="margin:0 0 8px;font-size:20px;font-weight:700;color:${BRAND.textPrimary};">
       ¡Ya hay stock disponible!
@@ -159,14 +186,14 @@ export function backInStockEmail(data: BackInStockData): string {
             Disponible
           </p>
           <p style="margin:0 0 16px;font-size:16px;font-weight:700;color:${BRAND.textPrimary};">
-            ${data.productName}
+            ${productName}
           </p>
           <table cellpadding="0" cellspacing="0">
             <tr>
               <td style="padding-right:20px;">
                 <p style="margin:0 0 4px;font-size:11px;color:${BRAND.textSecondary};text-transform:uppercase;letter-spacing:0.08em;">Talle</p>
                 <span style="display:inline-block;background-color:${BRAND.volcanic};color:white;font-size:13px;font-weight:700;padding:6px 14px;border-radius:8px;">
-                  ${data.talle}
+                  ${talle}
                 </span>
               </td>
               <td>
@@ -174,10 +201,10 @@ export function backInStockEmail(data: BackInStockData): string {
                 <table cellpadding="0" cellspacing="0">
                   <tr>
                     <td style="vertical-align:middle;padding-right:8px;">
-                      <span style="display:inline-block;width:20px;height:20px;border-radius:50%;background-color:${data.colorHex};border:1px solid ${BRAND.sandDark};"></span>
+                      <span style="display:inline-block;width:20px;height:20px;border-radius:50%;background-color:${colorHex};border:1px solid ${BRAND.sandDark};"></span>
                     </td>
                     <td style="vertical-align:middle;">
-                      <span style="font-size:13px;font-weight:600;color:${BRAND.textPrimary};">${data.colorName}</span>
+                      <span style="font-size:13px;font-weight:600;color:${BRAND.textPrimary};">${colorName}</span>
                     </td>
                   </tr>
                 </table>
@@ -212,24 +239,30 @@ interface AdminNewQuestionData {
 }
 
 export function adminNewQuestionEmail(data: AdminNewQuestionData): string {
+  // PUBLIC-TRIGGERED: any logged-in user can cause this email. Escape everything.
+  const customerName = data.customerName ? escapeHtml(data.customerName) : null
+  const customerEmail = escapeHtml(data.customerEmail)
+  // Preserve newlines in the user message but escape the rest.
+  const message = escapeHtml(data.message).replace(/\n/g, '<br>')
   const adminUrl = `${data.siteUrl}/admin/faq`
+
   const content = `
     <p style="margin:0 0 4px;font-size:11px;color:${BRAND.terra};text-transform:uppercase;letter-spacing:0.1em;font-weight:600;">
       Nueva consulta recibida
     </p>
     <h1 style="margin:0 0 8px;font-size:20px;font-weight:700;color:${BRAND.textPrimary};">
-      Un cliente envio una pregunta
+      Un cliente envió una pregunta
     </h1>
     <p style="margin:0 0 28px;font-size:14px;color:${BRAND.textSecondary};line-height:1.6;">
-      <strong style="color:${BRAND.textPrimary};">${data.customerName || data.customerEmail}</strong>
-      (${data.customerEmail}) escribio:
+      <strong style="color:${BRAND.textPrimary};">${customerName || customerEmail}</strong>
+      (${customerEmail}) escribio:
     </p>
 
     <table width="100%" cellpadding="0" cellspacing="0" style="background-color:${BRAND.sand};border-radius:12px;padding:20px 24px;margin-bottom:28px;">
       <tr>
         <td>
           <p style="margin:0;font-size:14px;color:${BRAND.textPrimary};line-height:1.6;font-style:italic;">
-            "${data.message}"
+            "${message}"
           </p>
         </td>
       </tr>
@@ -245,7 +278,7 @@ export function adminNewQuestionEmail(data: AdminNewQuestionData): string {
       </tr>
     </table>
   `
-  return baseLayout(content, 'Recibis este email porque sos administrador de SEISMILES Textil.')
+  return baseLayout(content, 'Recibís este email porque sos administrador de SEISMILES Textil.')
 }
 
 // ── FAQ reply email to user ──
@@ -258,12 +291,18 @@ interface FaqReplyData {
 }
 
 export function faqReplyEmail(data: FaqReplyData): string {
+  const customerName = data.customerName ? escapeHtml(data.customerName) : null
+  // Quoting back the user's own question — escape it.
+  const originalQuestion = escapeHtml(data.originalQuestion).replace(/\n/g, '<br>')
+  // replyText is admin-set; escape anyway for defense in depth.
+  const replyText = escapeHtml(data.replyText).replace(/\n/g, '<br>')
+
   const content = `
     <h1 style="margin:0 0 8px;font-size:20px;font-weight:700;color:${BRAND.textPrimary};">
       Respondimos tu consulta
     </h1>
     <p style="margin:0 0 28px;font-size:14px;color:${BRAND.textSecondary};line-height:1.6;">
-      Hola${data.customerName ? ` ${data.customerName}` : ''}! Te respondemos tu pregunta:
+      Hola${customerName ? ` ${customerName}` : ''}! Te respondemos tu pregunta:
     </p>
 
     <!-- Original question -->
@@ -272,7 +311,7 @@ export function faqReplyEmail(data: FaqReplyData): string {
         <td>
           <p style="margin:0 0 4px;font-size:11px;color:${BRAND.textSecondary};text-transform:uppercase;letter-spacing:0.08em;">Tu pregunta</p>
           <p style="margin:0;font-size:14px;color:${BRAND.textPrimary};line-height:1.6;font-style:italic;">
-            "${data.originalQuestion}"
+            "${originalQuestion}"
           </p>
         </td>
       </tr>
@@ -284,7 +323,7 @@ export function faqReplyEmail(data: FaqReplyData): string {
         <td>
           <p style="margin:0 0 4px;font-size:11px;color:${BRAND.terra};text-transform:uppercase;letter-spacing:0.08em;font-weight:600;">Nuestra respuesta</p>
           <p style="margin:0;font-size:14px;color:${BRAND.textPrimary};line-height:1.6;">
-            ${data.replyText}
+            ${replyText}
           </p>
         </td>
       </tr>
@@ -300,7 +339,7 @@ export function faqReplyEmail(data: FaqReplyData): string {
       </tr>
     </table>
   `
-  return baseLayout(content, 'Recibis este email porque enviaste una consulta en SEISMILES Textil.')
+  return baseLayout(content, 'Recibís este email porque enviaste una consulta en SEISMILES Textil.')
 }
 
 // ── Order confirmation email to customer ──
@@ -327,30 +366,36 @@ const PAYMENT_DISPLAY: Record<string, string> = {
 }
 
 export function orderConfirmationEmail(data: OrderConfirmationData): string {
+  const customerName = data.customerName ? escapeHtml(data.customerName) : null
+  const numeroPedido = escapeHtml(data.numeroPedido)
+  const productName = escapeHtml(data.productName)
+  const talle = data.talle ? escapeHtml(data.talle) : null
+  const colorName = data.colorName ? escapeHtml(data.colorName) : null
+  const colorHex = safeColor(data.colorHex)
   const perfilUrl = `${data.siteUrl}/perfil`
-  const paymentLabel = PAYMENT_DISPLAY[data.metodoPago] ?? data.metodoPago
+  const paymentLabel = escapeHtml(PAYMENT_DISPLAY[data.metodoPago] ?? data.metodoPago)
 
-  const colorBlock = data.colorName && data.colorHex
+  const colorBlock = colorName && data.colorHex
     ? `<td>
         <p style="margin:0 0 4px;font-size:11px;color:${BRAND.textSecondary};text-transform:uppercase;letter-spacing:0.08em;">Color</p>
         <table cellpadding="0" cellspacing="0">
           <tr>
             <td style="vertical-align:middle;padding-right:8px;">
-              <span style="display:inline-block;width:20px;height:20px;border-radius:50%;background-color:${data.colorHex};border:1px solid ${BRAND.sandDark};"></span>
+              <span style="display:inline-block;width:20px;height:20px;border-radius:50%;background-color:${colorHex};border:1px solid ${BRAND.sandDark};"></span>
             </td>
             <td style="vertical-align:middle;">
-              <span style="font-size:13px;font-weight:600;color:${BRAND.textPrimary};">${data.colorName}</span>
+              <span style="font-size:13px;font-weight:600;color:${BRAND.textPrimary};">${colorName}</span>
             </td>
           </tr>
         </table>
       </td>`
     : ''
 
-  const talleBlock = data.talle
+  const talleBlock = talle
     ? `<td style="padding-right:20px;">
         <p style="margin:0 0 4px;font-size:11px;color:${BRAND.textSecondary};text-transform:uppercase;letter-spacing:0.08em;">Talle</p>
         <span style="display:inline-block;background-color:${BRAND.volcanic};color:white;font-size:13px;font-weight:700;padding:6px 14px;border-radius:8px;">
-          ${data.talle}
+          ${talle}
         </span>
       </td>`
     : ''
@@ -360,10 +405,10 @@ export function orderConfirmationEmail(data: OrderConfirmationData): string {
       Pedido confirmado
     </p>
     <h1 style="margin:0 0 8px;font-size:20px;font-weight:700;color:${BRAND.textPrimary};">
-      ¡Gracias por tu compra${data.customerName ? `, ${data.customerName}` : ''}!
+      ¡Gracias por tu compra${customerName ? `, ${customerName}` : ''}!
     </h1>
     <p style="margin:0 0 28px;font-size:14px;color:${BRAND.textSecondary};line-height:1.6;">
-      Tu pedido <strong style="color:${BRAND.textPrimary};">${data.numeroPedido}</strong> fue confirmado con exito.
+      Tu pedido <strong style="color:${BRAND.textPrimary};">${numeroPedido}</strong> fue confirmado con éxito.
       Te avisaremos cuando este en camino.
     </p>
 
@@ -375,7 +420,7 @@ export function orderConfirmationEmail(data: OrderConfirmationData): string {
             Producto
           </p>
           <p style="margin:0 0 16px;font-size:16px;font-weight:700;color:${BRAND.textPrimary};">
-            ${data.productName}
+            ${productName}
           </p>
           <table cellpadding="0" cellspacing="0">
             <tr>
@@ -431,10 +476,10 @@ export function orderConfirmationEmail(data: OrderConfirmationData): string {
     </table>
 
     <p style="margin:20px 0 0;font-size:13px;color:${BRAND.textSecondary};line-height:1.6;text-align:center;">
-      Podes seguir el estado de tu pedido desde tu perfil.
+      Podés seguir el estado de tu pedido desde tu perfil.
     </p>
   `
-  return baseLayout(content, 'Recibis este email porque realizaste una compra en SEISMILES Textil.')
+  return baseLayout(content, 'Recibís este email porque realizaste una compra en SEISMILES Textil.')
 }
 
 // ── Gift card delivery email ──
@@ -448,15 +493,19 @@ interface GiftCardEmailData {
 }
 
 export function giftCardEmail(data: GiftCardEmailData): string {
+  const customerName = data.customerName ? escapeHtml(data.customerName) : null
+  const titulo = escapeHtml(data.titulo)
+  const codigo = escapeHtml(data.codigo)
+
   const content = `
     <p style="margin:0 0 4px;font-size:11px;color:${BRAND.terra};text-transform:uppercase;letter-spacing:0.1em;font-weight:600;">
       Gift Card
     </p>
     <h1 style="margin:0 0 8px;font-size:20px;font-weight:700;color:${BRAND.textPrimary};">
-      ¡Tu Gift Card esta lista${data.customerName ? `, ${data.customerName}` : ''}!
+      ¡Tu Gift Card está lista${customerName ? `, ${customerName}` : ''}!
     </h1>
     <p style="margin:0 0 28px;font-size:14px;color:${BRAND.textSecondary};line-height:1.6;">
-      Gracias por tu compra. Aca tenes tu tarjeta de regalo SEISMILES.
+      Gracias por tu compra. Acá tenés tu tarjeta de regalo SEISMILES.
     </p>
 
     <!-- Gift card visual -->
@@ -464,7 +513,7 @@ export function giftCardEmail(data: GiftCardEmailData): string {
       <tr>
         <td>
           <p style="margin:0 0 4px;font-size:11px;color:rgba(255,255,255,0.5);text-transform:uppercase;letter-spacing:0.15em;">
-            ${data.titulo}
+            ${titulo}
           </p>
           <p style="margin:0 0 20px;font-size:28px;font-weight:700;color:white;">
             $${data.monto.toLocaleString('es-AR')}
@@ -473,7 +522,7 @@ export function giftCardEmail(data: GiftCardEmailData): string {
             Codigo
           </p>
           <p style="margin:0;font-size:22px;font-weight:700;color:white;letter-spacing:0.12em;font-family:'Courier New',Courier,monospace;">
-            ${data.codigo}
+            ${codigo}
           </p>
         </td>
       </tr>
@@ -507,7 +556,7 @@ export function giftCardEmail(data: GiftCardEmailData): string {
       </tr>
     </table>
   `
-  return baseLayout(content, 'Recibis este email porque compraste una Gift Card en SEISMILES Textil.')
+  return baseLayout(content, 'Recibís este email porque compraste una Gift Card en SEISMILES Textil.')
 }
 
 // ── Admin digest: stock demand summary ──
@@ -532,14 +581,14 @@ export function adminStockDigestEmail(data: AdminStockDigestData): string {
   const rows = data.items.map((item) => `
     <tr>
       <td style="padding:8px 0;font-size:13px;color:${BRAND.textPrimary};border-bottom:1px solid ${BRAND.sandDark};">
-        ${item.productName}
+        ${escapeHtml(item.productName)}
       </td>
       <td style="padding:8px 0;font-size:13px;color:${BRAND.textPrimary};border-bottom:1px solid ${BRAND.sandDark};text-align:center;">
-        ${item.talle}
+        ${escapeHtml(item.talle)}
       </td>
       <td style="padding:8px 0;border-bottom:1px solid ${BRAND.sandDark};text-align:center;">
-        <span style="display:inline-block;width:14px;height:14px;border-radius:50%;background-color:${item.colorHex};border:1px solid ${BRAND.sandDark};vertical-align:middle;"></span>
-        <span style="font-size:13px;color:${BRAND.textPrimary};vertical-align:middle;margin-left:4px;">${item.colorName}</span>
+        <span style="display:inline-block;width:14px;height:14px;border-radius:50%;background-color:${safeColor(item.colorHex)};border:1px solid ${BRAND.sandDark};vertical-align:middle;"></span>
+        <span style="font-size:13px;color:${BRAND.textPrimary};vertical-align:middle;margin-left:4px;">${escapeHtml(item.colorName)}</span>
       </td>
       <td style="padding:8px 0;font-size:13px;font-weight:700;color:${BRAND.terra};border-bottom:1px solid ${BRAND.sandDark};text-align:right;">
         ${item.count}
@@ -555,7 +604,7 @@ export function adminStockDigestEmail(data: AdminStockDigestData): string {
       ${data.totalPending} clientes esperando stock
     </h1>
     <p style="margin:0 0 28px;font-size:14px;color:${BRAND.textSecondary};line-height:1.6;">
-      Hay nuevos pedidos de reposicion. Aca tenes un resumen de lo mas solicitado.
+      Hay nuevos pedidos de reposición. Acá tenés un resumen de lo más solicitado.
     </p>
 
     <table width="100%" cellpadding="0" cellspacing="0" style="background-color:${BRAND.sand};border-radius:12px;padding:20px 24px;margin-bottom:28px;">
@@ -584,7 +633,7 @@ export function adminStockDigestEmail(data: AdminStockDigestData): string {
       </tr>
     </table>
   `
-  return baseLayout(content, 'Recibis este email porque sos administrador de SEISMILES Textil.')
+  return baseLayout(content, 'Recibís este email porque sos administrador de SEISMILES Textil.')
 }
 
 // ── Password changed confirmation email ──
@@ -595,6 +644,8 @@ interface PasswordChangedData {
 }
 
 export function passwordChangedEmail(data: PasswordChangedData): string {
+  const customerName = data.customerName ? escapeHtml(data.customerName) : null
+
   const content = `
     <p style="margin:0 0 4px;font-size:11px;color:${BRAND.terra};text-transform:uppercase;letter-spacing:0.1em;font-weight:600;">
       Seguridad de tu cuenta
@@ -603,7 +654,7 @@ export function passwordChangedEmail(data: PasswordChangedData): string {
       Contraseña actualizada
     </h1>
     <p style="margin:0 0 28px;font-size:14px;color:${BRAND.textSecondary};line-height:1.6;">
-      Hola${data.customerName ? ` ${data.customerName}` : ''}! Te confirmamos que tu contraseña fue cambiada con exito.
+      Hola${customerName ? ` ${customerName}` : ''}! Te confirmamos que tu contraseña fue cambiada con exito.
     </p>
 
     <!-- Confirmation card -->
@@ -617,7 +668,7 @@ export function passwordChangedEmail(data: PasswordChangedData): string {
             Tu contraseña fue actualizada
           </p>
           <p style="margin:0;font-size:13px;color:${BRAND.textSecondary};line-height:1.6;">
-            Ya podes iniciar sesion con tu nueva contraseña.
+            Ya podés iniciar sesión con tu nueva contraseña.
           </p>
         </td>
       </tr>
@@ -627,7 +678,7 @@ export function passwordChangedEmail(data: PasswordChangedData): string {
       <tr>
         <td>
           <p style="margin:0;font-size:13px;color:#92400E;line-height:1.6;">
-            Si no fuiste vos quien cambio la contraseña, contactanos inmediatamente.
+            Si no fuiste vos quien cambió la contraseña, contactanos inmediatamente.
           </p>
         </td>
       </tr>
@@ -644,33 +695,33 @@ export function passwordChangedEmail(data: PasswordChangedData): string {
       </tr>
     </table>
   `
-  return baseLayout(content, 'Recibis este email porque se actualizo la contraseña de tu cuenta en SEISMILES Textil.')
+  return baseLayout(content, 'Recibís este email porque se actualizó la contraseña de tu cuenta en SEISMILES Textil.')
 }
 
 // ── Order status update email ──
 
 const STATUS_MESSAGES: Record<string, { heading: string; description: string; badgeColor: string; badgeBg: string }> = {
   en_preparacion: {
-    heading: 'Tu pedido esta siendo preparado',
+    heading: 'Tu pedido está siendo preparado',
     description: 'Estamos preparando tu pedido con mucho cuidado. Te avisaremos cuando lo despachemos.',
     badgeColor: '#1D4ED8',
     badgeBg: '#DBEAFE',
   },
   enviado: {
     heading: 'Tu pedido fue enviado',
-    description: 'Tu pedido ya esta en camino. Podes hacer seguimiento con el numero que te dejamos abajo.',
+    description: 'Tu pedido ya está en camino. Podés hacer seguimiento con el número que te dejamos abajo.',
     badgeColor: '#0369A1',
     badgeBg: '#E0F2FE',
   },
   entregado: {
     heading: 'Tu pedido fue entregado',
-    description: 'Esperamos que disfrutes tu compra. Si tenes alguna consulta, no dudes en escribirnos.',
+    description: 'Esperamos que disfrutes tu compra. Si tenés alguna consulta, no dudes en escribirnos.',
     badgeColor: '#047857',
     badgeBg: '#D1FAE5',
   },
   cancelada: {
     heading: 'Tu pedido fue cancelado',
-    description: 'Lamentamos informarte que tu pedido fue cancelado. Si tenes dudas, contactanos.',
+    description: 'Lamentamos informarte que tu pedido fue cancelado. Si tenés dudas, contactanos.',
     badgeColor: '#DC2626',
     badgeBg: '#FEE2E2',
   },
@@ -696,10 +747,15 @@ export function orderStatusUpdateEmail(data: OrderStatusUpdateData): string {
   const statusInfo = STATUS_MESSAGES[data.newStatus]
   if (!statusInfo) return ''
 
-  const statusLabel = STATUS_LABELS[data.newStatus] ?? data.newStatus
+  // statusLabel is from a fixed map, but fall back to escaped newStatus if missing.
+  const statusLabel = STATUS_LABELS[data.newStatus] ?? escapeHtml(data.newStatus)
+  const customerName = data.customerName ? escapeHtml(data.customerName) : null
+  const numeroPedido = escapeHtml(data.numeroPedido)
+  const productName = escapeHtml(data.productName)
+  const trackingNumber = data.trackingNumber ? escapeHtml(data.trackingNumber) : null
   const perfilUrl = `${data.siteUrl}/perfil`
 
-  const trackingBlock = data.trackingNumber
+  const trackingBlock = trackingNumber
     ? `
     <!-- Tracking number -->
     <table width="100%" cellpadding="0" cellspacing="0" style="background-color:${BRAND.sand};border-radius:12px;padding:20px 24px;margin-bottom:16px;">
@@ -709,7 +765,7 @@ export function orderStatusUpdateEmail(data: OrderStatusUpdateData): string {
             Numero de seguimiento
           </p>
           <p style="margin:0;font-size:18px;font-weight:700;color:${BRAND.textPrimary};letter-spacing:0.05em;font-family:'Courier New',Courier,monospace;">
-            ${data.trackingNumber}
+            ${trackingNumber}
           </p>
         </td>
       </tr>
@@ -722,7 +778,7 @@ export function orderStatusUpdateEmail(data: OrderStatusUpdateData): string {
       Actualizacion de pedido
     </p>
     <h1 style="margin:0 0 8px;font-size:20px;font-weight:700;color:${BRAND.textPrimary};">
-      ${statusInfo.heading}${data.customerName ? `, ${data.customerName}` : ''}
+      ${statusInfo.heading}${customerName ? `, ${customerName}` : ''}
     </h1>
     <p style="margin:0 0 28px;font-size:14px;color:${BRAND.textSecondary};line-height:1.6;">
       ${statusInfo.description}
@@ -735,11 +791,11 @@ export function orderStatusUpdateEmail(data: OrderStatusUpdateData): string {
           <table width="100%" cellpadding="0" cellspacing="0">
             <tr>
               <td style="padding:6px 0;font-size:13px;color:${BRAND.textSecondary};">Pedido</td>
-              <td style="padding:6px 0;font-size:13px;color:${BRAND.textPrimary};text-align:right;font-weight:600;">${data.numeroPedido}</td>
+              <td style="padding:6px 0;font-size:13px;color:${BRAND.textPrimary};text-align:right;font-weight:600;">${numeroPedido}</td>
             </tr>
             <tr>
               <td style="padding:6px 0;font-size:13px;color:${BRAND.textSecondary};">Producto</td>
-              <td style="padding:6px 0;font-size:13px;color:${BRAND.textPrimary};text-align:right;font-weight:600;">${data.productName}</td>
+              <td style="padding:6px 0;font-size:13px;color:${BRAND.textPrimary};text-align:right;font-weight:600;">${productName}</td>
             </tr>
             <tr>
               <td style="padding:6px 0;font-size:13px;color:${BRAND.textSecondary};">Estado</td>
@@ -768,10 +824,10 @@ export function orderStatusUpdateEmail(data: OrderStatusUpdateData): string {
     </table>
 
     <p style="margin:20px 0 0;font-size:13px;color:${BRAND.textSecondary};line-height:1.6;text-align:center;">
-      Podes seguir el estado de tu pedido desde tu perfil.
+      Podés seguir el estado de tu pedido desde tu perfil.
     </p>
   `
-  return baseLayout(content, 'Recibis este email porque realizaste una compra en SEISMILES Textil.')
+  return baseLayout(content, 'Recibís este email porque realizaste una compra en SEISMILES Textil.')
 }
 
 // ── Newsletter email helpers ──
@@ -808,6 +864,8 @@ interface WelcomeNewsletterData {
 }
 
 export function welcomeNewsletterEmail(data: WelcomeNewsletterData): string {
+  const couponCode = escapeHtml(data.couponCode)
+
   const content = `
     <p style="margin:0 0 4px;font-size:11px;color:${BRAND.terra};text-transform:uppercase;letter-spacing:0.1em;font-weight:600;">
       Bienvenido/a a la expedicion
@@ -816,7 +874,7 @@ export function welcomeNewsletterEmail(data: WelcomeNewsletterData): string {
       ¡Ya sos parte de SEISMILES!
     </h1>
     <p style="margin:0 0 28px;font-size:14px;color:${BRAND.textSecondary};line-height:1.6;">
-      Gracias por suscribirte. Aca tenes tu cupon de descuento del 10% para tu primera compra.
+      Gracias por suscribirte. Acá tenés tu cupón de descuento del 10% para tu primera compra.
     </p>
 
     <!-- Coupon card -->
@@ -824,10 +882,10 @@ export function welcomeNewsletterEmail(data: WelcomeNewsletterData): string {
       <tr>
         <td style="text-align:center;">
           <p style="margin:0 0 4px;font-size:11px;color:rgba(255,255,255,0.5);text-transform:uppercase;letter-spacing:0.15em;">
-            Tu cupon de descuento
+            Tu cupón de descuento
           </p>
           <p style="margin:0 0 8px;font-size:24px;font-weight:700;color:white;letter-spacing:0.12em;font-family:'Courier New',Courier,monospace;">
-            ${data.couponCode}
+            ${couponCode}
           </p>
           <p style="margin:0;font-size:13px;color:rgba(255,255,255,0.6);">
             10% de descuento en tu primera compra
@@ -880,4 +938,198 @@ export function campaignEmail(data: CampaignEmailData): string {
     </div>
   `
   return baseLayout(content, `Recibis este email porque te suscribiste al newsletter de SEISMILES Textil.<br/><a href="${data.unsubscribeUrl}" style="color:${BRAND.textSecondary};text-decoration:underline;">Desuscribirse</a>`)
+}
+
+// ── Boton de Arrepentimiento: constancia al consumidor (Res. 424/2020) ──
+
+interface ArrepentimientoReceiptData {
+  codigo: string
+  nombre: string
+  numeroPedido: string
+  fechaCompra: string | null
+  motivo: string | null
+  createdAt: string
+}
+
+export function arrepentimientoReceiptEmail(data: ArrepentimientoReceiptData): string {
+  // PUBLIC-TRIGGERED: anyone can submit the form. Escape every field.
+  const codigo = escapeHtml(data.codigo)
+  const nombre = escapeHtml(data.nombre)
+  const numeroPedido = escapeHtml(data.numeroPedido)
+  const fechaCompra = data.fechaCompra ? escapeHtml(data.fechaCompra) : 'No informada'
+  const motivo = data.motivo ? escapeHtml(data.motivo).replace(/\n/g, '<br>') : null
+  const createdAt = escapeHtml(data.createdAt)
+
+  const content = `
+    <p style="margin:0 0 4px;font-size:11px;color:${BRAND.terra};text-transform:uppercase;letter-spacing:0.1em;font-weight:600;">
+      Constancia de arrepentimiento
+    </p>
+    <h1 style="margin:0 0 8px;font-size:20px;font-weight:700;color:${BRAND.textPrimary};">
+      Recibimos tu solicitud, ${nombre}
+    </h1>
+    <p style="margin:0 0 24px;font-size:14px;color:${BRAND.textSecondary};line-height:1.6;">
+      Este email es tu constancia formal del ejercicio del derecho de arrepentimiento
+      (Res. 424/2020 - Ley 24.240 art. 34). Guardalo como comprobante.
+    </p>
+
+    <table width="100%" cellpadding="0" cellspacing="0" style="background-color:${BRAND.volcanic};border-radius:12px;padding:24px;margin-bottom:24px;">
+      <tr>
+        <td align="center">
+          <p style="margin:0 0 6px;font-size:11px;color:rgba(255,255,255,0.6);text-transform:uppercase;letter-spacing:0.15em;">
+            Código de constancia
+          </p>
+          <p style="margin:0;font-size:22px;font-weight:700;color:white;letter-spacing:0.05em;font-family:Menlo,Monaco,Consolas,monospace;">
+            ${codigo}
+          </p>
+        </td>
+      </tr>
+    </table>
+
+    <table width="100%" cellpadding="0" cellspacing="0" style="background-color:${BRAND.sand};border-radius:12px;padding:20px 24px;margin-bottom:24px;">
+      <tr>
+        <td>
+          <p style="margin:0 0 12px;font-size:11px;color:${BRAND.textSecondary};text-transform:uppercase;letter-spacing:0.08em;font-weight:600;">
+            Datos de la solicitud
+          </p>
+          <p style="margin:0 0 6px;font-size:13px;color:${BRAND.textPrimary};line-height:1.6;">
+            <strong>N° de pedido:</strong> ${numeroPedido}
+          </p>
+          <p style="margin:0 0 6px;font-size:13px;color:${BRAND.textPrimary};line-height:1.6;">
+            <strong>Fecha de compra:</strong> ${fechaCompra}
+          </p>
+          <p style="margin:0;font-size:13px;color:${BRAND.textPrimary};line-height:1.6;">
+            <strong>Fecha de solicitud:</strong> ${createdAt}
+          </p>
+          ${motivo ? `
+          <p style="margin:12px 0 0;font-size:13px;color:${BRAND.textPrimary};line-height:1.6;">
+            <strong>Motivo:</strong><br/>${motivo}
+          </p>` : ''}
+        </td>
+      </tr>
+    </table>
+
+    <table width="100%" cellpadding="0" cellspacing="0" style="background-color:white;border:1px solid ${BRAND.sandDark};border-radius:12px;padding:20px 24px;margin-bottom:24px;">
+      <tr>
+        <td>
+          <p style="margin:0 0 10px;font-size:13px;color:${BRAND.textPrimary};line-height:1.6;font-weight:700;">
+            Próximos pasos
+          </p>
+          <p style="margin:0 0 8px;font-size:13px;color:${BRAND.textSecondary};line-height:1.6;">
+            1. Vamos a contactarte dentro de las <strong style="color:${BRAND.textPrimary};">24 horas hábiles</strong> para coordinar la devolución del producto.
+          </p>
+          <p style="margin:0 0 8px;font-size:13px;color:${BRAND.textSecondary};line-height:1.6;">
+            2. El producto debe devolverse en su estado original. Los costos de envío de la devolución están a nuestro cargo.
+          </p>
+          <p style="margin:0;font-size:13px;color:${BRAND.textSecondary};line-height:1.6;">
+            3. Una vez recibido, procederemos al reembolso íntegro por el mismo medio de pago utilizado en la compra.
+          </p>
+        </td>
+      </tr>
+    </table>
+
+    <p style="margin:0;font-size:12px;color:${BRAND.textSecondary};line-height:1.6;text-align:center;">
+      Si tenés dudas, respondenos este email o escribinos a
+      <a href="mailto:seismilestextil@gmail.com" style="color:${BRAND.terra};text-decoration:underline;">seismilestextil@gmail.com</a>.
+    </p>
+  `
+  return baseLayout(content, 'Recibís este email porque solicitaste el ejercicio del derecho de arrepentimiento en la tienda SEISMILES Textil.')
+}
+
+// ── Boton de Arrepentimiento: notificacion al admin ──
+
+interface AdminArrepentimientoData {
+  codigo: string
+  nombre: string
+  dni: string
+  email: string
+  telefono: string | null
+  numeroPedido: string
+  fechaCompra: string | null
+  metodoPago: string | null
+  motivo: string | null
+  compraEncontrada: boolean
+  siteUrl: string
+}
+
+export function adminArrepentimientoEmail(data: AdminArrepentimientoData): string {
+  const codigo = escapeHtml(data.codigo)
+  const nombre = escapeHtml(data.nombre)
+  const dni = escapeHtml(data.dni)
+  const email = escapeHtml(data.email)
+  const telefono = data.telefono ? escapeHtml(data.telefono) : 'No proporcionado'
+  const numeroPedido = escapeHtml(data.numeroPedido)
+  const fechaCompra = data.fechaCompra ? escapeHtml(data.fechaCompra) : 'No informada'
+  const metodoPago = data.metodoPago ? escapeHtml(data.metodoPago) : 'No informado'
+  const motivo = data.motivo ? escapeHtml(data.motivo).replace(/\n/g, '<br>') : null
+  const adminUrl = `${data.siteUrl}/admin/arrepentimientos`
+
+  const matchBadge = data.compraEncontrada
+    ? `<span style="display:inline-block;padding:3px 10px;border-radius:999px;background-color:#DCFCE7;color:#166534;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;">Pedido encontrado</span>`
+    : `<span style="display:inline-block;padding:3px 10px;border-radius:999px;background-color:#FEF3C7;color:#92400E;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;">Pedido no encontrado</span>`
+
+  const content = `
+    <p style="margin:0 0 4px;font-size:11px;color:${BRAND.terra};text-transform:uppercase;letter-spacing:0.1em;font-weight:600;">
+      Boton de arrepentimiento
+    </p>
+    <h1 style="margin:0 0 8px;font-size:20px;font-weight:700;color:${BRAND.textPrimary};">
+      Nueva solicitud: ${codigo}
+    </h1>
+    <p style="margin:0 0 20px;font-size:14px;color:${BRAND.textSecondary};line-height:1.6;">
+      Tenes <strong style="color:${BRAND.textPrimary};">24 hs habiles</strong> para contactar al consumidor (Res. 424/2020).
+    </p>
+
+    <p style="margin:0 0 24px;">${matchBadge}</p>
+
+    <table width="100%" cellpadding="0" cellspacing="0" style="background-color:${BRAND.sand};border-radius:12px;padding:20px 24px;margin-bottom:24px;">
+      <tr>
+        <td>
+          <p style="margin:0 0 12px;font-size:11px;color:${BRAND.textSecondary};text-transform:uppercase;letter-spacing:0.08em;font-weight:600;">
+            Consumidor
+          </p>
+          <p style="margin:0 0 4px;font-size:13px;color:${BRAND.textPrimary};line-height:1.6;"><strong>Nombre:</strong> ${nombre}</p>
+          <p style="margin:0 0 4px;font-size:13px;color:${BRAND.textPrimary};line-height:1.6;"><strong>DNI:</strong> ${dni}</p>
+          <p style="margin:0 0 4px;font-size:13px;color:${BRAND.textPrimary};line-height:1.6;"><strong>Email:</strong> <a href="mailto:${email}" style="color:${BRAND.terra};">${email}</a></p>
+          <p style="margin:0;font-size:13px;color:${BRAND.textPrimary};line-height:1.6;"><strong>Telefono:</strong> ${telefono}</p>
+        </td>
+      </tr>
+    </table>
+
+    <table width="100%" cellpadding="0" cellspacing="0" style="background-color:${BRAND.sand};border-radius:12px;padding:20px 24px;margin-bottom:24px;">
+      <tr>
+        <td>
+          <p style="margin:0 0 12px;font-size:11px;color:${BRAND.textSecondary};text-transform:uppercase;letter-spacing:0.08em;font-weight:600;">
+            Compra declarada
+          </p>
+          <p style="margin:0 0 4px;font-size:13px;color:${BRAND.textPrimary};line-height:1.6;"><strong>N° de pedido:</strong> ${numeroPedido}</p>
+          <p style="margin:0 0 4px;font-size:13px;color:${BRAND.textPrimary};line-height:1.6;"><strong>Fecha de compra:</strong> ${fechaCompra}</p>
+          <p style="margin:0;font-size:13px;color:${BRAND.textPrimary};line-height:1.6;"><strong>Medio de pago:</strong> ${metodoPago}</p>
+        </td>
+      </tr>
+    </table>
+
+    ${motivo ? `
+    <table width="100%" cellpadding="0" cellspacing="0" style="background-color:white;border:1px solid ${BRAND.sandDark};border-radius:12px;padding:20px 24px;margin-bottom:24px;">
+      <tr>
+        <td>
+          <p style="margin:0 0 8px;font-size:11px;color:${BRAND.textSecondary};text-transform:uppercase;letter-spacing:0.08em;font-weight:600;">
+            Motivo declarado (opcional)
+          </p>
+          <p style="margin:0;font-size:13px;color:${BRAND.textPrimary};line-height:1.6;font-style:italic;">
+            "${motivo}"
+          </p>
+        </td>
+      </tr>
+    </table>` : ''}
+
+    <table width="100%" cellpadding="0" cellspacing="0">
+      <tr>
+        <td align="center">
+          <a href="${adminUrl}" style="display:inline-block;background-color:${BRAND.terra};color:white;font-size:13px;font-weight:700;text-decoration:none;padding:14px 32px;border-radius:12px;letter-spacing:0.05em;text-transform:uppercase;">
+            Gestionar en el panel
+          </a>
+        </td>
+      </tr>
+    </table>
+  `
+  return baseLayout(content, 'Recibís este email porque sos administrador de SEISMILES Textil.')
 }

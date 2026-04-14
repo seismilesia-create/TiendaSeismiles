@@ -29,7 +29,7 @@ export async function createCouponAction(formData: FormData) {
   const fecha_fin = fecha_fin_raw || null
 
   if (!codigo || !tipo || !valor) {
-    return { error: 'Codigo, tipo y valor son requeridos' }
+    return { error: 'Código, tipo y valor son requeridos' }
   }
 
   if (tipo !== 'porcentaje' && tipo !== 'monto_fijo') {
@@ -73,7 +73,7 @@ export async function updateCouponAction(id: string, formData: FormData) {
   const fecha_fin = fecha_fin_raw || null
 
   if (!codigo || !tipo || !valor) {
-    return { error: 'Codigo, tipo y valor son requeridos' }
+    return { error: 'Código, tipo y valor son requeridos' }
   }
 
   if (tipo === 'porcentaje' && (valor <= 0 || valor > 100)) {

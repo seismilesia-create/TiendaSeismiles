@@ -18,7 +18,7 @@ const PAYMENT_LABELS: Record<string, string> = {
 }
 
 const CANCEL_STYLES: Record<string, { label: string; className: string }> = {
-  pendiente_pago: { label: 'Esperando confirmacion de pago', className: 'bg-yellow-100 text-yellow-700 border-yellow-200' },
+  pendiente_pago: { label: 'Esperando confirmación de pago', className: 'bg-yellow-100 text-yellow-700 border-yellow-200' },
   cancelada: { label: 'Pedido cancelado', className: 'bg-red-100 text-red-700 border-red-200' },
   reembolsada: { label: 'Pedido reembolsado', className: 'bg-violet-100 text-violet-700 border-violet-200' },
 }

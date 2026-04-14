@@ -145,7 +145,7 @@ export default function ComingSoonPage() {
         {/* Logo */}
         <div className="mb-10 animate-fade-in">
           <Image
-            src="/images/logo-seismiles.png"
+            src="/images/logo-seismiles-v2.png"
             alt="SEISMILES Textil"
             width={180}
             height={78}

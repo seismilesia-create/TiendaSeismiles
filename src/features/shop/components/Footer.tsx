@@ -43,7 +43,7 @@ export function Footer({ productLines }: FooterProps) {
           <div className="lg:col-span-1">
             <Link href="/" className="inline-block mb-5">
               <Image
-                src="/images/logo-seismiles.png"
+                src="/images/logo-seismiles-v2.png"
                 alt="SEISMILES Textil"
                 width={120}
                 height={52}
@@ -82,7 +82,7 @@ export function Footer({ productLines }: FooterProps) {
               {productLines.map((line) => (
                 <li key={line.id}>
                   <Link
-                    href={`/catalogo?line=${line.slug}`}
+                    href={`/catalogo?linea=${line.slug}`}
                     className="text-body-sm text-volcanic-500 hover:text-terra-400 transition-colors"
                   >
                     {line.name}

@@ -39,10 +39,10 @@ export default function GlobalError({
                 margin: '0 0 0.75rem',
               }}
             >
-              Algo salio mal
+              Algo salió mal
             </h1>
             <p style={{ color: '#6B5B45', margin: '0 0 2rem', lineHeight: 1.6 }}>
-              Ocurrio un error inesperado. Intenta recargar la pagina.
+              Ocurrió un error inesperado. Intentá recargar la página.
             </p>
             <button
               onClick={reset}

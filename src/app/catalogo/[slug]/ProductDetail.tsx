@@ -19,81 +19,18 @@ import type { ProductDetailFromDB, CatalogProductFromDB, ReviewFromDB, ReviewSum
 // ── Constants ──
 
 const LINEA_LABELS: Record<string, string> = {
-  arista: 'Linea Arista',
-  pissis: 'Linea Pissis',
-  origen: 'Linea Origen',
-  terreno: 'Linea Terreno',
-  veta: 'Linea Veta',
-  'tres-cruces': 'Linea Tres Cruces',
-  nacimiento: 'Linea Nacimiento',
-  veladero: 'Linea Veladero',
-  'san-francisco': 'Linea San Francisco',
+  arista: 'Línea Arista',
+  pissis: 'Línea Pissis',
+  origen: 'Línea Origen',
+  terreno: 'Línea Terreno',
+  veta: 'Línea Veta',
+  'tres-cruces': 'Línea Tres Cruces',
+  nacimiento: 'Línea Nacimiento',
+  veladero: 'Línea Veladero',
+  'san-francisco': 'Línea San Francisco',
 }
 
 const TALLE_ORDER = ['XS', 'S', 'M', 'L', 'XL', '2XL', '3XL', '4XL']
-
-// CSS fabric texture patterns per product line
-const FABRIC_TEXTURES: Record<string, { pattern: string; size: string; opacity: number }> = {
-  // Piqué — diamond waffle weave
-  arista: {
-    pattern: `url("data:image/svg+xml,%3Csvg width='8' height='8' viewBox='0 0 8 8' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M4 0L8 4L4 8L0 4Z' fill='%23000' fill-opacity='0.12'/%3E%3C/svg%3E")`,
-    size: '6px 6px',
-    opacity: 1,
-  },
-  // Algodón pesado — horizontal ribbed
-  pissis: {
-    pattern: `url("data:image/svg+xml,%3Csvg width='4' height='4' viewBox='0 0 4 4' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='4' height='1' fill='%23000' fill-opacity='0.08'/%3E%3C/svg%3E")`,
-    size: '4px 4px',
-    opacity: 1,
-  },
-  // Algodón suave — subtle grain
-  origen: {
-    pattern: `url("data:image/svg+xml,%3Csvg width='4' height='4' viewBox='0 0 4 4' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='1' cy='1' r='0.6' fill='%23000' fill-opacity='0.06'/%3E%3C/svg%3E")`,
-    size: '4px 4px',
-    opacity: 1,
-  },
-  // Algodón resistente — crosshatch
-  terreno: {
-    pattern: `url("data:image/svg+xml,%3Csvg width='8' height='8' viewBox='0 0 8 8' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 0L8 8M8 0L0 8' stroke='%23000' stroke-opacity='0.08' stroke-width='0.8'/%3E%3C/svg%3E")`,
-    size: '6px 6px',
-    opacity: 1,
-  },
-  // Estampadas — sin textura especial
-  veta: {
-    pattern: 'none',
-    size: '0',
-    opacity: 0,
-  },
-  // Frisa invisible peinada — diagonal suave
-  'tres-cruces': {
-    pattern: `url("data:image/svg+xml,%3Csvg width='6' height='6' viewBox='0 0 6 6' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 6L6 0' stroke='%23000' stroke-opacity='0.07' stroke-width='1.2'/%3E%3C/svg%3E")`,
-    size: '5px 5px',
-    opacity: 1,
-  },
-  // Frisa cardada — puntos suaves
-  nacimiento: {
-    pattern: `url("data:image/svg+xml,%3Csvg width='6' height='6' viewBox='0 0 6 6' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='1.5' cy='1.5' r='1' fill='%23000' fill-opacity='0.06'/%3E%3Ccircle cx='4.5' cy='4.5' r='1' fill='%23000' fill-opacity='0.06'/%3E%3C/svg%3E")`,
-    size: '6px 6px',
-    opacity: 1,
-  },
-  // Rústico peinado pesado
-  veladero: {
-    pattern: `url("data:image/svg+xml,%3Csvg width='6' height='6' viewBox='0 0 6 6' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 0L6 6M6 0L0 6' stroke='%23000' stroke-opacity='0.1' stroke-width='1'/%3E%3C/svg%3E")`,
-    size: '5px 5px',
-    opacity: 1,
-  },
-  'san-francisco': {
-    pattern: `url("data:image/svg+xml,%3Csvg width='6' height='6' viewBox='0 0 6 6' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 0L6 6M6 0L0 6' stroke='%23000' stroke-opacity='0.1' stroke-width='1'/%3E%3C/svg%3E")`,
-    size: '5px 5px',
-    opacity: 1,
-  },
-  // Fallback — liso
-  _default: {
-    pattern: 'none',
-    size: '0',
-    opacity: 0,
-  },
-}
 
 // ── Icons ──
 
@@ -342,7 +279,6 @@ export function ProductDetail({ product, mostViewedProducts, reviews, reviewSumm
                 <div className="flex flex-wrap gap-3">
                   {product.colores.map((color) => {
                     const isActive = selectedColorId === color.id
-                    const texture = FABRIC_TEXTURES[product.linea] ?? FABRIC_TEXTURES._default
                     return (
                       <button
                         key={color.id}
@@ -354,12 +290,7 @@ export function ProductDetail({ product, mostViewedProducts, reviews, reviewSumm
                             : 'border-sand-300 hover:border-volcanic-400 hover:scale-105'
                         }`}
                         style={{ backgroundColor: color.hex }}
-                      >
-                        <span
-                          className="absolute inset-0 rounded-full"
-                          style={{ backgroundImage: texture.pattern, backgroundSize: texture.size, opacity: texture.opacity }}
-                        />
-                      </button>
+                      />
                     )
                   })}
                 </div>
@@ -416,7 +347,7 @@ export function ProductDetail({ product, mostViewedProducts, reviews, reviewSumm
                     <path d="M21.3 15.3a2.4 2.4 0 0 1 0 3.4l-2.6 2.6a2.4 2.4 0 0 1-3.4 0L2.7 8.7a2.41 2.41 0 0 1 0-3.4l2.6-2.6a2.41 2.41 0 0 1 3.4 0Z" />
                     <path d="m14.5 12.5 2-2" /><path d="m11.5 9.5 2-2" /><path d="m8.5 6.5 2-2" /><path d="m17.5 15.5 2-2" />
                   </svg>
-                  <span className="underline underline-offset-2 group-hover:decoration-terra-500">Guia de talles</span>
+                  <span className="underline underline-offset-2 group-hover:decoration-terra-500">Guía de talles</span>
                 </button>
               </div>
             )}
@@ -430,7 +361,7 @@ export function ProductDetail({ product, mostViewedProducts, reviews, reviewSumm
                   className="w-full flex items-center justify-center gap-3 py-4 bg-volcanic-900 hover:bg-volcanic-800 disabled:bg-volcanic-400 disabled:cursor-not-allowed text-white text-body-md font-semibold rounded-xl transition-all duration-300"
                 >
                   <ShoppingBagIcon className="w-5 h-5" />
-                  {!selectedSize ? 'Selecciona un talle' : 'Agregar al carrito'}
+                  {!selectedSize ? 'Seleccioná un talle' : 'Agregar al carrito'}
                 </button>
               </MagneticButton>
             </div>
@@ -439,27 +370,27 @@ export function ProductDetail({ product, mostViewedProducts, reviews, reviewSumm
             <div className="flex flex-col gap-3 py-6 border-t border-sand-200 mb-6">
               <div className="flex items-center gap-3">
                 <TruckIcon className="w-5 h-5 text-terra-500 flex-shrink-0" />
-                <span className="text-body-sm text-volcanic-600">Envio gratis a todo el pais</span>
+                <span className="text-body-sm text-volcanic-600">Envío gratis a todo el país</span>
               </div>
               <div className="flex items-center gap-3">
                 <CreditCardIcon className="w-5 h-5 text-terra-500 flex-shrink-0" />
-                <span className="text-body-sm text-volcanic-600">3 cuotas sin interes</span>
+                <span className="text-body-sm text-volcanic-600">3 cuotas sin interés</span>
               </div>
               <div className="flex items-center gap-3">
                 <RefreshIcon className="w-5 h-5 text-terra-500 flex-shrink-0" />
-                <span className="text-body-sm text-volcanic-600">Cambios faciles por 30 dias</span>
+                <span className="text-body-sm text-volcanic-600">Cambios fáciles por 30 días</span>
               </div>
             </div>
 
             {/* Accordions */}
             <div className="border-b border-sand-200">
               {product.descripcion && (
-                <Accordion title="Descripcion">
+                <Accordion title="Descripción">
                   {product.descripcion}
                 </Accordion>
               )}
               {product.detalles && (
-                <Accordion title="Detalles y composicion">
+                <Accordion title="Detalles y composición">
                   {product.detalles}
                 </Accordion>
               )}
@@ -486,7 +417,7 @@ export function ProductDetail({ product, mostViewedProducts, reviews, reviewSumm
         {mostViewedProducts.length > 0 && (
           <section className="mt-16 lg:mt-24">
             <h2 className="font-heading text-display-xs text-volcanic-900 mb-8">
-              Tambien te podria interesar
+              También te podria interesar
             </h2>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
               {mostViewedProducts.map((p) => (
@@ -524,7 +455,6 @@ export function ProductDetail({ product, mostViewedProducts, reviews, reviewSumm
       <SizeGuideDrawer
         open={sizeGuideOpen}
         onClose={() => setSizeGuideOpen(false)}
-        defaultCategory={product.categoria === 'buzos-camperas' ? 'buzos' : 'remeras'}
       />
 
       {/* Image Lightbox */}

@@ -16,9 +16,9 @@ export default function ShopSignupPage() {
       <ShopSignupForm />
 
       <p className="text-center text-body-sm text-volcanic-500">
-        Ya tenes cuenta?{' '}
+        ¿Ya tenés cuenta?{' '}
         <a href="/login" className="font-semibold text-terra-500 hover:text-terra-600 hover:underline">
-          Inicia sesion
+          Iniciá sesión
         </a>
       </p>
     </div>

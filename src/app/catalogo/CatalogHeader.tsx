@@ -1,5 +1,3 @@
-import { MountainIcon } from '@/features/shop/components'
-
 export function CatalogHeader({
   title,
   subtitle,
@@ -8,25 +6,48 @@ export function CatalogHeader({
   subtitle: string
 }) {
   return (
-    <section className="relative bg-volcanic-900 overflow-hidden">
-      {/* Subtle texture overlay */}
-      <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg width=\'60\' height=\'60\' viewBox=\'0 0 60 60\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'none\' fill-rule=\'evenodd\'%3E%3Cg fill=\'%23ffffff\' fill-opacity=\'1\'%3E%3Cpath d=\'M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")' }} />
+    <section className="relative bg-gradient-to-b from-sand-100 via-sand-50 to-sand-50 overflow-hidden border-b border-sand-200">
+      {/* Oversized brand watermark */}
+      <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none">
+        <span className="font-display text-[5rem] sm:text-[8rem] lg:text-[12rem] leading-none text-volcanic-900/[0.04] tracking-[0.05em] uppercase whitespace-nowrap">
+          SEISMILES
+        </span>
+      </div>
 
-      {/* Warm glow */}
-      <div className="absolute -bottom-20 left-1/2 -translate-x-1/2 w-[600px] h-[200px] bg-terra-500/15 rounded-full blur-[100px]" />
+      {/* Soft warm glow on top */}
+      <div className="absolute -top-32 left-1/2 -translate-x-1/2 w-[700px] h-[400px] bg-terra-500/10 rounded-full blur-[120px] pointer-events-none" />
 
-      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14 lg:py-20">
-        <div className="flex flex-col items-center text-center gap-4">
-          <div className="w-11 h-11 rounded-full bg-terra-500/20 flex items-center justify-center">
-            <MountainIcon className="w-5 h-5 text-terra-400" />
-          </div>
-          <h1 className="font-heading text-display-sm sm:text-display-md text-white">
-            {title}
-          </h1>
-          <p className="text-body-md text-volcanic-500 max-w-xl">
-            {subtitle}
-          </p>
+      {/* Mountain silhouette at the bottom */}
+      <svg
+        className="absolute bottom-0 left-0 w-full h-16 lg:h-24 text-volcanic-900/[0.06] pointer-events-none"
+        preserveAspectRatio="none"
+        viewBox="0 0 1200 120"
+        fill="currentColor"
+        aria-hidden="true"
+      >
+        <path d="M0,120 L0,85 L80,40 L160,70 L260,20 L360,60 L460,15 L560,55 L660,25 L760,5 L860,50 L960,30 L1060,55 L1160,20 L1200,45 L1200,120 Z" />
+      </svg>
+
+      {/* Content */}
+      <div className="relative max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-24 text-center">
+        {/* Badge with dividers */}
+        <div className="inline-flex items-center gap-3 mb-6">
+          <div className="w-8 h-px bg-terra-500" />
+          <span className="text-body-xs uppercase tracking-widest text-terra-500 font-semibold">
+            Colección completa
+          </span>
+          <div className="w-8 h-px bg-terra-500" />
         </div>
+
+        {/* Headline — display font, much bigger */}
+        <h1 className="font-display text-[2.75rem] sm:text-[4rem] lg:text-[5.5rem] leading-[0.95] tracking-[0.02em] uppercase text-volcanic-900 mb-6">
+          {title}
+        </h1>
+
+        {/* Subtitle */}
+        <p className="text-body-md lg:text-body-lg text-volcanic-500 max-w-2xl mx-auto leading-relaxed">
+          {subtitle}
+        </p>
       </div>
     </section>
   )

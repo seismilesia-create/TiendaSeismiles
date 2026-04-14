@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { getAdminProducts, getProductsForExport } from '@/features/shop/services/admin-products'
+import { FEATURED_PRODUCTS_LIMIT } from '@/features/shop/services/product-lines'
 import { ProductsTable } from '@/features/shop/components/admin/ProductsTable'
 import { CatalogBulkActions } from '@/features/shop/components/admin/CatalogBulkActions'
 
@@ -58,7 +59,7 @@ export default async function AdminProductsPage() {
           </Link>
         </div>
       ) : (
-        <ProductsTable products={products} />
+        <ProductsTable products={products} featuredLimit={FEATURED_PRODUCTS_LIMIT} />
       )}
     </div>
   )

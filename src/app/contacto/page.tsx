@@ -7,7 +7,7 @@ import { shopConfig } from '@/features/shop/config'
 
 export const metadata: Metadata = {
   title: 'Contacto | SEISMILES Textil',
-  description: 'Contactanos para consultas, pedidos mayoristas o personalizacion empresarial. Estamos en Catamarca, Argentina.',
+  description: 'Contactanos para consultas, pedidos mayoristas o personalización empresarial. Estamos en Catamarca, Argentina.',
 }
 
 function MailIcon({ className }: { className?: string }) {
@@ -82,8 +82,8 @@ export default async function ContactoPage() {
               Hablemos
             </h1>
             <p className="text-body-lg text-white/50 max-w-2xl mx-auto leading-relaxed">
-              Estamos aca para ayudarte. Escribinos por cualquier consulta sobre productos,
-              pedidos mayoristas o personalizacion para tu empresa.
+              Estamos acá para ayudarte. Escribinos por cualquier consulta sobre productos,
+              pedidos mayoristas o personalización para tu empresa.
             </p>
           </div>
         </section>
@@ -114,7 +114,7 @@ export default async function ContactoPage() {
                     <div>
                       <h3 className="font-heading text-base text-volcanic-900 mb-1">WhatsApp</h3>
                       <p className="text-body-sm text-volcanic-500 leading-relaxed">
-                        Escribinos y te respondemos al instante. Ideal para consultas rapidas sobre talles, stock y envios.
+                        Escribinos y te respondemos al instante. Ideal para consultas rápidas sobre talles, stock y envíos.
                       </p>
                       <span className="inline-flex items-center gap-1.5 mt-3 text-body-xs font-semibold text-terra-500 group-hover:gap-2 transition-all">
                         Enviar mensaje
@@ -153,10 +153,10 @@ export default async function ContactoPage() {
                     <div>
                       <h3 className="font-heading text-base text-volcanic-900 mb-1">Instagram</h3>
                       <p className="text-body-sm text-volcanic-500 leading-relaxed">
-                        Seguinos para ver las ultimas novedades, lanzamientos y el backstage de nuestra marca.
+                        Seguinos para ver las últimas novedades, lanzamientos y el backstage de nuestra marca.
                       </p>
                       <span className="inline-flex items-center gap-1.5 mt-3 text-body-xs font-semibold text-volcanic-700 group-hover:gap-2 transition-all">
-                        @seismiles_textil
+                        @seismiles_
                         <ArrowRightIcon className="w-3.5 h-3.5" />
                       </span>
                     </div>
@@ -167,12 +167,12 @@ export default async function ContactoPage() {
                       <MapPinIcon className="w-5 h-5 text-volcanic-500" />
                     </div>
                     <div>
-                      <h3 className="font-heading text-base text-volcanic-900 mb-1">Ubicacion</h3>
+                      <h3 className="font-heading text-base text-volcanic-900 mb-1">Ubicación</h3>
                       <p className="text-body-sm text-volcanic-500 leading-relaxed">
                         Catamarca, Argentina
                       </p>
                       <p className="text-body-xs text-volcanic-500 mt-1">
-                        Diseñamos y confeccionamos desde el corazon del noroeste argentino.
+                        Diseñamos y confeccionamos desde el corazón del noroeste argentino.
                       </p>
                     </div>
                   </div>
@@ -188,8 +188,8 @@ export default async function ContactoPage() {
                   Tal vez ya tenemos la respuesta
                 </h2>
                 <p className="text-body-md text-volcanic-500 leading-relaxed mb-8">
-                  Antes de escribirnos, te invitamos a revisar nuestra seccion de preguntas frecuentes
-                  donde respondemos las consultas mas comunes sobre envios, talles, pagos y devoluciones.
+                  Antes de escribirnos, te invitamos a revisar nuestra sección de preguntas frecuentes
+                  donde respondemos las consultas más comunes sobre envíos, talles, pagos y devoluciones.
                 </p>
 
                 <Link
@@ -202,7 +202,7 @@ export default async function ContactoPage() {
 
                 {/* Horarios */}
                 <div className="p-6 bg-white rounded-2xl border border-sand-200/60">
-                  <h3 className="font-heading text-lg text-volcanic-900 mb-4">Horarios de atencion</h3>
+                  <h3 className="font-heading text-lg text-volcanic-900 mb-4">Horarios de atención</h3>
                   <div className="space-y-3">
                     <div className="flex items-center justify-between">
                       <span className="text-body-sm text-volcanic-500">Lunes a Viernes</span>
@@ -210,7 +210,7 @@ export default async function ContactoPage() {
                     </div>
                     <div className="w-full h-px bg-sand-200" />
                     <div className="flex items-center justify-between">
-                      <span className="text-body-sm text-volcanic-500">Sabados</span>
+                      <span className="text-body-sm text-volcanic-500">Sábados</span>
                       <span className="text-body-sm font-medium text-volcanic-900">9:00 - 13:00</span>
                     </div>
                     <div className="w-full h-px bg-sand-200" />
@@ -220,7 +220,7 @@ export default async function ContactoPage() {
                     </div>
                   </div>
                   <p className="text-body-xs text-volcanic-500 mt-4">
-                    WhatsApp e Instagram: respondemos dentro de las 24hs habiles.
+                    WhatsApp e Instagram: respondemos dentro de las 24hs hábiles.
                   </p>
                 </div>
               </div>

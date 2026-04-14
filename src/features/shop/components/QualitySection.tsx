@@ -1,7 +1,7 @@
 import Image from 'next/image'
 import { shopConfig } from '../config'
 
-/** Icono de fibras de algodon */
+/** Icono de fibras de algodón */
 function CottonIcon({ className }: { className?: string }) {
   return (
     <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" strokeWidth={1.2} strokeLinecap="round" strokeLinejoin="round" className={className}>

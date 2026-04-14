@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache'
 import { requireAdmin } from '@/lib/auth/admin'
 import { createServiceClient } from '@/lib/supabase/server'
+import { validateImageUpload } from '@/lib/uploads/validate-image'
 import { backInStockEmail } from '@/lib/email/seismiles-templates'
 import {
   createProduct,
@@ -19,6 +20,32 @@ import {
   saveVariants,
   type VarianteInput,
 } from '@/features/shop/services/admin-products'
+import { FEATURED_PRODUCTS_LIMIT } from '@/features/shop/services/product-lines'
+
+/**
+ * Throws if marking this product as `destacado` would exceed FEATURED_PRODUCTS_LIMIT.
+ * Pass `currentProductoId` when updating, so the product itself is excluded from the count.
+ */
+async function assertFeaturedSlotAvailable(currentProductoId?: string): Promise<void> {
+  const supabase = createServiceClient()
+  let query = supabase
+    .from('productos')
+    .select('id', { count: 'exact', head: true })
+    .eq('destacado', true)
+    .eq('activo', true)
+
+  if (currentProductoId) {
+    query = query.neq('id', currentProductoId)
+  }
+
+  const { count, error } = await query
+  if (error) throw new Error('No se pudo verificar el cupo de destacados.')
+  if ((count ?? 0) >= FEATURED_PRODUCTS_LIMIT) {
+    throw new Error(
+      `Ya hay ${FEATURED_PRODUCTS_LIMIT} productos destacados. Quita uno desde la lista de productos antes de añadir este.`
+    )
+  }
+}
 
 function slugify(text: string): string {
   return text
@@ -35,8 +62,13 @@ export async function createProductAction(formData: FormData) {
 
   const nombre = formData.get('nombre') as string
   const slug = (formData.get('slug') as string) || slugify(nombre)
+  const destacado = formData.get('destacado') === 'true'
 
   try {
+    if (destacado) {
+      await assertFeaturedSlotAvailable()
+    }
+
     const producto = await createProduct({
       nombre,
       slug,
@@ -48,7 +80,7 @@ export async function createProductAction(formData: FormData) {
       cuidado: (formData.get('cuidado') as string) || undefined,
       detalles: (formData.get('detalles') as string) || undefined,
       activo: formData.get('activo') === 'true',
-      destacado: formData.get('destacado') === 'true',
+      destacado,
     })
 
     revalidatePath('/admin/productos')
@@ -62,7 +94,13 @@ export async function updateProductAction(productoId: string, formData: FormData
   const admin = await requireAdmin()
   if (!admin) return { error: 'No autorizado' }
 
+  const destacado = formData.get('destacado') === 'true'
+
   try {
+    if (destacado) {
+      await assertFeaturedSlotAvailable(productoId)
+    }
+
     await updateProduct(productoId, {
       nombre: formData.get('nombre') as string,
       slug: formData.get('slug') as string,
@@ -74,7 +112,7 @@ export async function updateProductAction(productoId: string, formData: FormData
       cuidado: (formData.get('cuidado') as string) || undefined,
       detalles: (formData.get('detalles') as string) || undefined,
       activo: formData.get('activo') === 'true',
-      destacado: formData.get('destacado') === 'true',
+      destacado,
     })
 
     revalidatePath('/admin/productos')
@@ -106,6 +144,23 @@ export async function toggleProductActiveAction(productoId: string, activo: bool
   try {
     await updateProduct(productoId, { activo })
     revalidatePath('/admin/productos')
+    return { success: true }
+  } catch (err) {
+    return { error: (err as Error).message }
+  }
+}
+
+export async function toggleProductDestacadoAction(productoId: string, destacado: boolean) {
+  const admin = await requireAdmin()
+  if (!admin) return { error: 'No autorizado' }
+
+  try {
+    if (destacado) {
+      await assertFeaturedSlotAvailable(productoId)
+    }
+    await updateProduct(productoId, { destacado })
+    revalidatePath('/admin/productos')
+    revalidatePath('/')
     return { success: true }
   } catch (err) {
     return { error: (err as Error).message }
@@ -175,9 +230,12 @@ export async function uploadColorImageAction(formData: FormData) {
 
   if (!file || !productoId || !colorId) return { error: 'Archivo, producto y color requeridos' }
 
+  const validation = await validateImageUpload(file)
+  if (!validation.ok) return { error: validation.error }
+
   try {
-    const buffer = await file.arrayBuffer()
-    const url = await uploadColorImage(productoId, colorId, buffer, file.name, file.type)
+    const { buffer, ext, contentType } = validation.image
+    const url = await uploadColorImage(productoId, colorId, buffer, ext, contentType)
     revalidatePath(`/admin/productos/${productoId}`)
     return { success: true, url }
   } catch (err) {
@@ -315,9 +373,12 @@ export async function uploadProductImageAction(formData: FormData) {
 
   if (!file || !productoId || !colorId) return { error: 'Archivo, producto y color requeridos' }
 
+  const validation = await validateImageUpload(file)
+  if (!validation.ok) return { error: validation.error }
+
   try {
-    const buffer = await file.arrayBuffer()
-    const imagen = await uploadProductImage(productoId, colorId, buffer, file.name, file.type, orden)
+    const { buffer, ext, contentType } = validation.image
+    const imagen = await uploadProductImage(productoId, colorId, buffer, ext, contentType, orden)
     revalidatePath(`/admin/productos/${productoId}`)
     return { success: true, imagen }
   } catch (err) {

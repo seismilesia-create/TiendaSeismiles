@@ -124,7 +124,7 @@ export default async function NosotrosPage() {
                 Lo que nos define
               </h2>
               <p className="text-body-md text-white/60 max-w-2xl mx-auto">
-                Cada decision que tomamos esta guiada por estos principios. Son nuestra brujula,
+                Cada decisión que tomamos está guiada por estos principios. Son nuestra brújula,
                 como la cordillera lo es para el viajero.
               </p>
             </div>
@@ -134,22 +134,22 @@ export default async function NosotrosPage() {
                 {
                   number: '01',
                   title: 'Calidad sin concesiones',
-                  description: 'Elegimos los mejores materiales: algodon de fibra larga, pique superior y frisas peinadas de primera calidad. No hay atajos cuando el objetivo es la excelencia.',
+                  description: 'Elegimos los mejores materiales: algodón de fibra larga, pique superior y frisas peinadas de primera calidad. No hay atajos cuando el objetivo es la excelencia.',
                 },
                 {
                   number: '02',
-                  title: 'Raices catamarquenas',
+                  title: 'Raíces catamarqueñas',
                   description: 'Diseñamos y confeccionamos en Catamarca. Nuestra identidad nace de la tierra, de sus colores, de su fuerza. Cada prenda lleva el ADN del altiplano.',
                 },
                 {
                   number: '03',
                   title: 'Hecho para durar',
-                  description: 'Costuras reforzadas, tinturas de alta fijacion, terminaciones impecables. Nuestras prendas estan hechas para acompañarte, no para descartarse.',
+                  description: 'Costuras reforzadas, tinturas de alta fijación, terminaciones impecables. Nuestras prendas están hechas para acompañarte, no para descartarse.',
                 },
                 {
                   number: '04',
-                  title: 'Diseño con proposito',
-                  description: 'Cada linea tiene nombre de volcan, cada detalle tiene razon de ser. Creamos ropa urbana con alma de montaña: versatil, resistente y con caracter.',
+                  title: 'Diseño con propósito',
+                  description: 'Cada línea tiene nombre de volcán, cada detalle tiene razón de ser. Creamos ropa urbana con alma de montaña: versátil, resistente y con carácter.',
                 },
                 {
                   number: '05',
@@ -209,18 +209,18 @@ export default async function NosotrosPage() {
               Unite a SEISMILES
             </span>
             <h2 className="font-heading text-display-sm sm:text-display-md text-volcanic-900 mb-6">
-              Conoce nuestra coleccion
+              Conoce nuestra colección
             </h2>
             <p className="text-body-md text-volcanic-500 leading-relaxed mb-10 max-w-xl mx-auto">
               Cada prenda es una declaracion de lo que somos: resistencia, calidez y autenticidad.
-              Explora las lineas que nacen de la montaña.
+              Explora las líneas que nacen de la montaña.
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
               <Link
                 href="/catalogo"
                 className="group flex items-center gap-2 px-8 py-4 bg-volcanic-900 hover:bg-volcanic-800 text-white text-body-md font-semibold rounded-xl transition-all duration-300 hover:shadow-warm-lg"
               >
-                Ver coleccion
+                Ver colección
                 <ArrowRightIcon className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-300" />
               </Link>
               <Link

@@ -109,7 +109,7 @@ export function CartSummary({ userId }: CartSummaryProps) {
     const result = await validateCouponCode(code, totalPrice)
 
     if (!result.valid) {
-      setCouponError(result.error ?? 'Codigo invalido')
+      setCouponError(result.error ?? 'Código inválido')
       setCouponLoading(false)
       return
     }
@@ -130,7 +130,7 @@ export function CartSummary({ userId }: CartSummaryProps) {
     if (!code) return
 
     if (appliedGiftCards.some((g) => g.code === code)) {
-      setGcError('Esta gift card ya esta aplicada')
+      setGcError('Esta gift card ya está aplicada')
       return
     }
 
@@ -140,7 +140,7 @@ export function CartSummary({ userId }: CartSummaryProps) {
     const result = await validateGiftCardCode(gcCode)
 
     if (!result.valid) {
-      setGcError(result.error ?? 'Codigo invalido')
+      setGcError(result.error ?? 'Código inválido')
       setGcLoading(false)
       return
     }
@@ -214,7 +214,7 @@ export function CartSummary({ userId }: CartSummaryProps) {
           </span>
         </div>
         <div className="flex items-center justify-between">
-          <span className="text-volcanic-500">Envio</span>
+          <span className="text-volcanic-500">Envío</span>
           <span className="font-semibold text-emerald-600">Gratis</span>
         </div>
       </div>
@@ -245,7 +245,7 @@ export function CartSummary({ userId }: CartSummaryProps) {
             <button
               onClick={removeCoupon}
               className="p-1 text-violet-500 hover:text-red-500 transition-colors"
-              title="Quitar cupon"
+              title="Quitar cupón"
             >
               <CloseIcon className="w-3.5 h-3.5" />
             </button>
@@ -258,7 +258,7 @@ export function CartSummary({ userId }: CartSummaryProps) {
         <div className="mb-4">
           <label className="flex items-center gap-1.5 text-body-xs font-medium text-volcanic-600 mb-2">
             <TagIcon className="w-3.5 h-3.5" />
-            Codigo de descuento
+            Código de descuento
           </label>
           <div className="flex gap-2">
             <input
@@ -326,7 +326,7 @@ export function CartSummary({ userId }: CartSummaryProps) {
       <div className="mb-4">
         <label className="flex items-center gap-1.5 text-body-xs font-medium text-volcanic-600 mb-2">
           <GiftIcon className="w-3.5 h-3.5" />
-          {appliedGiftCards.length > 0 ? 'Agregar otra Gift Card' : 'Codigo de Gift Card'}
+          {appliedGiftCards.length > 0 ? 'Agregar otra Gift Card' : 'Código de Gift Card'}
         </label>
         <div className="flex gap-2">
           <input
@@ -379,7 +379,7 @@ export function CartSummary({ userId }: CartSummaryProps) {
       </div>
       {totalFinal > 0 ? (
         <p className="text-body-xs text-volcanic-500 mb-6">
-          3 cuotas sin interes de ${cuotas.toLocaleString('es-AR')}
+          3 cuotas sin interés de ${cuotas.toLocaleString('es-AR')}
         </p>
       ) : (
         <p className="text-body-xs text-emerald-600 font-medium mb-6">
@@ -393,7 +393,7 @@ export function CartSummary({ userId }: CartSummaryProps) {
         <div className="mb-5 flex gap-2 p-3 bg-amber-50 border border-amber-200 rounded-xl">
           <GiftIcon className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
           <p className="text-body-xs text-amber-700">
-            Te quedan <span className="font-semibold">${saldoSobrante.toLocaleString('es-AR')}</span> de saldo sin usar. Podes volver a canjear tu gift card en tu proxima compra.
+            Te quedan <span className="font-semibold">${saldoSobrante.toLocaleString('es-AR')}</span> de saldo sin usar. Podés volver a canjear tu gift card en tu próxima compra.
           </p>
         </div>
       )}
@@ -444,7 +444,7 @@ export function CartSummary({ userId }: CartSummaryProps) {
       <div className="flex items-center gap-2 mt-5 pt-5 border-t border-sand-200">
         <ShieldIcon className="w-4 h-4 text-terra-500 shrink-0" />
         <p className="text-body-xs text-volcanic-500">
-          Compra segura · Envio gratis · Cambios por 30 dias
+          Compra segura · Envío gratis · Cambios por 30 días
         </p>
       </div>
     </div>

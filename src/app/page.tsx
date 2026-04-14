@@ -1,17 +1,17 @@
 import {
   MarqueeBanner, Navbar, HeroSection, FeaturedProducts,
   LookbookSection, CategoriesGrid, QualitySection, BenefitsBar,
-  InstagramSection, NewsletterSection, Footer, ScrollReveal,
+  NewsletterSection, Footer, ScrollReveal,
 } from '@/features/shop/components'
-import { getProductLines, getSeasonalFeaturedProducts } from '@/features/shop/services/product-lines'
+import { getAdminFeaturedProducts, getProductLines } from '@/features/shop/services/product-lines'
 import { getSeason, getSeasonDefaultTab, getSeasonSubtitle } from '@/features/shop/utils/season'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
 
 export default async function HomePage() {
   const season = getSeason()
-  const [productLines, seasonalProducts, supabase] = await Promise.all([
+  const [productLines, featuredProducts, supabase] = await Promise.all([
     getProductLines(),
-    getSeasonalFeaturedProducts(season, 4),
+    getAdminFeaturedProducts(),
     createClient(),
   ])
 
@@ -36,7 +36,7 @@ export default async function HomePage() {
       <main>
         <HeroSection />
         <ScrollReveal stagger>
-          <FeaturedProducts dbProducts={seasonalProducts} seasonSubtitle={getSeasonSubtitle(season)} />
+          <FeaturedProducts dbProducts={featuredProducts} seasonSubtitle={getSeasonSubtitle(season)} />
         </ScrollReveal>
         <ScrollReveal>
           <LookbookSection />
@@ -49,9 +49,6 @@ export default async function HomePage() {
         </ScrollReveal>
         <ScrollReveal stagger>
           <BenefitsBar />
-        </ScrollReveal>
-        <ScrollReveal>
-          <InstagramSection />
         </ScrollReveal>
         <ScrollReveal>
           <NewsletterSection />

@@ -6,15 +6,15 @@ import Link from 'next/link'
 import { HeartButton } from './HeartButton'
 
 const LINEA_LABELS: Record<string, string> = {
-  arista: 'Linea Arista',
-  pissis: 'Linea Pissis',
-  origen: 'Linea Origen',
-  terreno: 'Linea Terreno',
-  veta: 'Linea Veta',
-  'tres-cruces': 'Linea Tres Cruces',
-  nacimiento: 'Linea Nacimiento',
-  veladero: 'Linea Veladero',
-  'san-francisco': 'Linea San Francisco',
+  arista: 'Línea Arista',
+  pissis: 'Línea Pissis',
+  origen: 'Línea Origen',
+  terreno: 'Línea Terreno',
+  veta: 'Línea Veta',
+  'tres-cruces': 'Línea Tres Cruces',
+  nacimiento: 'Línea Nacimiento',
+  veladero: 'Línea Veladero',
+  'san-francisco': 'Línea San Francisco',
 }
 
 export interface Product {

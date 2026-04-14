@@ -13,10 +13,10 @@ export default function Error({
       <div className="text-center max-w-md">
         <p className="text-7xl font-extrabold text-volcanic-900 mb-2">500</p>
         <h1 className="text-2xl font-semibold text-volcanic-900 mb-3">
-          Algo salio mal
+          Algo salió mal
         </h1>
         <p className="text-volcanic-500 mb-8 leading-relaxed">
-          Ocurrio un error inesperado. Podes intentar de nuevo o volver al inicio.
+          Ocurrió un error inesperado. Podés intentar de nuevo o volver al inicio.
         </p>
         <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
           <button

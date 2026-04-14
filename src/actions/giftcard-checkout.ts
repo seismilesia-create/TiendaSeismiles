@@ -21,7 +21,7 @@ export async function createGiftcardCheckout(cardId: string): Promise<GiftcardCh
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
-  if (!user) return { error: 'Debes iniciar sesion para comprar' }
+  if (!user) return { error: 'Debés iniciar sesión para comprar' }
 
   const card = await getGiftCardDefinition(cardId)
   if (!card || !card.activo) return { error: 'Gift card no encontrada' }
@@ -45,7 +45,7 @@ export async function createGiftcardCheckout(cardId: string): Promise<GiftcardCh
 
   if (insertError || !giftcard) {
     console.error('Gift card insert error:', insertError)
-    return { error: 'Error al crear la gift card. Intenta de nuevo.' }
+    return { error: 'Error al crear la gift card. Intentá de nuevo.' }
   }
 
   // Create MP preference
@@ -81,7 +81,7 @@ export async function createGiftcardCheckout(cardId: string): Promise<GiftcardCh
     return { initPoint: response.init_point!, giftcardId: giftcard.id }
   } catch (mpError) {
     console.error('MP preference error:', mpError)
-    return { error: 'Error al conectar con Mercado Pago. Intenta de nuevo.' }
+    return { error: 'Error al conectar con Mercado Pago. Intentá de nuevo.' }
   }
 }
 
@@ -111,23 +111,34 @@ export async function confirmGiftcardPayment(
       // First get the monto to set saldo_restante
       const { data: existing } = await service
         .from('gift_cards')
-        .select('monto')
+        .select('monto, codigo')
         .eq('id', giftcardId)
         .single()
 
-      const { data: gc, error: updateError } = await service
+      // Idempotent activation: `neq('estado', 'activa')` makes sure we only
+      // transition — and send the email — if the card wasn't already active.
+      // Both the MP webhook AND this return-page handler target the same row,
+      // so without this gate the buyer would get duplicate emails.
+      const { data: gc } = await service
         .from('gift_cards')
-        .update({ estado: 'activa', mp_payment_id: String(paymentId), saldo_restante: existing?.monto ?? 0 })
+        .update({
+          estado: 'activa',
+          mp_payment_id: String(paymentId),
+          saldo_restante: existing?.monto ?? 0,
+        })
         .eq('id', giftcardId)
+        .neq('estado', 'activa')
         .select('codigo, monto, titulo, user_id')
         .single()
 
       if (gc) {
-        // Send email with gift card code (fire-and-forget)
+        // This caller won the transition — send the email exactly once.
         sendGiftcardEmail(gc.user_id, gc.codigo, gc.monto, gc.titulo)
       }
 
-      return { confirmed: true, codigo: gc?.codigo }
+      // Either we just activated the card or another caller already did —
+      // the result to the user is the same. Return the codigo if we have it.
+      return { confirmed: true, codigo: gc?.codigo ?? existing?.codigo }
     }
 
     if (mpStatus === 'rejected' || mpStatus === 'cancelled') {
@@ -135,6 +146,7 @@ export async function confirmGiftcardPayment(
         .from('gift_cards')
         .update({ estado: 'cancelada', mp_payment_id: String(paymentId) })
         .eq('id', giftcardId)
+        .neq('estado', 'cancelada')
 
       return { confirmed: false }
     }
@@ -188,10 +200,13 @@ export async function checkPendingGiftcard(): Promise<ConfirmGiftcardResult> {
     const mpStatus = payment.status ?? ''
 
     if (mpStatus === 'approved' || mpStatus === 'authorized') {
+      // Idempotent activation: same gate as confirmGiftcardPayment and the
+      // MP webhook — only the caller that wins the transition emails.
       const { data: updated } = await service
         .from('gift_cards')
         .update({ estado: 'activa', mp_payment_id: String(payment.id), saldo_restante: gc.monto })
         .eq('id', gc.id)
+        .neq('estado', 'activa')
         .select('codigo, monto, titulo, user_id')
         .single()
 

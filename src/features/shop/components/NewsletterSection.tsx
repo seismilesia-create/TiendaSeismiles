@@ -31,7 +31,7 @@ export function NewsletterSection() {
     // Validacion basica de email
     if (!trimmed || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed)) {
       setState('error')
-      setErrorMsg('Ingresa un email valido')
+      setErrorMsg('Ingresá un email válido')
       return
     }
 
@@ -49,7 +49,7 @@ export function NewsletterSection() {
       }
     } catch {
       setState('error')
-      setErrorMsg('Algo salio mal. Intenta de nuevo.')
+      setErrorMsg('Algo salió mal. Intentá de nuevo.')
     }
   }
 
@@ -68,7 +68,7 @@ export function NewsletterSection() {
 
         {/* Label */}
         <p className="text-body-xs uppercase tracking-widest text-terra-400 font-semibold mb-4">
-          Unite a la expedicion
+          Unite a la expedición
         </p>
 
         {/* Heading */}
@@ -78,7 +78,7 @@ export function NewsletterSection() {
 
         {/* Subtitle */}
         <p className="text-body-md text-white/60 leading-relaxed mb-10 max-w-lg mx-auto">
-          Suscribite y recibi tu cupon de descuento. Se el primero en conocer nuevos colores,
+          Suscribite y recibí tu cupón de descuento. Sé el primero en conocer nuevos colores,
           lanzamientos exclusivos y novedades desde la altura.
         </p>
 
@@ -89,10 +89,10 @@ export function NewsletterSection() {
               <CheckIcon className="w-5 h-5 text-terra-400" />
               <div className="text-left">
                 <p className="text-body-sm font-semibold text-white">
-                  Ya sos parte de la expedicion
+                  Ya sos parte de la expedición
                 </p>
                 <p className="text-body-xs text-white/50">
-                  Revisa tu email para encontrar tu cupon del 10%
+                  Revisá tu email para encontrar tu cupón del 10%
                 </p>
               </div>
             </div>
@@ -139,7 +139,7 @@ export function NewsletterSection() {
 
             {/* Disclaimer */}
             <p className="mt-4 text-body-xs text-white/20">
-              Al suscribirte aceptas nuestra politica de privacidad.
+              Al suscribirte aceptás nuestra política de privacidad.
             </p>
           </form>
         )}

@@ -34,7 +34,7 @@ export async function submitReview(formData: FormData) {
   const { data: { user } } = await supabase.auth.getUser()
 
   if (!user) {
-    return { error: 'Debes iniciar sesion para dejar una reseña.' }
+    return { error: 'Debés iniciar sesión para dejar una reseña.' }
   }
 
   const productoId = formData.get('producto_id') as string
@@ -47,7 +47,7 @@ export async function submitReview(formData: FormData) {
   const slug = formData.get('slug') as string
 
   if (!productoId || !puntuacion || puntuacion < 1 || puntuacion > 5) {
-    return { error: 'Selecciona una puntuacion general de 1 a 5 estrellas.' }
+    return { error: 'Seleccioná una puntuación general de 1 a 5 estrellas.' }
   }
 
   if (comentario.length > 1000) {
@@ -81,7 +81,7 @@ export async function submitReview(formData: FormData) {
     if (error.code === '23505') {
       return { error: 'Ya dejaste una reseña para este producto.' }
     }
-    return { error: 'No se pudo guardar la reseña. Intenta de nuevo.' }
+    return { error: 'No se pudo guardar la reseña. Intentá de nuevo.' }
   }
 
   revalidatePath(`/catalogo/${slug}`)

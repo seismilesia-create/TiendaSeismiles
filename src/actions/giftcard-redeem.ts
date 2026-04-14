@@ -12,12 +12,12 @@ interface ValidateResult {
 }
 
 export async function validateGiftCardCode(codigo: string): Promise<ValidateResult> {
-  if (!codigo?.trim()) return { valid: false, error: 'Ingresa un codigo de gift card' }
+  if (!codigo?.trim()) return { valid: false, error: 'Ingresá un código de gift card' }
 
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
-  if (!user) return { valid: false, error: 'Debes iniciar sesion' }
+  if (!user) return { valid: false, error: 'Debés iniciar sesión' }
 
   const service = createServiceClient()
 
@@ -27,10 +27,10 @@ export async function validateGiftCardCode(codigo: string): Promise<ValidateResu
     .eq('codigo', codigo.trim().toUpperCase())
     .single()
 
-  if (!gc) return { valid: false, error: 'Codigo de gift card no encontrado' }
+  if (!gc) return { valid: false, error: 'Código de gift card no encontrado' }
 
   if (gc.estado !== 'activa') {
-    return { valid: false, error: 'Esta gift card no esta activa' }
+    return { valid: false, error: 'Esta gift card no está activa' }
   }
 
   if (!gc.saldo_restante || gc.saldo_restante <= 0) {

@@ -49,7 +49,7 @@ export function UpdatePasswordForm() {
           required
           minLength={6}
           className="w-full px-4 py-3 rounded-xl bg-white border border-sand-200 text-volcanic-900 text-body-md focus:outline-none focus:border-terra-500 focus:ring-1 focus:ring-terra-500 transition-all"
-          placeholder="Minimo 6 caracteres"
+          placeholder="Mínimo 6 caracteres"
         />
       </div>
 
@@ -64,7 +64,7 @@ export function UpdatePasswordForm() {
           required
           minLength={6}
           className="w-full px-4 py-3 rounded-xl bg-white border border-sand-200 text-volcanic-900 text-body-md focus:outline-none focus:border-terra-500 focus:ring-1 focus:ring-terra-500 transition-all"
-          placeholder="Repeti tu contraseña"
+          placeholder="Repetí tu contraseña"
         />
       </div>
 

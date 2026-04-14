@@ -118,7 +118,7 @@ export function ResultadoGiftcard({ status, paymentId, externalReference }: Prop
             Gift Card activada!
           </h1>
           <p className="text-body-md text-volcanic-500 mb-6">
-            Tu gift card fue procesada correctamente. Tambien te la enviamos por email.
+            Tu gift card fue procesada correctamente. También te la enviamos por email.
           </p>
 
           {codigo && (

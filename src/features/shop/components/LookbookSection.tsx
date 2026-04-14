@@ -3,6 +3,7 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import { useRef, useState, useCallback, useEffect } from 'react'
+import { createPortal } from 'react-dom'
 
 type MediaItem =
   | { type: 'video'; src: string }
@@ -10,8 +11,8 @@ type MediaItem =
 
 const photos = [
   { src: '/images/Idea.jpg', alt: 'Remera naranja en la montaña', color: 'Naranja Volcánico' },
-  { src: '/images/Idea 1.jpg', alt: 'Polo rojo en el parque', color: 'Rojo Cumbre' },
   { src: '/images/Idea 2.jpg', alt: 'Remera blanca urbana', color: 'Blanco Salina' },
+  { src: '/images/Idea 6.jpg', alt: 'Remera petroleo en el parque', color: 'Petróleo' },
   { src: '/images/Idea 3.jpg', alt: 'Remera borgoña en la calle', color: 'Borgoña Andino' },
 ]
 
@@ -33,6 +34,9 @@ export function LookbookSection() {
   const scrollRef = useRef<HTMLDivElement>(null)
   const [activeIndex, setActiveIndex] = useState(0)
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null)
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => { setMounted(true) }, [])
 
   const handleScroll = useCallback(() => {
     if (!scrollRef.current) return
@@ -169,11 +173,10 @@ export function LookbookSection() {
               <button
                 key={index}
                 aria-label={`Ir a slide ${index + 1}`}
-                className={`h-2 rounded-full transition-all duration-300 ${
-                  activeIndex === index
-                    ? 'bg-terra-500 w-6'
-                    : 'bg-volcanic-900/20 w-2'
-                }`}
+                className={`h-2 rounded-full transition-all duration-300 ${activeIndex === index
+                  ? 'bg-terra-500 w-6'
+                  : 'bg-volcanic-900/20 w-2'
+                  }`}
               />
             ))}
           </div>
@@ -191,10 +194,10 @@ export function LookbookSection() {
         </div>
       </div>
 
-      {/* Lightbox */}
-      {lightboxIndex !== null && (
+      {/* Lightbox — rendered via portal to escape any transformed ancestors (ScrollReveal) */}
+      {mounted && lightboxIndex !== null && createPortal(
         <div
-          className="fixed inset-0 z-50 bg-black/95 flex items-center justify-center"
+          className="fixed inset-0 z-[100] bg-black/95 flex items-center justify-center"
           onClick={closeLightbox}
         >
           {/* Close button */}
@@ -259,7 +262,8 @@ export function LookbookSection() {
               />
             )}
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </section>
   )

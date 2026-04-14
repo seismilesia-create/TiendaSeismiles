@@ -318,7 +318,7 @@ export function GiftCardDefForm({ existing }: { existing?: GiftCardDef }) {
               )}
               <div className={`relative z-10 flex items-start justify-between ${imagenUrl ? 'drop-shadow-md' : ''}`}>
                 <Image
-                  src="/images/logo-seismiles.png"
+                  src="/images/logo-seismiles-v2.png"
                   alt=""
                   width={80}
                   height={35}

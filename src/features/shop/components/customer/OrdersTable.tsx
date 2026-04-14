@@ -28,13 +28,13 @@ export function OrdersTable({ orders }: Props) {
         <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-sand-100 flex items-center justify-center">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" className="w-7 h-7 text-volcanic-500"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z" /><path d="M3 6h18" /><path d="M16 10a4 4 0 0 1-8 0" /></svg>
         </div>
-        <p className="text-body-md font-medium text-volcanic-700 mb-1">Sin pedidos aun</p>
-        <p className="text-body-sm text-volcanic-500">Cuando realices tu primera compra, aparecera aqui.</p>
+        <p className="text-body-md font-medium text-volcanic-700 mb-1">Sin pedidos aún</p>
+        <p className="text-body-sm text-volcanic-500">Cuando realices tu primera compra, aparecerá acá.</p>
         <Link
           href="/catalogo"
           className="inline-block mt-5 px-6 py-2.5 bg-volcanic-900 hover:bg-volcanic-800 text-white text-body-sm font-semibold rounded-xl transition-colors"
         >
-          Explorar catalogo
+          Explorar catálogo
         </Link>
       </div>
     )

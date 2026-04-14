@@ -7,7 +7,6 @@ interface OrderItem {
   variantId: string
   productId: string
   cantidad: number
-  precio: number
 }
 
 interface PlaceOrderResult {
@@ -17,18 +16,19 @@ interface PlaceOrderResult {
 }
 
 export async function placeOrder(items: OrderItem[]): Promise<PlaceOrderResult> {
-  if (!items.length) return { error: 'El carrito esta vacio' }
+  if (!items.length) return { error: 'El carrito está vacío' }
 
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
-  if (!user) return { error: 'Debes iniciar sesion para comprar' }
+  if (!user) return { error: 'Debés iniciar sesión para comprar' }
 
+  // Precio is intentionally omitted: place_order re-derives it from the
+  // productos table to prevent client-side price tampering.
   const rpcItems = items.map((i) => ({
     variant_id: i.variantId,
     product_id: i.productId,
     cantidad: i.cantidad,
-    precio: i.precio,
   }))
 
   const { data, error } = await supabase.rpc('place_order', {
@@ -38,9 +38,9 @@ export async function placeOrder(items: OrderItem[]): Promise<PlaceOrderResult> 
 
   if (error) {
     if (error.message.includes('Stock insuficiente')) {
-      return { error: 'Algunos productos no tienen stock suficiente. Actualiza tu carrito.' }
+      return { error: 'Algunos productos no tienen stock suficiente. Actualizá tu carrito.' }
     }
-    return { error: 'Error al procesar el pedido. Intenta de nuevo.' }
+    return { error: 'Error al procesar el pedido. Intentá de nuevo.' }
   }
 
   revalidatePath('/catalogo')

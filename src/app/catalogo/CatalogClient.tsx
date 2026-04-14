@@ -46,15 +46,13 @@ function filterProducts(
   products: CatalogProductFromDB[],
   type: string,
   line: string,
-  audience: string,
-  colors: string[],
+  color: string | null,
   sizes: string[],
 ): CatalogProductFromDB[] {
   return products.filter((p) => {
     if (type !== 'todos' && p.categoria !== type) return false
     if (line !== 'todos' && p.linea !== line) return false
-    if (audience !== 'todos' && p.genero !== audience) return false
-    if (colors.length > 0 && !p.colores.some((c) => c.color_base_hex && colors.includes(c.color_base_hex))) return false
+    if (color && !p.colores.some((c) => c.color_base_hex === color)) return false
     if (sizes.length > 0 && !p.variantes.some((v) => sizes.includes(v.talle))) return false
     return true
   })
@@ -85,14 +83,12 @@ interface CatalogClientProps {
 }
 
 /* Valid type param values that map to catalog filter */
-const VALID_TYPES = ['remeras-lisas', 'estampadas', 'buzos-camperas']
-const VALID_AUDIENCES = ['hombres', 'mujeres', 'ninos']
+const VALID_TYPES = ['remeras-lisas', 'buzos']
 
 function CatalogInner({ products, favoriteProductIds = [], isLoggedIn = false }: CatalogClientProps) {
   const favoriteSet = useMemo(() => new Set(favoriteProductIds), [favoriteProductIds])
   const searchParams = useSearchParams()
   const paramType = searchParams.get('type')
-  const paramGenero = searchParams.get('genero')
   const paramLinea = searchParams.get('linea')
 
   const [activeType, setActiveType] = useState(() =>
@@ -101,22 +97,17 @@ function CatalogInner({ products, favoriteProductIds = [], isLoggedIn = false }:
   const [activeLine, setActiveLine] = useState(() =>
     paramLinea ?? 'todos'
   )
-  const [activeAudience, setActiveAudience] = useState(() =>
-    paramGenero && VALID_AUDIENCES.includes(paramGenero) ? paramGenero : 'todos'
-  )
   const [activeSort, setActiveSort] = useState('destacados')
-  const [activeColors, setActiveColors] = useState<string[]>([])
+  const [activeColor, setActiveColor] = useState<string | null>(null)
   const [activeSizes, setActiveSizes] = useState<string[]>([])
 
   // Sync filters when URL search params change (e.g. clicking a new navbar link)
   useEffect(() => {
     const t = searchParams.get('type')
-    const g = searchParams.get('genero')
     const l = searchParams.get('linea')
     setActiveType(t && VALID_TYPES.includes(t) ? t : 'todos')
-    setActiveAudience(g && VALID_AUDIENCES.includes(g) ? g : 'todos')
     setActiveLine(l ?? 'todos')
-    setActiveColors([])
+    setActiveColor(null)
     setActiveSizes([])
   }, [searchParams])
 
@@ -128,10 +119,9 @@ function CatalogInner({ products, favoriteProductIds = [], isLoggedIn = false }:
     setActiveLine('todos')
   }
 
-  function handleColorToggle(color: string) {
-    setActiveColors((prev) =>
-      prev.includes(color) ? prev.filter((c) => c !== color) : [...prev, color]
-    )
+  function handleColorChange(color: string) {
+    // Click el mismo color → limpia. Click otro → reemplaza.
+    setActiveColor((prev) => (prev === color ? null : color))
   }
 
   function handleSizeToggle(size: string) {
@@ -143,27 +133,24 @@ function CatalogInner({ products, favoriteProductIds = [], isLoggedIn = false }:
   function handleClearAll() {
     setActiveType('todos')
     setActiveLine('todos')
-    setActiveAudience('todos')
-    setActiveColors([])
+    setActiveColor(null)
     setActiveSizes([])
   }
 
   const filteredProducts = useMemo(() => {
-    const filtered = filterProducts(products, activeType, activeLine, activeAudience, activeColors, activeSizes)
+    const filtered = filterProducts(products, activeType, activeLine, activeColor, activeSizes)
     return sortProducts(filtered, activeSort)
-  }, [products, activeType, activeLine, activeAudience, activeSort, activeColors, activeSizes])
+  }, [products, activeType, activeLine, activeSort, activeColor, activeSizes])
 
   const filterProps = {
     activeType,
     onTypeChange: handleTypeChange,
     activeLine,
     onLineChange: setActiveLine,
-    activeAudience,
-    onAudienceChange: setActiveAudience,
     activeSort,
     onSortChange: setActiveSort,
-    activeColors,
-    onColorToggle: handleColorToggle,
+    activeColor,
+    onColorChange: handleColorChange,
     activeSizes,
     onSizeToggle: handleSizeToggle,
     totalProducts: filteredProducts.length,
@@ -176,7 +163,7 @@ function CatalogInner({ products, favoriteProductIds = [], isLoggedIn = false }:
     <>
       <CatalogHeader
         title="Nuestras Prendas"
-        subtitle="Cada prenda nace de la inmensidad del altiplano. Algodones premium, estampas unicas, la confianza que vestis."
+        subtitle="Cada prenda nace de la inmensidad del altiplano. Algodones premium, estampas únicas, la confianza que vestís."
       />
 
       <section className="bg-sand-50 min-h-screen">
@@ -215,8 +202,8 @@ function CatalogInner({ products, favoriteProductIds = [], isLoggedIn = false }:
                 </p>
                 <p className="mt-2 text-body-sm text-volcanic-500 text-center">
                   {products.length === 0
-                    ? 'Todavia no hay productos cargados. Pronto estaran disponibles.'
-                    : 'Proba ajustando los filtros para explorar nuestra coleccion.'}
+                    ? 'Todavía no hay productos cargados. Pronto estarán disponibles.'
+                    : 'Probá ajustando los filtros para explorar nuestra colección.'}
                 </p>
                 {products.length > 0 && (
                   <button
@@ -238,8 +225,8 @@ function CatalogInner({ products, favoriteProductIds = [], isLoggedIn = false }:
                     {`Mostrando ${filteredProducts.length} de ${products.length} productos`}
                   </p>
                   <p className="max-w-md text-center text-body-sm leading-relaxed text-volcanic-500">
-                    Todas nuestras prendas estan hechas con materiales premium de primera calidad.
-                    Envio gratis a todo el pais.
+                    Todas nuestras prendas están hechas con materiales premium de primera calidad.
+                    Envío gratis a todo el país.
                   </p>
                 </div>
               </div>

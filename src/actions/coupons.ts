@@ -15,7 +15,7 @@ export async function validateCouponCode(
   code: string,
   subtotal: number
 ): Promise<ValidateCouponResult> {
-  if (!code.trim()) return { valid: false, error: 'Ingresa un codigo' }
+  if (!code.trim()) return { valid: false, error: 'Ingresá un código' }
 
   const service = createServiceClient()
   const normalizedCode = code.trim().toUpperCase()
@@ -28,26 +28,34 @@ export async function validateCouponCode(
     .single()
 
   if (fetchErr || !coupon) {
-    return { valid: false, error: 'Codigo de descuento invalido' }
+    return { valid: false, error: 'Código de descuento inválido' }
   }
 
   // Check active
   if (!coupon.activo) {
-    return { valid: false, error: 'Este cupon ya no esta activo' }
+    return { valid: false, error: 'Este cupón ya no está activo' }
   }
 
   // Check date range
   const now = new Date()
   if (coupon.fecha_inicio && new Date(coupon.fecha_inicio) > now) {
-    return { valid: false, error: 'Este cupon aun no esta vigente' }
+    return { valid: false, error: 'Este cupón aún no está vigente' }
   }
   if (coupon.fecha_fin && new Date(coupon.fecha_fin) < now) {
-    return { valid: false, error: 'Este cupon ya vencio' }
+    return { valid: false, error: 'Este cupón ya venció' }
   }
 
-  // Check max uses
-  if (coupon.max_usos !== null && coupon.usos_actuales >= coupon.max_usos) {
-    return { valid: false, error: 'Este cupon ya alcanzo su limite de usos' }
+  // Check max uses — authoritative count from cupon_usos rather than the
+  // denormalized `usos_actuales` counter, which can drift under races and
+  // after cancellations.
+  if (coupon.max_usos !== null) {
+    const { count: usosActuales } = await service
+      .from('cupon_usos')
+      .select('id', { count: 'exact', head: true })
+      .eq('cupon_id', coupon.id)
+    if ((usosActuales ?? 0) >= coupon.max_usos) {
+      return { valid: false, error: 'Este cupón ya alcanzó su límite de usos' }
+    }
   }
 
   // Check per-user usage
@@ -64,7 +72,7 @@ export async function validateCouponCode(
         .limit(1)
 
       if (usage && usage.length > 0) {
-        return { valid: false, error: 'Ya usaste este cupon' }
+        return { valid: false, error: 'Ya usaste este cupón' }
       }
     }
   }

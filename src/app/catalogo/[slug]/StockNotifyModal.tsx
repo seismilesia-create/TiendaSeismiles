@@ -170,17 +170,17 @@ export function StockNotifyModal({
               <UserIcon className="w-7 h-7 text-terra-500" />
             </div>
             <h3 className="font-heading text-lg text-volcanic-900 mb-2">
-              Crea una cuenta para recibir alertas de stock
+              Creá una cuenta para recibir alertas de stock
             </h3>
             <p className="text-body-sm text-volcanic-500 leading-relaxed mb-8">
-              Registrate o inicia sesion para que te avisemos cuando <span className="font-semibold text-volcanic-700">{productName}</span> en talle <span className="font-semibold text-volcanic-700">{talle}</span> vuelva a estar disponible.
+              Registrate o iniciá sesión para que te avisemos cuando <span className="font-semibold text-volcanic-700">{productName}</span> en talle <span className="font-semibold text-volcanic-700">{talle}</span> vuelva a estar disponible.
             </p>
             <div className="flex flex-col gap-3">
               <Link
                 href="/login"
                 className="w-full flex items-center justify-center py-3.5 bg-volcanic-900 hover:bg-volcanic-800 text-white text-body-sm font-semibold rounded-xl transition-colors"
               >
-                Iniciar sesion
+                Iniciar sesión
               </Link>
               <Link
                 href="/registro"
@@ -203,7 +203,7 @@ export function StockNotifyModal({
                   Avisame cuando haya stock
                 </h3>
                 <p className="text-body-xs text-volcanic-500">
-                  Te enviamos un email cuando este disponible.
+                  Te enviamos un email cuando esté disponible.
                 </p>
               </div>
             </div>

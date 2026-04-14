@@ -95,6 +95,14 @@ function LogoutIcon({ className }: { className?: string }) {
   )
 }
 
+function ArrepentimientoIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" className={className}>
+      <path d="M3 12a9 9 0 1 0 3-6.7L3 8" /><path d="M3 3v5h5" />
+    </svg>
+  )
+}
+
 function MenuIcon({ className }: { className?: string }) {
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className={className}>
@@ -114,6 +122,7 @@ function CloseIcon({ className }: { className?: string }) {
 const NAV_ITEMS = [
   { href: '/admin/dashboard', label: 'Dashboard', icon: DashboardIcon },
   { href: '/admin/pedidos', label: 'Pedidos', icon: OrdersIcon },
+  { href: '/admin/arrepentimientos', label: 'Arrepentimientos', icon: ArrepentimientoIcon },
   { href: '/admin/productos', label: 'Productos', icon: ProductIcon },
   { href: '/admin/inventario', label: 'Inventario', icon: InventoryIcon },
   { href: '/admin/gift-cards', label: 'Gift Cards', icon: GiftCardIcon },
@@ -138,7 +147,7 @@ export function AdminSidebar() {
       <div className="px-5 pt-6 pb-8">
         <Link href="/admin/dashboard" className="block" onClick={() => setMobileOpen(false)}>
           <Image
-            src="/images/logo-seismiles.png"
+            src="/images/logo-seismiles-v2.png"
             alt="SEISMILES"
             width={120}
             height={48}
@@ -203,7 +212,7 @@ export function AdminSidebar() {
       <div className="lg:hidden fixed top-0 left-0 right-0 h-14 bg-volcanic-900 flex items-center justify-between px-4 z-30">
         <Link href="/admin/dashboard">
           <Image
-            src="/images/logo-seismiles.png"
+            src="/images/logo-seismiles-v2.png"
             alt="SEISMILES"
             width={100}
             height={40}

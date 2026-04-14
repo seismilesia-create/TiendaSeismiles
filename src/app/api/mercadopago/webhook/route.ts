@@ -2,12 +2,24 @@ import { createHmac, timingSafeEqual } from 'crypto'
 import { NextRequest, NextResponse } from 'next/server'
 import { createServiceClient } from '@/lib/supabase/server'
 import { mpPayment } from '@/lib/mercadopago'
-import { sendOrderConfirmationEmails } from '@/lib/email/send-order-confirmation'
 import { sendGiftcardEmail } from '@/lib/email/send-giftcard-email'
+import { confirmPayment } from '@/actions/checkout'
 
 function verifyWebhookSignature(request: NextRequest, dataId: string): boolean {
   const secret = process.env.MP_WEBHOOK_SECRET
-  if (!secret) return true // Skip verification if no secret configured (dev mode)
+  if (!secret) {
+    // Fail-closed in production: a missing webhook secret in prod is a
+    // misconfiguration, not a legitimate "dev mode". Without this guard a
+    // single forgotten env var would let anyone on the internet replay
+    // webhooks with crafted payment IDs. In development, accept unsigned
+    // webhooks so local flows still work.
+    if (process.env.NODE_ENV === 'production') {
+      console.error('[mp-webhook] MP_WEBHOOK_SECRET missing in production — rejecting')
+      return false
+    }
+    console.warn('[mp-webhook] MP_WEBHOOK_SECRET not set — accepting unsigned (dev only)')
+    return true
+  }
 
   const xSignature = request.headers.get('x-signature')
   const xRequestId = request.headers.get('x-request-id')
@@ -37,17 +49,6 @@ function verifyWebhookSignature(request: NextRequest, dataId: string): boolean {
   } catch {
     return false
   }
-}
-
-const STATUS_MAP: Record<string, string> = {
-  approved: 'confirmado',
-  authorized: 'confirmado',
-  pending: 'pendiente_pago',
-  in_process: 'pendiente_pago',
-  rejected: 'cancelada',
-  cancelled: 'cancelada',
-  refunded: 'reembolsada',
-  charged_back: 'reembolsada',
 }
 
 export async function POST(request: NextRequest) {
@@ -88,17 +89,26 @@ export async function POST(request: NextRequest) {
       const mpStatus = status ?? ''
 
       if (mpStatus === 'approved' || mpStatus === 'authorized') {
-        // Get monto first to set saldo_restante
+        // Read monto to seed saldo_restante.
         const { data: existing } = await service
           .from('gift_cards')
           .select('monto')
           .eq('id', giftcardId)
           .single()
 
+        // Idempotent activation: only transition and email if the card was
+        // NOT already active. MP retries the webhook and this endpoint can
+        // also be hit by confirmGiftcardPayment from the return page —
+        // without this gate the user would get multiple gift card emails.
         const { data: gc } = await service
           .from('gift_cards')
-          .update({ estado: 'activa', mp_payment_id: String(paymentId), saldo_restante: existing?.monto ?? 0 })
+          .update({
+            estado: 'activa',
+            mp_payment_id: String(paymentId),
+            saldo_restante: existing?.monto ?? 0,
+          })
           .eq('id', giftcardId)
+          .neq('estado', 'activa')
           .select('codigo, monto, titulo, user_id')
           .single()
 
@@ -110,105 +120,18 @@ export async function POST(request: NextRequest) {
           .from('gift_cards')
           .update({ estado: 'cancelada', mp_payment_id: String(paymentId) })
           .eq('id', giftcardId)
+          .neq('estado', 'cancelada')
       }
 
       return NextResponse.json({ received: true })
     }
 
     // ── Regular order payments ──
-    const orderNumbers = externalRef.split(',').map((n: string) => n.trim())
-    const newEstado = STATUS_MAP[status ?? ''] ?? 'pendiente_pago'
-
-    // Update order status and payment ID
-    await service
-      .from('compras')
-      .update({
-        estado: newEstado,
-        mp_payment_id: String(paymentId),
-      })
-      .in('numero_pedido', orderNumbers)
-
-    // If payment was rejected/cancelled, restore stock
-    if (newEstado === 'cancelada') {
-      for (const num of orderNumbers) {
-        const { data: order } = await service
-          .from('compras')
-          .select('variante_id, cantidad')
-          .eq('numero_pedido', num)
-          .single()
-
-        if (order?.variante_id) {
-          const { data: variant } = await service
-            .from('variantes')
-            .select('stock')
-            .eq('id', order.variante_id)
-            .single()
-
-          if (variant) {
-            await service
-              .from('variantes')
-              .update({ stock: variant.stock + order.cantidad })
-              .eq('id', order.variante_id)
-          }
-        }
-      }
-    }
-
-    // If confirmed, deduct gift card balances, register coupon usage, and send email
-    if (newEstado === 'confirmado') {
-      // Read gift_cards_applied and coupon info from the first order
-      const { data: orderWithData } = await service
-        .from('compras')
-        .select('gift_cards_applied, cupon_id, cupon_descuento, user_id')
-        .in('numero_pedido', orderNumbers)
-        .limit(1)
-        .single()
-
-      if (orderWithData?.gift_cards_applied) {
-        const gcList = orderWithData.gift_cards_applied as { id: string; descuento: number }[]
-        for (const gc of gcList) {
-          const { data: current } = await service
-            .from('gift_cards')
-            .select('saldo_restante')
-            .eq('id', gc.id)
-            .single()
-
-          if (current) {
-            await service
-              .from('gift_cards')
-              .update({ saldo_restante: Math.max(0, (current.saldo_restante ?? 0) - gc.descuento) })
-              .eq('id', gc.id)
-          }
-        }
-      }
-
-      // Register coupon usage on payment confirmation
-      if (orderWithData?.cupon_id && orderWithData?.user_id) {
-        await service
-          .from('cupon_usos')
-          .insert({
-            cupon_id: orderWithData.cupon_id,
-            user_id: orderWithData.user_id,
-            compra_ids: orderNumbers,
-            descuento_aplicado: Number(orderWithData.cupon_descuento) || 0,
-          })
-
-        const { data: couponCurrent } = await service
-          .from('cupones')
-          .select('usos_actuales')
-          .eq('id', orderWithData.cupon_id)
-          .single()
-
-        if (couponCurrent) {
-          await service
-            .from('cupones')
-            .update({ usos_actuales: (couponCurrent.usos_actuales ?? 0) + 1 })
-            .eq('id', orderWithData.cupon_id)
-        }
-      }
-
-      sendOrderConfirmationEmails(orderNumbers)
-    }
+    // Delegate to confirmPayment so the idempotent state-transition gate
+    // applies to BOTH callers (webhook + user-return page). Whichever fires
+    // first runs the side effects exactly once; the second sees the rows
+    // already transitioned and becomes a no-op.
+    await confirmPayment(String(paymentId), externalRef)
 
     return NextResponse.json({ received: true })
   } catch (error) {

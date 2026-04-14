@@ -84,10 +84,10 @@ export default async function FaqPage() {
             >
               <div>
                 <p className="text-body-sm font-semibold text-volcanic-900 group-hover:text-terra-500 transition-colors">
-                  Politica de cambios y devoluciones
+                  Política de cambios y devoluciones
                 </p>
                 <p className="text-body-xs text-volcanic-500 mt-0.5">
-                  Conoce los plazos, condiciones y como gestionar tu cambio o devolucion.
+                  Conoce los plazos, condiciones y como gestionar tu cambio o devolución.
                 </p>
               </div>
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5 text-volcanic-500 group-hover:text-terra-500 group-hover:translate-x-1 transition-all shrink-0">

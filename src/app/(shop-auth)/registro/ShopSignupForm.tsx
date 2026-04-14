@@ -66,22 +66,22 @@ export function ShopSignupForm() {
       <div className="text-center py-4">
         <MailIcon className="w-14 h-14 mx-auto text-terra-500 mb-5" />
         <h2 className="font-heading text-display-xs text-volcanic-900 mb-3">
-          Revisa tu email
+          Revisá tu email
         </h2>
         <p className="text-body-md text-volcanic-500 mb-2">
-          Enviamos un link de confirmacion a:
+          Enviamos un link de confirmación a:
         </p>
         <p className="text-body-md font-semibold text-volcanic-900 mb-6">
           {submittedEmail}
         </p>
         <p className="text-body-sm text-volcanic-500 mb-8">
-          Hace click en el link del email para activar tu cuenta. Si no lo ves, revisa la carpeta de spam.
+          Hacé click en el link del email para activar tu cuenta. Si no lo ves, revisá la carpeta de spam.
         </p>
         <Link
           href="/login"
           className="inline-flex items-center px-6 py-3 text-body-sm font-medium text-volcanic-600 hover:text-volcanic-900 transition-colors"
         >
-          Volver al inicio de sesion
+          Volver al inicio de sesión
         </Link>
       </div>
     )
@@ -121,7 +121,7 @@ export function ShopSignupForm() {
             required
             minLength={6}
             className="w-full px-4 py-3 rounded-xl bg-white border border-sand-200 text-volcanic-900 text-body-md focus:outline-none focus:border-terra-500 focus:ring-1 focus:ring-terra-500 transition-all"
-            placeholder="Minimo 6 caracteres"
+            placeholder="Mínimo 6 caracteres"
           />
         </div>
 

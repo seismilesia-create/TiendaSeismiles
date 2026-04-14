@@ -38,8 +38,8 @@ export interface BulkUpdateResult {
   errors: string[]
 }
 
-const VALID_CATEGORIAS = ['remeras-lisas', 'estampadas', 'buzos-camperas']
-const VALID_GENEROS = ['hombres', 'mujeres', 'ninos']
+const VALID_CATEGORIAS = ['remeras-lisas', 'estampadas', 'buzos']
+const VALID_GENEROS = ['hombres', 'mujeres']
 const VALID_LINEAS = [
   'arista', 'pissis', 'origen', 'terreno',
   'veta',

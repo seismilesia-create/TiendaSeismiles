@@ -22,6 +22,9 @@ export interface ProductLineRow {
   image_url: string | null
 }
 
+/** Maximum number of products that can be marked as "destacado" simultaneously. */
+export const FEATURED_PRODUCTS_LIMIT = 4
+
 export interface FeaturedProductFromDB {
   id: string
   nombre: string
@@ -44,12 +47,29 @@ export async function getFeaturedProducts(): Promise<FeaturedProductFromDB[]> {
       .eq('destacado', true)
       .eq('activo', true)
       .order('created_at', { ascending: false })
-      .limit(4)
+      .limit(FEATURED_PRODUCTS_LIMIT)
 
     if (error) throw error
     return (data ?? []) as FeaturedProductFromDB[]
   } catch {
     return []
+  }
+}
+
+/** Count active products currently marked as destacado. */
+export async function countFeaturedProducts(): Promise<number> {
+  try {
+    const supabase = createAnonClient()
+    const { count, error } = await supabase
+      .from('productos')
+      .select('id', { count: 'exact', head: true })
+      .eq('destacado', true)
+      .eq('activo', true)
+
+    if (error) throw error
+    return count ?? 0
+  } catch {
+    return 0
   }
 }
 
@@ -91,6 +111,58 @@ export async function getMostViewedProducts(excludeId?: string, limit = 4): Prom
     const { data, error } = await query
     if (error) throw error
     return (data ?? []).slice(0, limit) as CatalogProductFromDB[]
+  } catch {
+    return []
+  }
+}
+
+/**
+ * Fetch products manually flagged as "destacado" by the admin (full catalog shape).
+ * If fewer than `limit` are flagged, fills the remaining slots with most-viewed
+ * products so the home section never looks empty.
+ */
+export async function getAdminFeaturedProducts(limit = FEATURED_PRODUCTS_LIMIT): Promise<CatalogProductFromDB[]> {
+  try {
+    const supabase = createAnonClient()
+    const { data, error } = await supabase
+      .from('productos')
+      .select(`
+        id, nombre, slug, precio, categoria, linea, genero, destacado, created_at,
+        colores(nombre, hex, color_base, color_base_hex, imagen_url),
+        variantes(talle)
+      `)
+      .eq('destacado', true)
+      .eq('activo', true)
+      .order('created_at', { ascending: false })
+      .limit(limit)
+
+    if (error) throw error
+    const featured = (data ?? []) as CatalogProductFromDB[]
+
+    // Fallback: if the admin hasn't filled all slots, complete with most-viewed.
+    if (featured.length >= limit) return featured
+
+    const missing = limit - featured.length
+    const excludeIds = featured.map((p) => p.id)
+    let fillerQuery = supabase
+      .from('productos')
+      .select(`
+        id, nombre, slug, precio, categoria, linea, genero, destacado, created_at,
+        colores(nombre, hex, color_base, color_base_hex, imagen_url),
+        variantes(talle)
+      `)
+      .eq('activo', true)
+      .order('visualizaciones', { ascending: false })
+      .limit(missing)
+
+    if (excludeIds.length > 0) {
+      fillerQuery = fillerQuery.not('id', 'in', `(${excludeIds.join(',')})`)
+    }
+
+    const { data: fillerData, error: fillerError } = await fillerQuery
+    if (fillerError) throw fillerError
+
+    return [...featured, ...((fillerData ?? []) as CatalogProductFromDB[])]
   } catch {
     return []
   }
@@ -358,10 +430,13 @@ export async function getProductLines(): Promise<ProductLineRow[]> {
 
   for (const tab of shopConfig.productTypeTabs) {
     for (const cat of tab.categories) {
+      // Config slugs carry a decorative `linea-` prefix; the catalog filter
+      // expects the bare value (e.g. `arista`, not `linea-arista`).
+      const lineaSlug = cat.slug.replace(/^linea-/, '')
       lines.push({
-        id: cat.slug,
+        id: lineaSlug,
         name: cat.title,
-        slug: cat.slug,
+        slug: lineaSlug,
         description: cat.subtitle,
         display_order: order++,
         is_active: true,

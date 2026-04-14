@@ -3,11 +3,20 @@
 import { createServiceClient } from '@/lib/supabase/server'
 import { getResend, EMAIL_CONFIG } from '@/lib/email'
 import { welcomeNewsletterEmail } from '@/lib/email/seismiles-templates'
+import { checkRateLimit, getClientIp } from '@/lib/rate-limit'
 
 export async function subscribeNewsletter(email: string): Promise<{ error?: string }> {
+  // Per-IP limit: 10 subscriptions per hour is more than enough for a shared
+  // family/office IP. Scripted enumeration hits this quickly.
+  const ip = await getClientIp()
+  const ipLimit = await checkRateLimit(`newsletter:ip:${ip}`, 10, 3600)
+  if (!ipLimit.allowed) {
+    return { error: 'Demasiadas suscripciones desde esta conexión. Intentá más tarde.' }
+  }
+
   const trimmed = email.trim().toLowerCase()
   if (!trimmed || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed)) {
-    return { error: 'Email invalido' }
+    return { error: 'Email inválido' }
   }
 
   const service = createServiceClient()

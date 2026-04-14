@@ -6,17 +6,17 @@ export default function NotFound() {
       <div className="text-center max-w-md">
         <p className="text-7xl font-extrabold text-volcanic-900 mb-2">404</p>
         <h1 className="text-2xl font-semibold text-volcanic-900 mb-3">
-          Pagina no encontrada
+          Página no encontrada
         </h1>
         <p className="text-volcanic-500 mb-8 leading-relaxed">
-          La pagina que buscas no existe o fue movida. Explora nuestro catalogo o volve al inicio.
+          La página que buscás no existe o fue movida. Explorá nuestro catálogo o volvé al inicio.
         </p>
         <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
           <Link
             href="/catalogo"
             className="px-6 py-3 bg-volcanic-900 hover:bg-volcanic-800 text-white text-sm font-semibold rounded-lg transition-colors"
           >
-            Ver catalogo
+            Ver catálogo
           </Link>
           <Link
             href="/"

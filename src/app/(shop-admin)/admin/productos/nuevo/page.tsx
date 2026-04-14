@@ -1,10 +1,13 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { ProductForm } from '@/features/shop/components/admin/ProductForm'
+import { countFeaturedProducts, FEATURED_PRODUCTS_LIMIT } from '@/features/shop/services/product-lines'
 
 export const metadata: Metadata = { title: 'Nuevo Producto | Admin SEISMILES' }
 
-export default function NewProductPage() {
+export default async function NewProductPage() {
+  const featuredCount = await countFeaturedProducts()
+
   return (
     <div>
       <div className="flex items-center gap-3 mb-8">
@@ -20,7 +23,7 @@ export default function NewProductPage() {
 
       <h1 className="font-heading text-2xl text-volcanic-900 mb-8">Crear producto</h1>
 
-      <ProductForm />
+      <ProductForm featuredCount={featuredCount} featuredLimit={FEATURED_PRODUCTS_LIMIT} />
     </div>
   )
 }

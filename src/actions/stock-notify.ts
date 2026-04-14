@@ -15,7 +15,7 @@ export async function subscribeToStock(formData: FormData) {
   const colorHex = formData.get('color_hex') as string
 
   if (!email || !EMAIL_REGEX.test(email)) {
-    return { error: 'Ingresa un email valido.' }
+    return { error: 'Ingresá un email válido.' }
   }
 
   if (!productoId || !talle || !colorId) {

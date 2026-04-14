@@ -40,7 +40,7 @@ export default async function FavoritosPage() {
         <form action={signout}>
           <button className="flex items-center gap-2 px-4 py-2 rounded-xl text-body-sm text-volcanic-500 hover:text-red-500 hover:bg-red-50 border border-sand-200 transition-all">
             <LogoutIcon className="w-4 h-4" />
-            Cerrar sesion
+            Cerrar sesión
           </button>
         </form>
       </div>
@@ -67,16 +67,16 @@ export default async function FavoritosPage() {
             <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
           </svg>
           <p className="font-heading text-display-xs text-volcanic-900">
-            No tenes favoritos
+            No tenés favoritos
           </p>
           <p className="mt-2 text-body-sm text-volcanic-500 text-center">
-            Explora nuestro catalogo y guarda los productos que mas te gusten.
+            Explorá nuestro catálogo y guardá los productos que más te gusten.
           </p>
           <Link
             href="/catalogo"
             className="mt-6 px-6 py-2.5 bg-volcanic-900 hover:bg-volcanic-800 text-white text-body-sm font-semibold rounded-xl transition-colors"
           >
-            Ver catalogo
+            Ver catálogo
           </Link>
         </div>
       )}

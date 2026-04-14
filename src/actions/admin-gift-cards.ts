@@ -2,6 +2,7 @@
 
 import { revalidatePath } from 'next/cache'
 import { requireAdmin } from '@/lib/auth/admin'
+import { validateImageUpload } from '@/lib/uploads/validate-image'
 import {
   createGiftCardDefinition,
   updateGiftCardDefinition,
@@ -92,9 +93,12 @@ export async function uploadGiftCardImageAction(formData: FormData) {
 
   if (!file || !defId) return { error: 'Archivo y gift card requeridos' }
 
+  const validation = await validateImageUpload(file)
+  if (!validation.ok) return { error: validation.error }
+
   try {
-    const buffer = await file.arrayBuffer()
-    const { url } = await uploadGiftCardImage(defId, buffer, file.name, file.type)
+    const { buffer, ext, contentType } = validation.image
+    const { url } = await uploadGiftCardImage(defId, buffer, ext, contentType)
     revalidateGiftCards()
     return { success: true, url }
   } catch (err) {

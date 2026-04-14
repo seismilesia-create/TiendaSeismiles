@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
 import { sendPasswordChangedEmail } from '@/lib/email/send-password-changed'
+import { translateAuthError } from '@/lib/auth/error-messages'
 
 export async function login(formData: FormData) {
   const supabase = await createClient()
@@ -14,7 +15,7 @@ export async function login(formData: FormData) {
   })
 
   if (error) {
-    return { error: error.message }
+    return { error: translateAuthError(error.message) }
   }
 
   // Check role to decide redirect
@@ -48,7 +49,7 @@ export async function signup(formData: FormData) {
   })
 
   if (error) {
-    return { error: error.message }
+    return { error: translateAuthError(error.message) }
   }
 
   // Don't redirect — the form will show a "check your email" message
@@ -71,7 +72,7 @@ export async function resetPassword(formData: FormData) {
   })
 
   if (error) {
-    return { error: error.message }
+    return { error: translateAuthError(error.message) }
   }
 
   return { success: true }
@@ -84,7 +85,7 @@ export async function updatePassword(formData: FormData) {
   const { data, error } = await supabase.auth.updateUser({ password })
 
   if (error) {
-    return { error: error.message }
+    return { error: translateAuthError(error.message) }
   }
 
   if (data.user) {

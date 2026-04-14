@@ -9,7 +9,7 @@ import { BlogCategoryFilter } from './BlogCategoryFilter'
 
 export const metadata: Metadata = {
   title: 'Blog | SEISMILES Textil',
-  description: 'Articulos sobre cuidados de tela, materiales premium, estilo y la historia detras de SEISMILES. Aprende a cuidar tu ropa y conoce nuestros procesos.',
+  description: 'Articulos sobre cuidados de tela, materiales premium, estilo y la historia detrás de SEISMILES. Aprende a cuidar tu ropa y conoce nuestros procesos.',
 }
 
 interface Props {
@@ -68,7 +68,7 @@ export default async function BlogPage({ searchParams }: Props) {
             {posts.length === 0 ? (
               <div className="text-center py-16">
                 <p className="text-body-lg text-volcanic-500">
-                  Pronto publicaremos nuestros primeros articulos. Volve a visitarnos.
+                  Pronto publicaremos nuestros primeros artículos. Volve a visitarnos.
                 </p>
               </div>
             ) : (

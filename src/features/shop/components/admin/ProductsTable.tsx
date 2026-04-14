@@ -4,7 +4,7 @@ import { useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { deleteProductAction, duplicateProductAction, toggleProductActiveAction } from '@/actions/admin-products'
+import { deleteProductAction, duplicateProductAction, toggleProductActiveAction, toggleProductDestacadoAction } from '@/actions/admin-products'
 import { bulkUpdateCatalogAction } from '@/actions/catalog-bulk'
 
 interface Producto {
@@ -43,7 +43,7 @@ const GENERO_LABELS: Record<string, string> = {
 const CATEGORIAS = [
   { value: 'remeras-lisas', label: 'Remeras Lisas' },
   { value: 'estampadas', label: 'Estampadas' },
-  { value: 'buzos-camperas', label: 'Buzos y Camperas' },
+  { value: 'buzos', label: 'Buzos' },
 ]
 
 const LINEAS_ALL = [
@@ -61,7 +61,6 @@ const LINEAS_ALL = [
 const GENEROS = [
   { value: 'hombres', label: 'Hombres' },
   { value: 'mujeres', label: 'Mujeres' },
-  { value: 'ninos', label: 'Niños' },
 ]
 
 function FilterIcon({ className }: { className?: string }) {
@@ -88,13 +87,30 @@ function TrashIcon({ className }: { className?: string }) {
   )
 }
 
-export function ProductsTable({ products }: { products: Producto[] }) {
+function StarIcon({ className, filled }: { className?: string; filled?: boolean }) {
+  return (
+    <svg viewBox="0 0 24 24" fill={filled ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" /></svg>
+  )
+}
+
+interface ProductsTableProps {
+  products: Producto[]
+  featuredLimit: number
+}
+
+export function ProductsTable({ products, featuredLimit }: ProductsTableProps) {
   const router = useRouter()
   const [deleting, setDeleting] = useState<string | null>(null)
   const [duplicating, setDuplicating] = useState<string | null>(null)
   const [toggling, setToggling] = useState<string | null>(null)
+  const [togglingDestacado, setTogglingDestacado] = useState<string | null>(null)
   const [filterLinea, setFilterLinea] = useState<string>('')
   const [filterGenero, setFilterGenero] = useState<string>('')
+  const [filterDestacados, setFilterDestacados] = useState(false)
+
+  // Live count of destacados — derived from the products prop, refreshes after router.refresh()
+  const featuredCount = products.filter((p) => p.destacado && p.activo).length
+  const featuredSlotsFull = featuredCount >= featuredLimit
 
   // Bulk edit state
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
@@ -116,10 +132,11 @@ export function ProductsTable({ products }: { products: Producto[] }) {
   const filtered = products.filter((p) => {
     if (filterLinea && p.linea !== filterLinea) return false
     if (filterGenero && p.genero !== filterGenero) return false
+    if (filterDestacados && !p.destacado) return false
     return true
   })
 
-  const hasFilters = filterLinea || filterGenero
+  const hasFilters = filterLinea || filterGenero || filterDestacados
 
   function toggleSelect(id: string) {
     setSelectedIds((prev) => {
@@ -210,6 +227,13 @@ export function ProductsTable({ products }: { products: Producto[] }) {
     setToggling(null)
   }
 
+  async function handleToggleDestacado(id: string, currentDestacado: boolean) {
+    setTogglingDestacado(id)
+    const result = await toggleProductDestacadoAction(id, !currentDestacado)
+    setTogglingDestacado(null)
+    if (result.error) alert(result.error)
+  }
+
   async function handleDuplicate(id: string) {
     setDuplicating(id)
     const result = await duplicateProductAction(id)
@@ -247,9 +271,27 @@ export function ProductsTable({ products }: { products: Producto[] }) {
             <option key={g} value={g}>{GENERO_LABELS[g] ?? g}</option>
           ))}
         </select>
+        <button
+          onClick={() => setFilterDestacados((v) => !v)}
+          title={filterDestacados ? 'Mostrar todos' : 'Solo destacados'}
+          className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-body-xs font-medium rounded-lg border transition-colors ${
+            filterDestacados
+              ? 'bg-terra-500 text-white border-terra-500'
+              : 'bg-white text-volcanic-700 border-sand-200 hover:border-terra-400 hover:text-terra-600'
+          }`}
+        >
+          <StarIcon className="w-3.5 h-3.5" filled={filterDestacados} />
+          Destacados
+          <span className={`px-1.5 py-0.5 rounded-md font-mono text-[10px] ${
+            filterDestacados ? 'bg-white/20' : featuredSlotsFull ? 'bg-terra-50 text-terra-600' : 'bg-sand-100 text-volcanic-500'
+          }`}>
+            {featuredCount}/{featuredLimit}
+          </span>
+        </button>
+
         {hasFilters && (
           <button
-            onClick={() => { setFilterLinea(''); setFilterGenero('') }}
+            onClick={() => { setFilterLinea(''); setFilterGenero(''); setFilterDestacados(false) }}
             className="px-3 py-1.5 text-body-xs font-medium text-terra-600 hover:text-terra-700 hover:bg-terra-50 rounded-lg transition-colors"
           >
             Limpiar filtros
@@ -458,11 +500,31 @@ export function ProductsTable({ products }: { products: Producto[] }) {
                 >
                   {toggling === product.id ? '...' : product.activo ? 'Activo' : 'Inactivo'}
                 </button>
-                {product.destacado && (
-                  <span className="px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider rounded-full bg-terra-100 text-terra-700">
-                    Destacado
-                  </span>
-                )}
+                {(() => {
+                  const canToggle = product.destacado || !featuredSlotsFull
+                  const isLoading = togglingDestacado === product.id
+                  const title = product.destacado
+                    ? 'Click para quitar de destacados'
+                    : canToggle
+                      ? 'Click para destacar en la landing'
+                      : `Límite de ${featuredLimit} destacados alcanzado`
+                  return (
+                    <button
+                      onClick={() => canToggle && handleToggleDestacado(product.id, product.destacado)}
+                      disabled={!canToggle || isLoading}
+                      title={title}
+                      className={`inline-flex items-center justify-center w-6 h-6 rounded-full transition-colors ${
+                        product.destacado
+                          ? 'bg-terra-500 text-white hover:bg-terra-600'
+                          : canToggle
+                            ? 'bg-white/90 text-volcanic-400 hover:bg-terra-50 hover:text-terra-500'
+                            : 'bg-white/60 text-volcanic-300 cursor-not-allowed'
+                      } ${isLoading ? 'opacity-50' : ''}`}
+                    >
+                      <StarIcon className="w-3.5 h-3.5" filled={product.destacado} />
+                    </button>
+                  )
+                })()}
               </div>
               {/* Checkbox */}
               <button

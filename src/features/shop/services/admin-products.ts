@@ -390,12 +390,11 @@ export async function uploadColorImage(
   productoId: string,
   colorId: string,
   fileBuffer: ArrayBuffer,
-  fileName: string,
+  ext: string,
   contentType: string,
 ): Promise<string> {
   const supabase = createServiceClient()
 
-  const ext = fileName.split('.').pop() || 'jpg'
   const storagePath = `products/${productoId}/${colorId}-${Date.now()}.${ext}`
 
   const { error: uploadError } = await supabase.storage
@@ -425,13 +424,12 @@ export async function uploadProductImage(
   productoId: string,
   colorId: string,
   fileBuffer: ArrayBuffer,
-  fileName: string,
+  ext: string,
   contentType: string,
   orden: number,
 ): Promise<ImagenRow> {
   const supabase = createServiceClient()
 
-  const ext = fileName.split('.').pop() || 'jpg'
   const storagePath = `products/${productoId}/${colorId}-${Date.now()}-${orden}.${ext}`
 
   const { error: uploadError } = await supabase.storage
