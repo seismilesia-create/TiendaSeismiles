@@ -69,6 +69,14 @@ export function CatalogBulkActions({ exportData }: Props) {
   const [result, setResult] = useState<BulkUpdateResult | null>(null)
   const [parseError, setParseError] = useState<string | null>(null)
 
+  // Stock masivo panel state
+  const [showStockPanel, setShowStockPanel] = useState(false)
+  const [stockValue, setStockValue] = useState<string>('')
+  const [selectedTalles, setSelectedTalles] = useState<Set<string>>(new Set(TALLES))
+  const [selectedProducts, setSelectedProducts] = useState<Set<string>>(new Set())
+  const [onlyExisting, setOnlyExisting] = useState(true)
+  const [productSearch, setProductSearch] = useState('')
+
   // Discover all talle keys from data (in case DB has extra sizes)
   const allTalles = useCallback(() => {
     const set = new Set(TALLES)
@@ -315,6 +323,121 @@ export function CatalogBulkActions({ exportData }: Props) {
     setParseError(null)
   }, [])
 
+  // Group exportData by producto_id for the stock masivo panel
+  const productsGrouped = useCallback(() => {
+    const map = new Map<string, { nombre: string; colores: { id: string; nombre: string; stock: Record<string, number> }[] }>()
+    for (const row of exportData) {
+      if (!row.color_id) continue
+      if (!map.has(row.producto_id)) {
+        map.set(row.producto_id, { nombre: row.nombre, colores: [] })
+      }
+      map.get(row.producto_id)!.colores.push({
+        id: row.color_id,
+        nombre: row.color_nombre,
+        stock: row.stock,
+      })
+    }
+    return [...map.entries()].map(([id, v]) => ({ id, ...v }))
+  }, [exportData])
+
+  const toggleTalle = useCallback((t: string) => {
+    setSelectedTalles((prev) => {
+      const next = new Set(prev)
+      if (next.has(t)) next.delete(t)
+      else next.add(t)
+      return next
+    })
+  }, [])
+
+  const toggleProduct = useCallback((id: string) => {
+    setSelectedProducts((prev) => {
+      const next = new Set(prev)
+      if (next.has(id)) next.delete(id)
+      else next.add(id)
+      return next
+    })
+  }, [])
+
+  const filteredProducts = useCallback(() => {
+    const q = productSearch.trim().toLowerCase()
+    const all = productsGrouped()
+    if (!q) return all
+    return all.filter((p) => p.nombre.toLowerCase().includes(q))
+  }, [productSearch, productsGrouped])
+
+  const toggleAllFiltered = useCallback(() => {
+    const filtered = filteredProducts()
+    const allSelected = filtered.every((p) => selectedProducts.has(p.id))
+    setSelectedProducts((prev) => {
+      const next = new Set(prev)
+      if (allSelected) {
+        for (const p of filtered) next.delete(p.id)
+      } else {
+        for (const p of filtered) next.add(p.id)
+      }
+      return next
+    })
+  }, [filteredProducts, selectedProducts])
+
+  const handlePreviewStockMasivo = useCallback(() => {
+    setParseError(null)
+    setResult(null)
+
+    const newStock = Math.round(Number(stockValue))
+    if (isNaN(newStock) || newStock < 0) {
+      setParseError('Ingresá un stock válido (entero >= 0).')
+      return
+    }
+    if (selectedTalles.size === 0) {
+      setParseError('Seleccioná al menos un talle.')
+      return
+    }
+    if (selectedProducts.size === 0) {
+      setParseError('Seleccioná al menos un producto.')
+      return
+    }
+
+    const groups = productsGrouped()
+    const stockChanges: BulkUpdatePayload['stockChanges'] = []
+    const diffs: DiffItem[] = []
+
+    for (const prod of groups) {
+      if (!selectedProducts.has(prod.id)) continue
+      for (const color of prod.colores) {
+        for (const talle of selectedTalles) {
+          const existing = color.stock[talle]
+          const variantExists = existing !== undefined
+          if (onlyExisting && !variantExists) continue
+          const oldStock = existing ?? 0
+          if (oldStock === newStock) continue
+          stockChanges.push({
+            producto_id: prod.id,
+            color_id: color.id,
+            talle,
+            new_stock: newStock,
+          })
+          diffs.push({
+            producto_id: prod.id,
+            nombre: prod.nombre,
+            color_nombre: color.nombre,
+            field: `Stock ${talle}`,
+            old_value: oldStock,
+            new_value: newStock,
+          })
+        }
+      }
+    }
+
+    if (diffs.length === 0) {
+      setParseError('No hay cambios para aplicar con los criterios elegidos.')
+      return
+    }
+
+    setDiff(diffs)
+    setPayload({ productChanges: [], stockChanges })
+    setShowStockPanel(false)
+  }, [stockValue, selectedTalles, selectedProducts, onlyExisting, productsGrouped])
+
   return (
     <div>
       {/* Action buttons */}
@@ -336,6 +459,17 @@ export function CatalogBulkActions({ exportData }: Props) {
           {importing ? 'Leyendo...' : 'Importar Excel'}
         </button>
 
+        <button
+          onClick={() => {
+            setShowStockPanel((v) => !v)
+            setParseError(null)
+            setResult(null)
+          }}
+          className="inline-flex items-center gap-2 px-4 py-2.5 bg-white border border-sand-200 hover:bg-sand-50 text-volcanic-700 text-body-sm font-medium rounded-xl transition-all"
+        >
+          Stock masivo
+        </button>
+
         <input
           ref={fileInputRef}
           type="file"
@@ -344,6 +478,131 @@ export function CatalogBulkActions({ exportData }: Props) {
           onChange={handleFileSelect}
         />
       </div>
+
+      {/* Stock masivo panel */}
+      {showStockPanel && !diff && (
+        <div className="mt-4 rounded-2xl bg-white border border-sand-200/60 p-5">
+          <h3 className="font-heading text-lg text-volcanic-900">Modificar stock masivamente</h3>
+          <p className="text-body-xs text-volcanic-500 mt-1">
+            Aplica el mismo stock a los talles y productos seleccionados.
+          </p>
+
+          <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-5">
+            {/* Stock value */}
+            <div>
+              <label className="block text-body-xs font-semibold text-volcanic-700 mb-1.5">
+                Nuevo stock
+              </label>
+              <input
+                type="number"
+                min={0}
+                step={1}
+                value={stockValue}
+                onChange={(e) => setStockValue(e.target.value)}
+                placeholder="Ej: 10"
+                className="w-full px-3 py-2 border border-sand-200 rounded-lg text-body-sm focus:outline-none focus:ring-2 focus:ring-volcanic-300"
+              />
+              <label className="mt-3 flex items-center gap-2 text-body-xs text-volcanic-600">
+                <input
+                  type="checkbox"
+                  checked={onlyExisting}
+                  onChange={(e) => setOnlyExisting(e.target.checked)}
+                />
+                Solo talles existentes (no crear variantes nuevas)
+              </label>
+            </div>
+
+            {/* Talles */}
+            <div>
+              <label className="block text-body-xs font-semibold text-volcanic-700 mb-1.5">
+                Talles a modificar
+              </label>
+              <div className="flex flex-wrap gap-2">
+                {TALLES.map((t) => {
+                  const active = selectedTalles.has(t)
+                  return (
+                    <button
+                      key={t}
+                      type="button"
+                      onClick={() => toggleTalle(t)}
+                      className={`px-3 py-1.5 rounded-lg text-body-xs font-medium border transition-all ${
+                        active
+                          ? 'bg-volcanic-900 text-white border-volcanic-900'
+                          : 'bg-white text-volcanic-600 border-sand-200 hover:bg-sand-50'
+                      }`}
+                    >
+                      {t}
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
+          </div>
+
+          {/* Products */}
+          <div className="mt-5">
+            <div className="flex items-center justify-between mb-2">
+              <label className="block text-body-xs font-semibold text-volcanic-700">
+                Productos ({selectedProducts.size} seleccionado{selectedProducts.size !== 1 ? 's' : ''})
+              </label>
+              <button
+                type="button"
+                onClick={toggleAllFiltered}
+                className="text-body-xs text-volcanic-600 hover:text-volcanic-900 underline"
+              >
+                {filteredProducts().every((p) => selectedProducts.has(p.id)) && filteredProducts().length > 0
+                  ? 'Deseleccionar visibles'
+                  : 'Seleccionar visibles'}
+              </button>
+            </div>
+            <input
+              type="text"
+              value={productSearch}
+              onChange={(e) => setProductSearch(e.target.value)}
+              placeholder="Buscar producto..."
+              className="w-full px-3 py-2 border border-sand-200 rounded-lg text-body-sm focus:outline-none focus:ring-2 focus:ring-volcanic-300 mb-2"
+            />
+            <div className="max-h-64 overflow-y-auto border border-sand-200/60 rounded-lg divide-y divide-sand-200/30">
+              {filteredProducts().map((p) => (
+                <label
+                  key={p.id}
+                  className="flex items-center gap-3 px-3 py-2 hover:bg-sand-50 cursor-pointer"
+                >
+                  <input
+                    type="checkbox"
+                    checked={selectedProducts.has(p.id)}
+                    onChange={() => toggleProduct(p.id)}
+                  />
+                  <span className="text-body-sm text-volcanic-900 flex-1">{p.nombre}</span>
+                  <span className="text-body-xs text-volcanic-500">
+                    {p.colores.length} color{p.colores.length !== 1 ? 'es' : ''}
+                  </span>
+                </label>
+              ))}
+              {filteredProducts().length === 0 && (
+                <div className="px-3 py-4 text-body-xs text-volcanic-500 text-center">
+                  Sin resultados
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div className="mt-5 flex items-center justify-end gap-3">
+            <button
+              onClick={() => setShowStockPanel(false)}
+              className="px-5 py-2.5 text-body-sm font-medium text-volcanic-600 hover:text-volcanic-900 transition-colors"
+            >
+              Cancelar
+            </button>
+            <button
+              onClick={handlePreviewStockMasivo}
+              className="px-6 py-2.5 bg-volcanic-900 hover:bg-volcanic-800 text-white text-body-sm font-semibold rounded-xl transition-all"
+            >
+              Previsualizar cambios
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Parse error */}
       {parseError && (

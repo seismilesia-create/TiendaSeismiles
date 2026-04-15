@@ -151,7 +151,7 @@ export const shopConfig: ShopConfig = {
     heading: 'Calidad forjada en la altura',
     subtitle:
       'Entendemos la urgencia de tus tiempos y la importancia de los detalles. Cada prenda pasa por un estricto control de calidad.',
-    imageUrl: 'https://images.unsplash.com/photo-1562157873-818bc0726f68?w=600&h=800&fit=crop&crop=center',
+    imageUrl: '/images/Remeras_Logo.jpg',
     features: [
       {
         number: '01',

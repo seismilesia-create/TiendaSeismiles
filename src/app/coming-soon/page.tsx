@@ -50,16 +50,64 @@ const CountdownTile = ({
   </div>
 )
 
+type Star = {
+  id: number
+  x: number
+  y: number
+  size: number
+  delay: number
+  duration: number
+}
+
+// Duración del ciclo día-noche completo (en ms)
+const CYCLE_MS = 80000
+
 export default function ComingSoonPage() {
   const [timeLeft, setTimeLeft] = useState<TimeLeft>(getTimeLeft(LAUNCH_DATE))
   const [email, setEmail] = useState('')
   const [submitted, setSubmitted] = useState(false)
   const [formError, setFormError] = useState('')
   const [isPending, startTransition] = useTransition()
+  const [cycle, setCycle] = useState(0) // 0 → 1, avanza continuamente
+  const [stars, setStars] = useState<Star[]>([])
+  const [isMobile, setIsMobile] = useState(false)
+
+  useEffect(() => {
+    const mq = window.matchMedia('(max-width: 640px)')
+    const update = () => setIsMobile(mq.matches)
+    update()
+    mq.addEventListener('change', update)
+    return () => mq.removeEventListener('change', update)
+  }, [])
+
+  useEffect(() => {
+    // Generamos las estrellas sólo en el cliente para evitar mismatch de hidratación
+    setStars(
+      Array.from({ length: 60 }, (_, i) => ({
+        id: i,
+        x: Math.random() * 100,
+        y: Math.random() * 55,
+        size: Math.random() * 1.6 + 0.6,
+        delay: Math.random() * 4,
+        duration: 2 + Math.random() * 3,
+      })),
+    )
+  }, [])
 
   useEffect(() => {
     const interval = setInterval(() => setTimeLeft(getTimeLeft(LAUNCH_DATE)), 1000)
     return () => clearInterval(interval)
+  }, [])
+
+  useEffect(() => {
+    let raf = 0
+    const start = performance.now()
+    const tick = (now: number) => {
+      setCycle(((now - start) % CYCLE_MS) / CYCLE_MS)
+      raf = requestAnimationFrame(tick)
+    }
+    raf = requestAnimationFrame(tick)
+    return () => cancelAnimationFrame(raf)
   }, [])
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -82,8 +130,44 @@ export default function ComingSoonPage() {
     { value: timeLeft.seconds, label: 'Seg', pulse: true },
   ]
 
+  // ─── Ciclo día/noche ─────────────────────────────────────────────────
+  // cycle: 0=medianoche, 0.25=amanecer, 0.5=mediodía, 0.75=atardecer, 1=medianoche
+  const nightness = (1 + Math.cos(2 * Math.PI * cycle)) / 2 // 1=noche, 0=día
+
+  // Sol: visible en [0.25, 0.75]. Luna: en [0.75, 1] ∪ [0, 0.25]
+  const sunT = (cycle - 0.25) * 2 // 0→1 durante el día
+  const moonT =
+    cycle >= 0.75 ? (cycle - 0.75) * 2 : cycle < 0.25 ? (cycle + 0.25) * 2 : -1
+
+  // En mobile: trayectoria casi horizontal, cruzando de izquierda a derecha con un arco suave
+  const arcPeakDrop = isMobile ? 14 : 68 // cuánto sube respecto al horizonte
+  const arcHorizon = isMobile ? 28 : 85 // posición Y del horizonte (%) — en mobile queda alto
+  const arcXStart = isMobile ? -2 : 8   // entra desde fuera de pantalla
+  const arcXSpan = isMobile ? 104 : 84  // sale por fuera de pantalla
+  const arc = (t: number) => {
+    if (t < 0 || t > 1) return { visible: 0, x: 50, y: 80 }
+    const h = Math.sin(Math.PI * t) // 0→1→0
+    return {
+      visible: Math.min(1, h * 1.4),
+      x: arcXStart + t * arcXSpan,
+      y: arcHorizon - h * arcPeakDrop,
+    }
+  }
+  const sun = arc(sunT)
+  const moon = arc(moonT)
+
   return (
-    <main className="min-h-screen flex flex-col items-center justify-center relative overflow-hidden bg-sand-100">
+    <main
+      className="min-h-screen flex flex-col items-center justify-center relative overflow-hidden"
+      style={{
+        // Cielo que interpola entre día y noche
+        background: `linear-gradient(to bottom,
+          rgb(${Math.round(245 - nightness * 225)}, ${Math.round(240 - nightness * 218)}, ${Math.round(232 - nightness * 197)}) 0%,
+          rgb(${Math.round(240 - nightness * 215)}, ${Math.round(230 - nightness * 205)}, ${Math.round(218 - nightness * 180)}) 55%,
+          rgb(${Math.round(232 - nightness * 200)}, ${Math.round(220 - nightness * 190)}, ${Math.round(205 - nightness * 170)}) 100%)`,
+        transition: 'background 1s linear',
+      }}
+    >
 
       {/* Keyframes */}
       <style>{`
@@ -99,20 +183,108 @@ export default function ComingSoonPage() {
           0%, 100% { transform: translateX(0); }
           50%       { transform: translateX(-18px); }
         }
+        @keyframes twinkle {
+          0%, 100% { opacity: 0.2; transform: scale(0.85); }
+          50%       { opacity: 1;   transform: scale(1.15); }
+        }
       `}</style>
 
-      {/* Gradiente sutil */}
-      <div className="absolute inset-0 pointer-events-none bg-gradient-to-b from-sand-50/25 via-transparent to-sand-200/30" />
+      {/* Estrellas — fade-in según oscuridad del cielo */}
+      <div
+        className="absolute inset-0 pointer-events-none"
+        style={{ opacity: Math.max(0, (nightness - 0.35) * 1.6) }}
+      >
+        {stars.map((s) => (
+          <span
+            key={s.id}
+            className="absolute rounded-full bg-white"
+            style={{
+              left: `${s.x}%`,
+              top: `${s.y}%`,
+              width: `${s.size}px`,
+              height: `${s.size}px`,
+              boxShadow: `0 0 ${s.size * 2}px rgba(255,255,255,0.8)`,
+              animation: `twinkle ${s.duration}s ease-in-out ${s.delay}s infinite`,
+            }}
+          />
+        ))}
+      </div>
 
-      {/* Siluetas de montañas — 3 capas con parallax independiente */}
-      <div className="absolute bottom-0 left-0 right-0 pointer-events-none" style={{ height: '45vh' }}>
+      {/* Sol */}
+      {sun.visible > 0 && (
+        <div
+          className="absolute pointer-events-none"
+          style={{
+            left: `${sun.x}%`,
+            top: `${sun.y}%`,
+            width: isMobile ? '72px' : '110px',
+            height: isMobile ? '72px' : '110px',
+            transform: 'translate(-50%, -50%)',
+            opacity: sun.visible,
+          }}
+        >
+          <div
+            className="absolute inset-0 rounded-full"
+            style={{
+              background:
+                'radial-gradient(circle, rgba(255,220,160,0.55) 0%, rgba(255,200,140,0.25) 40%, transparent 70%)',
+              transform: 'scale(2.8)',
+            }}
+          />
+          <div
+            className="absolute inset-0 rounded-full"
+            style={{
+              background:
+                'radial-gradient(circle at 35% 35%, #FFE9B5 0%, #F7C873 55%, #E39A52 100%)',
+              boxShadow: '0 0 48px rgba(243, 180, 105, 0.6)',
+            }}
+          />
+        </div>
+      )}
+
+      {/* Luna */}
+      {moon.visible > 0 && (
+        <div
+          className="absolute pointer-events-none"
+          style={{
+            left: `${moon.x}%`,
+            top: `${moon.y}%`,
+            width: isMobile ? '56px' : '80px',
+            height: isMobile ? '56px' : '80px',
+            transform: 'translate(-50%, -50%)',
+            opacity: moon.visible,
+          }}
+        >
+          <div
+            className="absolute inset-0 rounded-full"
+            style={{
+              background:
+                'radial-gradient(circle, rgba(230,235,255,0.45) 0%, rgba(200,210,240,0.15) 45%, transparent 75%)',
+              transform: 'scale(3)',
+            }}
+          />
+          <div
+            className="absolute inset-0 rounded-full"
+            style={{
+              background:
+                'radial-gradient(circle at 35% 35%, #F5F3EC 0%, #D8D2C2 60%, #9E9581 100%)',
+              boxShadow: '0 0 32px rgba(220, 220, 210, 0.5)',
+            }}
+          />
+        </div>
+      )}
+
+      {/* Siluetas de montañas — 3 capas. Se oscurecen durante la noche */}
+      <div
+        className="absolute bottom-0 left-0 right-0 pointer-events-none"
+        style={{ height: '45vh', filter: `brightness(${1 - nightness * 0.65})`, transition: 'filter 1s linear' }}
+      >
         <svg
           className="absolute bottom-0 left-0 w-full h-full"
           viewBox="0 0 1440 400"
           preserveAspectRatio="xMidYMax slice"
           xmlns="http://www.w3.org/2000/svg"
         >
-          {/* Capa lejana — gentil, más clara */}
           <g style={{ animation: 'mountain-far 10s ease-in-out infinite' }}>
             <path
               d="M-50,400 L-50,278 L100,270 L230,255 L360,262 L460,240 L590,250 L710,228 L840,244 L970,230 L1100,240 L1250,248 L1390,236 L1490,242 L1490,400 Z"
@@ -120,7 +292,6 @@ export default function ComingSoonPage() {
               opacity="0.60"
             />
           </g>
-          {/* Capa media — picos más marcados */}
           <g style={{ animation: 'mountain-mid 7s ease-in-out infinite' }}>
             <path
               d="M-50,400 L-50,288 L70,278 L195,255 L318,218 L418,250 L548,198 L668,230 L798,208 L920,234 L1058,202 L1198,228 L1338,212 L1490,222 L1490,400 Z"
@@ -128,7 +299,6 @@ export default function ComingSoonPage() {
               opacity="0.60"
             />
           </g>
-          {/* Capa delantera — más alta, más oscura */}
           <g style={{ animation: 'mountain-near 5s ease-in-out infinite' }}>
             <path
               d="M-50,400 L-50,298 L55,290 L175,272 L305,232 L415,262 L555,182 L685,238 L818,158 L948,212 L1088,175 L1228,222 L1375,188 L1490,204 L1490,400 Z"
