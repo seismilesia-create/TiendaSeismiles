@@ -319,6 +319,8 @@ export const shopConfig: ShopConfig = {
           { label: 'Nosotros', href: '/nosotros' },
           { label: 'Blog', href: '/blog' },
           { label: 'Gift Cards', href: '/giftcards' },
+          { label: 'Política de privacidad', href: '/politica-de-privacidad' },
+          { label: 'Términos y condiciones', href: '/terminos-y-condiciones' },
         ],
       },
       {

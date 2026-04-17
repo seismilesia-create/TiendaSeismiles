@@ -139,7 +139,7 @@ export function NewsletterSection() {
 
             {/* Disclaimer */}
             <p className="mt-4 text-body-xs text-white/20">
-              Al suscribirte aceptás nuestra política de privacidad.
+              Al suscribirte aceptás nuestra <a href="/politica-de-privacidad" className="underline hover:text-white/40 transition-colors">política de privacidad</a>.
             </p>
           </form>
         )}
