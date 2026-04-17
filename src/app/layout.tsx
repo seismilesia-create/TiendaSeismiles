@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 import './globals.css'
-import { WhatsAppFloat } from '@/features/shop/components/WhatsAppFloat'
+import { ChatBot } from '@/features/shop/components/ChatBot'
 import { ViewTransitions } from '@/features/shop/components/ViewTransitions'
 
 const SITE_NAME = 'SEISMILES Textil'
@@ -38,7 +38,7 @@ export default function RootLayout({
         <ViewTransitions>
           {children}
         </ViewTransitions>
-        <WhatsAppFloat />
+        <ChatBot />
       </body>
     </html>
   )
