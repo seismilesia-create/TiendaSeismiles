@@ -8,6 +8,9 @@ const SITE_DESCRIPTION = 'Indumentaria urbana premium nacida en la Ruta de los S
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://seismilestextil.com'),
+  verification: {
+    google: '-GF1fuZ1RmZEyq5wwNz8aY-5Hd0yuLzUCzYfg8guZ8c',
+  },
   title: {
     default: `${SITE_NAME} | Indumentaria Premium - Catamarca, Argentina`,
     template: `%s | ${SITE_NAME}`,
