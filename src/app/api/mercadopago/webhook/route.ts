@@ -113,7 +113,7 @@ export async function POST(request: NextRequest) {
           .single()
 
         if (gc) {
-          sendGiftcardEmail(gc.user_id, gc.codigo, gc.monto, gc.titulo)
+          await sendGiftcardEmail(gc.user_id, gc.codigo, gc.monto, gc.titulo)
         }
       } else if (mpStatus === 'rejected' || mpStatus === 'cancelled') {
         await service

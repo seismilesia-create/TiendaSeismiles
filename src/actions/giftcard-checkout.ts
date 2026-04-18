@@ -133,7 +133,7 @@ export async function confirmGiftcardPayment(
 
       if (gc) {
         // This caller won the transition — send the email exactly once.
-        sendGiftcardEmail(gc.user_id, gc.codigo, gc.monto, gc.titulo)
+        await sendGiftcardEmail(gc.user_id, gc.codigo, gc.monto, gc.titulo)
       }
 
       // Either we just activated the card or another caller already did —
@@ -211,7 +211,7 @@ export async function checkPendingGiftcard(): Promise<ConfirmGiftcardResult> {
         .single()
 
       if (updated) {
-        sendGiftcardEmail(updated.user_id, updated.codigo, updated.monto, updated.titulo)
+        await sendGiftcardEmail(updated.user_id, updated.codigo, updated.monto, updated.titulo)
       }
 
       return { confirmed: true, codigo: updated?.codigo ?? gc.codigo }

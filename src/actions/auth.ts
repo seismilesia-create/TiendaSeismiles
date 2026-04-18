@@ -89,7 +89,7 @@ export async function updatePassword(formData: FormData) {
   }
 
   if (data.user) {
-    sendPasswordChangedEmail(data.user.id)
+    await sendPasswordChangedEmail(data.user.id)
   }
 
   revalidatePath('/', 'layout')
