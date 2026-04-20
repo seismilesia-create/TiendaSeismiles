@@ -66,7 +66,7 @@ export function MobileMenu({ open, onClose, user }: MobileMenuProps) {
         <div className="flex items-center justify-between px-6 py-5 border-b border-sand-200">
           <Image
             src="/images/logo-seismiles-v2.png"
-            alt="SEISMILES Textil"
+            alt="SEISMILES"
             width={100}
             height={44}
             className="h-9 w-auto brightness-[0.35] contrast-[1.1]"

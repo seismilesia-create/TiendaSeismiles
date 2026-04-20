@@ -1,5 +1,5 @@
 // ============================================================
-// SITE CONFIG - SEISMILES Textil (Minimal)
+// SITE CONFIG - SEISMILES (Minimal)
 // ============================================================
 // Solo lo necesario para api/contact y layouts (auth)/(main).
 // La config completa de la tienda esta en src/features/shop/config.ts
@@ -15,7 +15,7 @@ export interface SiteConfig {
 }
 
 export const siteConfig: SiteConfig = {
-  firmName: 'SEISMILES Textil',
+  firmName: 'SEISMILES',
   contact: {
     phone: '+5493834243614',
     email: 'seismilestextil@gmail.com',

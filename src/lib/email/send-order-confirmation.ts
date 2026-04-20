@@ -8,21 +8,17 @@ import { orderConfirmationEmail } from '@/lib/email/seismiles-templates'
  * Errors are logged but never thrown — email failure should not break the checkout flow.
  */
 export async function sendOrderConfirmationEmails(orderNumbers: string[]): Promise<void> {
-  console.log('[order-email] fn entered with orders:', orderNumbers)
-  console.log('[order-email] env check - has RESEND_API_KEY:', !!process.env.RESEND_API_KEY, 'has RESEND_FROM_EMAIL:', !!process.env.RESEND_FROM_EMAIL)
   try {
     const service = createServiceClient()
     const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
 
-    const { data: orders, error: fetchError } = await service
+    const { data: orders } = await service
       .from('compras')
       .select(
         'numero_pedido, cantidad, precio_unitario, total, metodo_pago, user_id, variante_id, productos(nombre), profiles(email, full_name)'
       )
       .in('numero_pedido', orderNumbers)
 
-    if (fetchError) console.error('[order-email] fetch error:', fetchError)
-    console.log('[order-email] orders fetched:', orders?.length ?? 0)
     if (!orders?.length) return
 
     // Fetch variant details (talle + color) for each order
@@ -73,22 +69,19 @@ export async function sendOrderConfirmationEmails(orderNumbers: string[]): Promi
         siteUrl,
       })
 
-      console.log('[order-email] Sending to:', profile.email, 'from:', EMAIL_CONFIG.from, 'orden:', order.numero_pedido)
       const result = await resend.emails.send({
         from: EMAIL_CONFIG.from,
         to: profile.email,
-        subject: `Pedido ${order.numero_pedido} confirmado — SEISMILES Textil`,
+        subject: `Pedido ${order.numero_pedido} confirmado — SEISMILES`,
         html,
       })
 
       if (result.error) {
-        console.error('[order-email] Resend returned error:', JSON.stringify(result.error))
-      } else {
-        console.log('[order-email] Sent ok, id:', result.data?.id)
+        console.error('Resend error for order', order.numero_pedido, ':', result.error)
       }
     }
   } catch (err) {
     // Log but don't throw — email should never break checkout
-    console.error('[order-email] Exception:', err)
+    console.error('Error sending order confirmation emails:', err)
   }
 }

@@ -8,8 +8,8 @@ import { signout } from '@/actions/auth'
 import { ProfileNav } from './ProfileNav'
 
 export const metadata: Metadata = {
-  title: 'Mi perfil | SEISMILES Textil',
-  description: 'Gestioná tu cuenta y revisá tus pedidos en SEISMILES Textil.',
+  title: 'Mi perfil | SEISMILES',
+  description: 'Gestioná tu cuenta y revisá tus pedidos en SEISMILES.',
 }
 
 function UserIcon({ className }: { className?: string }) {

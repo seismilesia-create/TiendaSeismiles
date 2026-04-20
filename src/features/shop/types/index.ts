@@ -1,5 +1,5 @@
 // ============================================================
-// SHOP TYPES - SEISMILES Textil
+// SHOP TYPES - SEISMILES
 // Tipos para la landing page y futuro catalogo de productos
 // ============================================================
 

@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 
-export const metadata: Metadata = { title: 'Desuscripción | SEISMILES Textil' }
+export const metadata: Metadata = { title: 'Desuscripción | SEISMILES' }
 
 const MESSAGES: Record<string, { heading: string; body: string }> = {
   success: {

@@ -5,8 +5,8 @@ import { getProductLines } from '@/features/shop/services/product-lines'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
 
 export const metadata: Metadata = {
-  title: 'Términos y Condiciones | SEISMILES Textil',
-  description: 'Términos y condiciones de uso de la tienda online SEISMILES Textil. Condiciones de compra, pagos, responsabilidades y más.',
+  title: 'Términos y Condiciones | SEISMILES',
+  description: 'Términos y condiciones de uso de la tienda online SEISMILES. Condiciones de compra, pagos, responsabilidades y más.',
 }
 
 function FileTextIcon({ className }: { className?: string }) {
@@ -147,7 +147,7 @@ export default async function TerminosCondicionesPage() {
 
               <div className="space-y-4 text-body-md text-volcanic-600 leading-relaxed">
                 <p>
-                  Los presentes Términos y Condiciones regulan el uso del sitio web de <strong className="text-volcanic-900">SEISMILES Textil</strong>,
+                  Los presentes Términos y Condiciones regulan el uso del sitio web de <strong className="text-volcanic-900">SEISMILES</strong>,
                   con domicilio en San Fernando del Valle de Catamarca, provincia de Catamarca, República Argentina,
                   y la relación contractual entre SEISMILES y los usuarios que accedan o realicen compras a través del sitio.
                 </p>
@@ -431,7 +431,7 @@ export default async function TerminosCondicionesPage() {
                 <p>
                   Todo el contenido del sitio web — incluyendo pero no limitado a textos, imágenes,
                   fotografías, logotipos, diseños, marcas, nombres comerciales y código fuente — es
-                  propiedad exclusiva de SEISMILES Textil o de sus licenciantes, y está protegido
+                  propiedad exclusiva de SEISMILES o de sus licenciantes, y está protegido
                   por la legislación argentina e internacional sobre propiedad intelectual.
                 </p>
                 <p className="mt-4">

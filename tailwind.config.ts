@@ -8,7 +8,7 @@ const config: Config = {
     extend: {
       colors: {
         // =============================================
-        // PALETA ANDINA - Seismiles Textil
+        // PALETA ANDINA - Seismiles
         // Inspirada en el altiplano catamarqueno
         // =============================================
 

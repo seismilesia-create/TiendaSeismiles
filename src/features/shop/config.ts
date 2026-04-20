@@ -1,7 +1,7 @@
 import type { ShopConfig } from './types'
 
 // ============================================================
-// SHOP CONFIG - SEISMILES Textil
+// SHOP CONFIG - SEISMILES
 // Indumentaria urbana premium con alma de montaña
 // ============================================================
 
@@ -125,7 +125,7 @@ export const shopConfig: ShopConfig = {
           slug: 'linea-tres-cruces',
           gradientFrom: '#2C2420',
           gradientTo: '#1A1614',
-          imageUrl: '/images/buzo.jpg',
+          imageUrl: '/images/Buzo.jpg',
         },
       ],
     },
@@ -339,6 +339,6 @@ export const shopConfig: ShopConfig = {
       { name: 'Mercado Pago', slug: 'mercadopago' },
       { name: 'Transferencia', slug: 'transferencia' },
     ],
-    copyright: '2026 SEISMILES Textil. Calidad de altura. Todos los derechos reservados.',
+    copyright: '2026 SEISMILES. Calidad de altura. Todos los derechos reservados.',
   },
 }

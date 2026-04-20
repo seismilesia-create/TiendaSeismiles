@@ -65,7 +65,7 @@ export async function subscribeToStock(formData: FormData) {
   if (process.env.RESEND_API_KEY) {
     const { Resend } = await import('resend')
     const resend = new Resend(process.env.RESEND_API_KEY)
-    const fromEmail = process.env.RESEND_FROM_EMAIL || 'SEISMILES Textil <onboarding@resend.dev>'
+    const fromEmail = process.env.RESEND_FROM_EMAIL || 'SEISMILES <onboarding@resend.dev>'
 
     // 1. Confirmation to customer
     try {

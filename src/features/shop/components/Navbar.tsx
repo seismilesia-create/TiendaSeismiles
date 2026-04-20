@@ -72,7 +72,7 @@ export function Navbar({ productLines, user }: NavbarProps) {
             <Link href="/" className="flex items-center group">
               <Image
                 src="/images/logo-seismiles-v2.png"
-                alt="SEISMILES Textil"
+                alt="SEISMILES"
                 width={140}
                 height={60}
                 className="logo-hover-rise h-10 lg:h-12 w-auto brightness-[0.35] contrast-[1.1] group-hover:brightness-[0.25] transition-[filter] duration-300"

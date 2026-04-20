@@ -5,7 +5,7 @@ import { getResend, EMAIL_CONFIG } from '@/lib/email'
 import { welcomeNewsletterEmail } from '@/lib/email/seismiles-templates'
 import { checkRateLimit, getClientIp } from '@/lib/rate-limit'
 
-export async function subscribeNewsletter(email: string): Promise<{ error?: string }> {
+export async function subscribeNewsletter(email: string): Promise<{ error?: string; alreadySubscribed?: boolean }> {
   // Per-IP limit: 10 subscriptions per hour is more than enough for a shared
   // family/office IP. Scripted enumeration hits this quickly.
   const ip = await getClientIp()
@@ -29,8 +29,7 @@ export async function subscribeNewsletter(email: string): Promise<{ error?: stri
 
   if (subError) {
     if (subError.code === '23505') {
-      // Already subscribed — don't reveal, return success
-      return {}
+      return { alreadySubscribed: true }
     }
     return { error: 'Error al suscribirse' }
   }

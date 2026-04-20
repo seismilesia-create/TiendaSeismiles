@@ -74,7 +74,7 @@ export async function POST(request: NextRequest) {
       Authorization: `Bearer ${apiKey}`,
       'Content-Type': 'application/json',
       'HTTP-Referer': process.env.NEXT_PUBLIC_SITE_URL || 'https://seismilestextil.com',
-      'X-Title': 'SEISMILES Textil',
+      'X-Title': 'SEISMILES',
     },
     body: JSON.stringify({
       model: MODEL,

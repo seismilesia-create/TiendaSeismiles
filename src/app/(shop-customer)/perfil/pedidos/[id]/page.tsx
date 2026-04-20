@@ -7,7 +7,7 @@ import { OrderProgressBar } from '@/features/shop/components/customer/OrderProgr
 import { OrderProductCard } from '@/features/shop/components/customer/OrderProductCard'
 
 export const metadata: Metadata = {
-  title: 'Detalle de pedido | SEISMILES Textil',
+  title: 'Detalle de pedido | SEISMILES',
 }
 
 const PAYMENT_LABELS: Record<string, string> = {

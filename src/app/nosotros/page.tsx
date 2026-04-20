@@ -6,8 +6,8 @@ import { getProductLines } from '@/features/shop/services/product-lines'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
 
 export const metadata: Metadata = {
-  title: 'Nosotros | SEISMILES Textil',
-  description: 'Nacidos en la inmensidad del altiplano catamarqueño. Conoce la historia de SEISMILES Textil, nuestra esencia y la ruta que nos inspira.',
+  title: 'Nosotros | SEISMILES',
+  description: 'Nacidos en la inmensidad del altiplano catamarqueño. Conoce la historia de SEISMILES, nuestra esencia y la ruta que nos inspira.',
 }
 
 function MountainIcon({ className }: { className?: string }) {

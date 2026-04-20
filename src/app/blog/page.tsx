@@ -8,7 +8,7 @@ import { createClient, createServiceClient } from '@/lib/supabase/server'
 import { BlogCategoryFilter } from './BlogCategoryFilter'
 
 export const metadata: Metadata = {
-  title: 'Blog | SEISMILES Textil',
+  title: 'Blog | SEISMILES',
   description: 'Articulos sobre cuidados de tela, materiales premium, estilo y la historia detrás de SEISMILES. Aprende a cuidar tu ropa y conoce nuestros procesos.',
 }
 

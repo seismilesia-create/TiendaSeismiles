@@ -46,7 +46,7 @@ export function ProductCard({ product, isFavorited = false, isLoggedIn = false }
       onMouseLeave={() => setIsHovered(false)}
     >
       {/* Image container */}
-      <div className="relative aspect-[3/4] overflow-hidden rounded-xl bg-sand-100">
+      <div className="relative aspect-[3/5] overflow-hidden rounded-xl bg-sand-100">
         {imageUrl ? (
           <Image
             src={imageUrl}

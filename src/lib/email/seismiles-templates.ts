@@ -1,4 +1,4 @@
-// SEISMILES Textil — Branded email templates
+// SEISMILES — Branded email templates
 // Colors: volcanic-900 (#1C1917), terra-500 (#C75B39), sand-100 (#F5F0EB)
 //
 // SECURITY: every interpolation of `data.*` string fields below goes through
@@ -18,7 +18,7 @@ function safeColor(hex: string | null | undefined, fallback = '#999999'): string
 }
 
 const BRAND = {
-  name: 'SEISMILES Textil',
+  name: 'SEISMILES',
   tagline: 'Calidad de altura',
   volcanic: '#1C1917',
   terra: '#C75B39',
@@ -278,7 +278,7 @@ export function adminNewQuestionEmail(data: AdminNewQuestionData): string {
       </tr>
     </table>
   `
-  return baseLayout(content, 'Recibís este email porque sos administrador de SEISMILES Textil.')
+  return baseLayout(content, 'Recibís este email porque sos administrador de SEISMILES.')
 }
 
 // ── FAQ reply email to user ──
@@ -339,7 +339,7 @@ export function faqReplyEmail(data: FaqReplyData): string {
       </tr>
     </table>
   `
-  return baseLayout(content, 'Recibís este email porque enviaste una consulta en SEISMILES Textil.')
+  return baseLayout(content, 'Recibís este email porque enviaste una consulta en SEISMILES.')
 }
 
 // ── Order confirmation email to customer ──
@@ -479,7 +479,7 @@ export function orderConfirmationEmail(data: OrderConfirmationData): string {
       Podés seguir el estado de tu pedido desde tu perfil.
     </p>
   `
-  return baseLayout(content, 'Recibís este email porque realizaste una compra en SEISMILES Textil.')
+  return baseLayout(content, 'Recibís este email porque realizaste una compra en SEISMILES.')
 }
 
 // ── Gift card delivery email ──
@@ -556,7 +556,7 @@ export function giftCardEmail(data: GiftCardEmailData): string {
       </tr>
     </table>
   `
-  return baseLayout(content, 'Recibís este email porque compraste una Gift Card en SEISMILES Textil.')
+  return baseLayout(content, 'Recibís este email porque compraste una Gift Card en SEISMILES.')
 }
 
 // ── Admin digest: stock demand summary ──
@@ -633,7 +633,7 @@ export function adminStockDigestEmail(data: AdminStockDigestData): string {
       </tr>
     </table>
   `
-  return baseLayout(content, 'Recibís este email porque sos administrador de SEISMILES Textil.')
+  return baseLayout(content, 'Recibís este email porque sos administrador de SEISMILES.')
 }
 
 // ── Password changed confirmation email ──
@@ -695,7 +695,7 @@ export function passwordChangedEmail(data: PasswordChangedData): string {
       </tr>
     </table>
   `
-  return baseLayout(content, 'Recibís este email porque se actualizó la contraseña de tu cuenta en SEISMILES Textil.')
+  return baseLayout(content, 'Recibís este email porque se actualizó la contraseña de tu cuenta en SEISMILES.')
 }
 
 // ── Order status update email ──
@@ -827,7 +827,7 @@ export function orderStatusUpdateEmail(data: OrderStatusUpdateData): string {
       Podés seguir el estado de tu pedido desde tu perfil.
     </p>
   `
-  return baseLayout(content, 'Recibís este email porque realizaste una compra en SEISMILES Textil.')
+  return baseLayout(content, 'Recibís este email porque realizaste una compra en SEISMILES.')
 }
 
 // ── Newsletter email helpers ──
@@ -919,7 +919,7 @@ export function welcomeNewsletterEmail(data: WelcomeNewsletterData): string {
       </tr>
     </table>
   `
-  return baseLayout(content, `Recibis este email porque te suscribiste al newsletter de SEISMILES Textil.<br/><a href="${data.unsubscribeUrl}" style="color:${BRAND.textSecondary};text-decoration:underline;">Desuscribirse</a>`)
+  return baseLayout(content, `Recibis este email porque te suscribiste al newsletter de SEISMILES.<br/><a href="${data.unsubscribeUrl}" style="color:${BRAND.textSecondary};text-decoration:underline;">Desuscribirse</a>`)
 }
 
 // ── Campaign newsletter email ──
@@ -937,7 +937,7 @@ export function campaignEmail(data: CampaignEmailData): string {
       ${htmlContent}
     </div>
   `
-  return baseLayout(content, `Recibis este email porque te suscribiste al newsletter de SEISMILES Textil.<br/><a href="${data.unsubscribeUrl}" style="color:${BRAND.textSecondary};text-decoration:underline;">Desuscribirse</a>`)
+  return baseLayout(content, `Recibis este email porque te suscribiste al newsletter de SEISMILES.<br/><a href="${data.unsubscribeUrl}" style="color:${BRAND.textSecondary};text-decoration:underline;">Desuscribirse</a>`)
 }
 
 // ── Boton de Arrepentimiento: constancia al consumidor (Res. 424/2020) ──
@@ -1032,7 +1032,7 @@ export function arrepentimientoReceiptEmail(data: ArrepentimientoReceiptData): s
       <a href="mailto:seismilestextil@gmail.com" style="color:${BRAND.terra};text-decoration:underline;">seismilestextil@gmail.com</a>.
     </p>
   `
-  return baseLayout(content, 'Recibís este email porque solicitaste el ejercicio del derecho de arrepentimiento en la tienda SEISMILES Textil.')
+  return baseLayout(content, 'Recibís este email porque solicitaste el ejercicio del derecho de arrepentimiento en la tienda SEISMILES.')
 }
 
 // ── Boton de Arrepentimiento: notificacion al admin ──
@@ -1131,5 +1131,5 @@ export function adminArrepentimientoEmail(data: AdminArrepentimientoData): strin
       </tr>
     </table>
   `
-  return baseLayout(content, 'Recibís este email porque sos administrador de SEISMILES Textil.')
+  return baseLayout(content, 'Recibís este email porque sos administrador de SEISMILES.')
 }

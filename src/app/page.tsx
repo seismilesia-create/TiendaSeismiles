@@ -1,7 +1,7 @@
 import {
   MarqueeBanner, Navbar, HeroSection, FeaturedProducts,
   LookbookSection, CategoriesGrid, QualitySection, BenefitsBar,
-  NewsletterSection, Footer, ScrollReveal,
+  NewsletterSection, Footer, ScrollReveal, WelcomeDiscountModal,
 } from '@/features/shop/components'
 import { getAdminFeaturedProducts, getProductLines } from '@/features/shop/services/product-lines'
 import { getSeason, getSeasonDefaultTab, getSeasonSubtitle } from '@/features/shop/utils/season'
@@ -56,6 +56,7 @@ export default async function HomePage() {
       </main>
 
       <Footer productLines={productLines} />
+      <WelcomeDiscountModal />
     </>
   )
 }

@@ -21,7 +21,7 @@ export default function ShopAuthLayout({ children }: { children: React.ReactNode
           <Link href="/">
             <Image
               src="/images/logo-seismiles-v2.png"
-              alt="SEISMILES Textil"
+              alt="SEISMILES"
               width={160}
               height={68}
               className="h-12 w-auto brightness-0 invert"
@@ -38,7 +38,7 @@ export default function ShopAuthLayout({ children }: { children: React.ReactNode
           </div>
 
           <p className="text-body-xs text-white/40">
-            SEISMILES Textil &mdash; San Fernando del Valle de Catamarca
+            SEISMILES &mdash; San Fernando del Valle de Catamarca
           </p>
         </div>
       </div>
@@ -50,7 +50,7 @@ export default function ShopAuthLayout({ children }: { children: React.ReactNode
           <Link href="/">
             <Image
               src="/images/logo-seismiles-v2.png"
-              alt="SEISMILES Textil"
+              alt="SEISMILES"
               width={140}
               height={60}
               className="h-10 w-auto brightness-[0.35] contrast-[1.1]"

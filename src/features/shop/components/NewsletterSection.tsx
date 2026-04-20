@@ -16,7 +16,7 @@ function SendIcon({ className }: { className?: string }) {
   )
 }
 
-type FormState = 'idle' | 'loading' | 'success' | 'error'
+type FormState = 'idle' | 'loading' | 'success' | 'already' | 'error'
 
 export function NewsletterSection() {
   const [email, setEmail] = useState('')
@@ -44,6 +44,8 @@ export function NewsletterSection() {
       if (result.error) {
         setState('error')
         setErrorMsg(result.error)
+      } else if (result.alreadySubscribed) {
+        setState('already')
       } else {
         setState('success')
       }
@@ -93,6 +95,20 @@ export function NewsletterSection() {
                 </p>
                 <p className="text-body-xs text-white/50">
                   Revisá tu email para encontrar tu cupón del 10%
+                </p>
+              </div>
+            </div>
+          </div>
+        ) : state === 'already' ? (
+          <div className="animate-fade-in-up">
+            <div className="inline-flex items-center gap-3 px-6 py-4 rounded-xl bg-terra-500/15 border border-terra-500/20">
+              <CheckIcon className="w-5 h-5 text-terra-400" />
+              <div className="text-left">
+                <p className="text-body-sm font-semibold text-white">
+                  Ya estás suscripto
+                </p>
+                <p className="text-body-xs text-white/50">
+                  Buscá tu cupón del 10% en los emails que te enviamos.
                 </p>
               </div>
             </div>

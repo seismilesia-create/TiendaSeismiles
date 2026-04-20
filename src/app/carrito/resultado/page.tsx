@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import { ResultadoContent } from './ResultadoContent'
 
 export const metadata: Metadata = {
-  title: 'Resultado del pago | SEISMILES Textil',
+  title: 'Resultado del pago | SEISMILES',
 }
 
 // MP appends these params to back_urls:

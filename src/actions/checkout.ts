@@ -464,7 +464,6 @@ interface ConfirmResult {
 }
 
 export async function confirmPayment(paymentId: string, externalReference: string): Promise<ConfirmResult> {
-  console.log('[confirmPayment] called with paymentId:', paymentId, 'ref:', externalReference)
   if (!paymentId || !externalReference) return { confirmed: false, error: 'Datos incompletos' }
 
   try {
@@ -474,7 +473,6 @@ export async function confirmPayment(paymentId: string, externalReference: strin
     const mpStatus = payment.status ?? ''
     const newEstado = STATUS_MAP[mpStatus] ?? 'pendiente_pago'
     const orderNumbers = externalReference.split(',').map((n) => n.trim()).filter(Boolean)
-    console.log('[confirmPayment] mpStatus:', mpStatus, 'newEstado:', newEstado, 'orders:', orderNumbers)
 
     if (orderNumbers.length === 0) {
       return { confirmed: false, error: 'Referencia externa vacia' }
@@ -526,14 +524,11 @@ export async function confirmPayment(paymentId: string, externalReference: strin
         .select('numero_pedido')
 
       if (!transitioned || transitioned.length === 0) {
-        console.log('[confirmPayment] transition lost (already confirmed by other caller), skipping email')
         // Another caller already confirmed. Report success so UI agrees.
         return { confirmed: true }
       }
 
-      console.log('[confirmPayment] transition won, about to send email for orders:', orderNumbers)
       await sendOrderConfirmationEmails(orderNumbers)
-      console.log('[confirmPayment] email send returned')
 
       revalidatePath('/perfil')
       revalidatePath('/catalogo')

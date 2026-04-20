@@ -44,7 +44,7 @@ export function Footer({ productLines }: FooterProps) {
             <Link href="/" className="inline-block mb-5">
               <Image
                 src="/images/logo-seismiles-v2.png"
-                alt="SEISMILES Textil"
+                alt="SEISMILES"
                 width={120}
                 height={52}
                 className="h-12 w-auto brightness-0 invert opacity-90 hover:opacity-100 transition-opacity duration-300"

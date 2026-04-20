@@ -5,8 +5,8 @@ import { getProductLines } from '@/features/shop/services/product-lines'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
 
 export const metadata: Metadata = {
-  title: 'Política de Privacidad | SEISMILES Textil',
-  description: 'Política de privacidad de SEISMILES Textil. Conocé cómo recopilamos, usamos y protegemos tu información personal.',
+  title: 'Política de Privacidad | SEISMILES',
+  description: 'Política de privacidad de SEISMILES. Conocé cómo recopilamos, usamos y protegemos tu información personal.',
 }
 
 function ShieldIcon({ className }: { className?: string }) {
@@ -124,7 +124,7 @@ export default async function PoliticaPrivacidadPage() {
 
               <div className="space-y-4 text-body-md text-volcanic-600 leading-relaxed">
                 <p>
-                  El responsable del tratamiento de tus datos personales es <strong className="text-volcanic-900">SEISMILES Textil</strong>,
+                  El responsable del tratamiento de tus datos personales es <strong className="text-volcanic-900">SEISMILES</strong>,
                   con domicilio en San Fernando del Valle de Catamarca, Catamarca, Argentina.
                 </p>
                 <div className="rounded-xl bg-sand-50 border border-sand-200 p-4">
