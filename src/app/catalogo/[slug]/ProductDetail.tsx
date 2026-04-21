@@ -52,14 +52,6 @@ function TruckIcon({ className }: { className?: string }) {
   )
 }
 
-function CreditCardIcon({ className }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" className={className}>
-      <rect width="20" height="14" x="2" y="5" rx="2" /><line x1="2" x2="22" y1="10" y2="10" />
-    </svg>
-  )
-}
-
 function RefreshIcon({ className }: { className?: string }) {
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" className={className}>
@@ -261,14 +253,11 @@ export function ProductDetail({ product, mostViewedProducts, reviews, reviewSumm
                 </span>
               </button>
             )}
-            <div className="mb-1">
+            <div className="mb-8">
               <span className="text-display-xs font-semibold text-volcanic-900">
                 ${product.precio.toLocaleString('es-AR')}
               </span>
             </div>
-            <p className="text-body-sm text-volcanic-500 mb-8">
-              3 cuotas sin interes de ${Math.round(product.precio / 3).toLocaleString('es-AR')}
-            </p>
 
             {/* Color selector */}
             {product.colores.length > 0 && (
@@ -371,10 +360,6 @@ export function ProductDetail({ product, mostViewedProducts, reviews, reviewSumm
               <div className="flex items-center gap-3">
                 <TruckIcon className="w-5 h-5 text-terra-500 flex-shrink-0" />
                 <span className="text-body-sm text-volcanic-600">Envío gratis a todo el país</span>
-              </div>
-              <div className="flex items-center gap-3">
-                <CreditCardIcon className="w-5 h-5 text-terra-500 flex-shrink-0" />
-                <span className="text-body-sm text-volcanic-600">3 cuotas sin interés</span>
               </div>
               <div className="flex items-center gap-3">
                 <RefreshIcon className="w-5 h-5 text-terra-500 flex-shrink-0" />

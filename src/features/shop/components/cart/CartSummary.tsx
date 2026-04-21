@@ -97,7 +97,6 @@ export function CartSummary({ userId }: CartSummaryProps) {
   const descuentoGcTotal = gcDescuentos.reduce((sum, d) => sum + d, 0)
   const saldoSobrante = appliedGiftCards.reduce((sum, gc) => sum + gc.saldo, 0) - descuentoGcTotal
   const totalFinal = subtotalDespuesCupon - descuentoGcTotal
-  const cuotas = totalFinal > 0 ? Math.round(totalFinal / 3) : 0
 
   async function handleApplyCoupon() {
     const code = couponCode.trim().toUpperCase()
@@ -377,11 +376,7 @@ export function CartSummary({ userId }: CartSummaryProps) {
           </span>
         </div>
       </div>
-      {totalFinal > 0 ? (
-        <p className="text-body-xs text-volcanic-500 mb-6">
-          3 cuotas sin interés de ${cuotas.toLocaleString('es-AR')}
-        </p>
-      ) : (
+      {totalFinal === 0 && (
         <p className="text-body-xs text-emerald-600 font-medium mb-6">
           {descuentoGcTotal > 0
             ? `Cubierto con ${appliedCoupon ? 'descuento + ' : ''}Gift Card${appliedGiftCards.length > 1 ? 's' : ''}`

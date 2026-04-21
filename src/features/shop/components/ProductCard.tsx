@@ -124,11 +124,6 @@ export function ProductCard({ product, isFavorited = false, isLoggedIn = false }
             {`$${product.precio.toLocaleString('es-AR')}`}
           </span>
         </div>
-
-        {/* Installments */}
-        <p className="text-body-xs text-volcanic-500">
-          {`3 cuotas sin interes de $${Math.round(product.precio / 3).toLocaleString('es-AR')}`}
-        </p>
       </div>
     </Link>
   )

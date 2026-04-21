@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import './globals.css'
 import { ChatBot } from '@/features/shop/components/ChatBot'
 import { ViewTransitions } from '@/features/shop/components/ViewTransitions'
+import { CartSyncProvider } from '@/features/shop/components/CartSyncProvider'
 
 const SITE_NAME = 'SEISMILES'
 const SITE_DESCRIPTION = 'Indumentaria urbana premium nacida en la Ruta de los SEISMILES, Catamarca. Remeras de algodón, pique superior y buzos canguro super premium. Calidad forjada a 6000 metros de altura.'
@@ -41,6 +42,7 @@ export default function RootLayout({
         <ViewTransitions>
           {children}
         </ViewTransitions>
+        <CartSyncProvider />
         <ChatBot />
       </body>
     </html>

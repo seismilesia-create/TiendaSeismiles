@@ -318,7 +318,7 @@ export default async function TerminosCondicionesPage() {
                   <div className="rounded-xl bg-sand-50 border border-sand-200 p-4">
                     <p className="text-body-sm font-semibold text-volcanic-900 mb-1">Tarjetas</p>
                     <p className="text-body-sm text-volcanic-500">
-                      Crédito y débito (Visa, Mastercard, American Express). Hasta 3 cuotas sin interés con tarjeta de crédito.
+                      Crédito y débito (Visa, Mastercard, American Express).
                     </p>
                   </div>
 

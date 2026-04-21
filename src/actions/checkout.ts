@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
 import { mpPreference, mpPayment } from '@/lib/mercadopago'
 import { sendOrderConfirmationEmails } from '@/lib/email/send-order-confirmation'
+import { markAbandonedCartConverted } from '@/actions/abandoned-cart'
 
 interface CheckoutItem {
   variantId: string
@@ -368,6 +369,7 @@ export async function createCheckout(items: CheckoutItem[], giftCardCodes?: stri
       .in('numero_pedido', orderNumbers)
 
     await sendOrderConfirmationEmails(orderNumbers)
+    await markAbandonedCartConverted(user.id)
 
     revalidatePath('/catalogo')
     revalidatePath('/admin/inventario')
@@ -521,7 +523,7 @@ export async function confirmPayment(paymentId: string, externalReference: strin
         .update({ estado: 'confirmado', mp_payment_id: String(paymentId) })
         .in('numero_pedido', orderNumbers)
         .neq('estado', 'confirmado')
-        .select('numero_pedido')
+        .select('numero_pedido, user_id')
 
       if (!transitioned || transitioned.length === 0) {
         // Another caller already confirmed. Report success so UI agrees.
@@ -529,6 +531,8 @@ export async function confirmPayment(paymentId: string, externalReference: strin
       }
 
       await sendOrderConfirmationEmails(orderNumbers)
+      const buyerId = transitioned[0]?.user_id
+      if (buyerId) await markAbandonedCartConverted(buyerId)
 
       revalidatePath('/perfil')
       revalidatePath('/catalogo')

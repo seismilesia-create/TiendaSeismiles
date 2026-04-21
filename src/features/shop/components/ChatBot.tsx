@@ -1,8 +1,41 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
+import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import ReactMarkdown, { type Components } from 'react-markdown'
+import remarkGfm from 'remark-gfm'
+import rehypeSanitize from 'rehype-sanitize'
 import { shopConfig } from '../config'
+
+const markdownComponents: Components = {
+  a: ({ href, children }) => {
+    if (!href) return <>{children}</>
+    const isInternal = href.startsWith('/')
+    const cls =
+      'font-medium text-terra-600 underline underline-offset-2 hover:text-terra-700'
+    if (isInternal) {
+      return (
+        <Link href={href} className={cls}>
+          {children}
+        </Link>
+      )
+    }
+    return (
+      <a href={href} target="_blank" rel="noopener noreferrer" className={cls}>
+        {children}
+      </a>
+    )
+  },
+  p: ({ children }) => <p className="mb-2 last:mb-0">{children}</p>,
+  ul: ({ children }) => (
+    <ul className="mb-2 list-disc space-y-1 pl-5 last:mb-0">{children}</ul>
+  ),
+  ol: ({ children }) => (
+    <ol className="mb-2 list-decimal space-y-1 pl-5 last:mb-0">{children}</ol>
+  ),
+  strong: ({ children }) => <strong className="font-semibold">{children}</strong>,
+}
 
 type Message = { role: 'user' | 'assistant'; content: string }
 
@@ -313,13 +346,25 @@ function MessageBubble({
   return (
     <div className={`flex ${isUser ? 'justify-end' : 'justify-start'}`}>
       <div
-        className={`max-w-[85%] whitespace-pre-wrap rounded-2xl px-3.5 py-2 text-sm leading-relaxed ${
+        className={`max-w-[85%] rounded-2xl px-3.5 py-2 text-sm leading-relaxed ${
           isUser
-            ? 'rounded-br-sm bg-terra-500 text-white'
+            ? 'whitespace-pre-wrap rounded-br-sm bg-terra-500 text-white'
             : 'rounded-bl-sm border border-sand-300 bg-white text-volcanic-900'
         }`}
       >
-        {pending ? <TypingDots /> : content}
+        {pending ? (
+          <TypingDots />
+        ) : isUser ? (
+          content
+        ) : (
+          <ReactMarkdown
+            remarkPlugins={[remarkGfm]}
+            rehypePlugins={[rehypeSanitize]}
+            components={markdownComponents}
+          >
+            {content}
+          </ReactMarkdown>
+        )}
       </div>
     </div>
   )

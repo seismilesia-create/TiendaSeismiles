@@ -28,7 +28,6 @@ export const shopConfig: ShopConfig = {
 
   marqueeMessages: [
     { text: 'Envío gratis a todo el país' },
-    { text: '3 cuotas sin interés' },
     { text: 'Calidad de altura' },
     { text: 'Calidad premium garantizada' },
   ],
@@ -220,7 +219,7 @@ export const shopConfig: ShopConfig = {
       {
         section: 'Pagos',
         question: '¿Cuáles son los medios de pago disponibles?',
-        answer: 'Aceptamos tarjetas de crédito y débito (Visa, Mastercard, American Express), transferencia bancaria, Mercado Pago y efectivo a través de Rapipago y Pago Fácil. Ofrecemos hasta 3 cuotas sin interés con tarjeta.',
+        answer: 'Aceptamos tarjetas de crédito y débito (Visa, Mastercard, American Express), transferencia bancaria, Mercado Pago y efectivo a través de Rapipago y Pago Fácil.',
       },
       {
         section: 'Productos',

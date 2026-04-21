@@ -15,9 +15,9 @@ export function getResend(): Resend {
 }
 
 // Email configuration
-// Note: Use 'onboarding@resend.dev' for testing without verified domain
-// Change to your verified domain in production
+// Production uses the verified seismilestextil.com.ar domain; override via
+// RESEND_FROM_EMAIL only if you need a different sender for a specific env.
 export const EMAIL_CONFIG = {
-  from: process.env.RESEND_FROM_EMAIL || 'SEISMILES <onboarding@resend.dev>',
+  from: process.env.RESEND_FROM_EMAIL || 'SEISMILES <hola@seismilestextil.com.ar>',
   replyTo: 'seismilestextil@gmail.com',
 }

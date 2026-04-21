@@ -1133,3 +1133,239 @@ export function adminArrepentimientoEmail(data: AdminArrepentimientoData): strin
   `
   return baseLayout(content, 'Recibís este email porque sos administrador de SEISMILES.')
 }
+
+// ── Abandoned cart emails ──
+
+interface AbandonedCartItem {
+  productName: string
+  productSlug: string
+  colorName: string
+  colorHex: string
+  talle: string
+  cantidad: number
+  precio: number
+  imagenUrl: string | null
+}
+
+interface AbandonedCartBaseData {
+  customerName: string | null
+  items: AbandonedCartItem[]
+  subtotal: number
+  siteUrl: string
+}
+
+interface AbandonedCartDiscountData extends AbandonedCartBaseData {
+  couponCode: string
+  discountPercent: number
+  expiresAtLabel: string
+}
+
+function renderCartItems(items: AbandonedCartItem[]): string {
+  return items
+    .map((item) => {
+      const productName = escapeHtml(item.productName)
+      const colorName = escapeHtml(item.colorName)
+      const colorHex = safeColor(item.colorHex)
+      const talle = escapeHtml(item.talle)
+      const image = item.imagenUrl && /^https?:\/\//.test(item.imagenUrl)
+        ? item.imagenUrl
+        : null
+      const subtotal = item.precio * item.cantidad
+
+      const imageCell = image
+        ? `<td width="88" style="padding-right:16px;vertical-align:top;">
+            <img src="${image}" alt="${productName}" width="88" height="88" style="display:block;border-radius:10px;background-color:${BRAND.sandDark};object-fit:cover;" />
+          </td>`
+        : `<td width="88" style="padding-right:16px;vertical-align:top;">
+            <div style="width:88px;height:88px;border-radius:10px;background-color:${BRAND.sandDark};"></div>
+          </td>`
+
+      return `
+        <table width="100%" cellpadding="0" cellspacing="0" style="background-color:${BRAND.sand};border-radius:12px;padding:16px;margin-bottom:12px;">
+          <tr>
+            ${imageCell}
+            <td style="vertical-align:top;">
+              <p style="margin:0 0 6px;font-size:15px;font-weight:700;color:${BRAND.textPrimary};line-height:1.3;">
+                ${productName}
+              </p>
+              <table cellpadding="0" cellspacing="0" style="margin-bottom:6px;">
+                <tr>
+                  <td style="padding-right:10px;">
+                    <span style="display:inline-block;background-color:${BRAND.volcanic};color:white;font-size:11px;font-weight:700;padding:3px 8px;border-radius:6px;letter-spacing:0.05em;">
+                      ${talle}
+                    </span>
+                  </td>
+                  <td style="vertical-align:middle;padding-right:6px;">
+                    <span style="display:inline-block;width:14px;height:14px;border-radius:50%;background-color:${colorHex};border:1px solid ${BRAND.sandDark};vertical-align:middle;"></span>
+                  </td>
+                  <td style="vertical-align:middle;">
+                    <span style="font-size:12px;color:${BRAND.textSecondary};">${colorName}</span>
+                  </td>
+                </tr>
+              </table>
+              <p style="margin:0;font-size:12px;color:${BRAND.textSecondary};">
+                ${item.cantidad} × $${item.precio.toLocaleString('es-AR')} · <strong style="color:${BRAND.textPrimary};">$${subtotal.toLocaleString('es-AR')}</strong>
+              </p>
+            </td>
+          </tr>
+        </table>`
+    })
+    .join('')
+}
+
+function cartSummaryFooter(subtotal: number): string {
+  return `
+    <table width="100%" cellpadding="0" cellspacing="0" style="margin:8px 0 24px;">
+      <tr>
+        <td style="padding:10px 0;border-top:1px solid ${BRAND.sandDark};font-size:14px;color:${BRAND.textSecondary};">
+          Subtotal
+        </td>
+        <td style="padding:10px 0;border-top:1px solid ${BRAND.sandDark};text-align:right;font-size:16px;font-weight:700;color:${BRAND.textPrimary};">
+          $${subtotal.toLocaleString('es-AR')}
+        </td>
+      </tr>
+    </table>`
+}
+
+export function abandonedCartReminderEmail(data: AbandonedCartBaseData): string {
+  const customerName = data.customerName ? escapeHtml(data.customerName) : null
+  const cartUrl = `${data.siteUrl}/carrito`
+
+  const content = `
+    <p style="margin:0 0 4px;font-size:11px;color:${BRAND.terra};text-transform:uppercase;letter-spacing:0.1em;font-weight:600;">
+      Tu carrito te espera
+    </p>
+    <h1 style="margin:0 0 8px;font-size:20px;font-weight:700;color:${BRAND.textPrimary};">
+      Te dejaste esto en el carrito${customerName ? `, ${customerName}` : ''}
+    </h1>
+    <p style="margin:0 0 24px;font-size:14px;color:${BRAND.textSecondary};line-height:1.6;">
+      Guardamos tu selección. Seguí donde lo dejaste — el stock puede moverse rápido.
+    </p>
+
+    ${renderCartItems(data.items)}
+    ${cartSummaryFooter(data.subtotal)}
+
+    <table width="100%" cellpadding="0" cellspacing="0">
+      <tr>
+        <td align="center">
+          <a href="${cartUrl}" style="display:inline-block;background-color:${BRAND.volcanic};color:white;font-size:13px;font-weight:700;text-decoration:none;padding:14px 32px;border-radius:12px;letter-spacing:0.05em;text-transform:uppercase;">
+            Volver al carrito
+          </a>
+        </td>
+      </tr>
+    </table>
+  `
+  return baseLayout(content, 'Recibís este email porque dejaste productos en tu carrito de SEISMILES.')
+}
+
+export function abandonedCartDiscountEmail(data: AbandonedCartDiscountData): string {
+  const customerName = data.customerName ? escapeHtml(data.customerName) : null
+  const couponCode = escapeHtml(data.couponCode)
+  const expiresAtLabel = escapeHtml(data.expiresAtLabel)
+  const cartUrl = `${data.siteUrl}/carrito`
+
+  const content = `
+    <p style="margin:0 0 4px;font-size:11px;color:${BRAND.terra};text-transform:uppercase;letter-spacing:0.1em;font-weight:600;">
+      Un regalo de SEISMILES
+    </p>
+    <h1 style="margin:0 0 8px;font-size:20px;font-weight:700;color:${BRAND.textPrimary};">
+      Tenés ${data.discountPercent}% OFF esperándote${customerName ? `, ${customerName}` : ''}
+    </h1>
+    <p style="margin:0 0 24px;font-size:14px;color:${BRAND.textSecondary};line-height:1.6;">
+      Seguimos guardando tu carrito. Usá este código antes que expire y llevate tu pedido con descuento.
+    </p>
+
+    <table width="100%" cellpadding="0" cellspacing="0" style="background:linear-gradient(135deg,${BRAND.volcanic},#4A3D35);border-radius:16px;padding:24px;margin-bottom:24px;">
+      <tr>
+        <td style="text-align:center;">
+          <p style="margin:0 0 4px;font-size:11px;color:rgba(255,255,255,0.5);text-transform:uppercase;letter-spacing:0.15em;">
+            Tu código de descuento
+          </p>
+          <p style="margin:0 0 8px;font-size:24px;font-weight:700;color:white;letter-spacing:0.12em;font-family:'Courier New',Courier,monospace;">
+            ${couponCode}
+          </p>
+          <p style="margin:0;font-size:12px;color:rgba(255,255,255,0.6);">
+            ${data.discountPercent}% OFF · vence ${expiresAtLabel}
+          </p>
+        </td>
+      </tr>
+    </table>
+
+    <p style="margin:0 0 12px;font-size:12px;color:${BRAND.textSecondary};text-transform:uppercase;letter-spacing:0.08em;font-weight:600;">
+      Lo que dejaste en el carrito
+    </p>
+    ${renderCartItems(data.items)}
+    ${cartSummaryFooter(data.subtotal)}
+
+    <table width="100%" cellpadding="0" cellspacing="0">
+      <tr>
+        <td align="center">
+          <a href="${cartUrl}" style="display:inline-block;background-color:${BRAND.terra};color:white;font-size:13px;font-weight:700;text-decoration:none;padding:14px 32px;border-radius:12px;letter-spacing:0.05em;text-transform:uppercase;">
+            Aprovechar el descuento
+          </a>
+        </td>
+      </tr>
+    </table>
+
+    <p style="margin:20px 0 0;font-size:12px;color:${BRAND.textSecondary};line-height:1.6;text-align:center;">
+      Ingresá el código en el carrito antes de pagar. Válido por un único uso.
+    </p>
+  `
+  return baseLayout(content, 'Recibís este email porque dejaste productos en tu carrito de SEISMILES.')
+}
+
+export function abandonedCartLastChanceEmail(data: AbandonedCartDiscountData): string {
+  const customerName = data.customerName ? escapeHtml(data.customerName) : null
+  const couponCode = escapeHtml(data.couponCode)
+  const expiresAtLabel = escapeHtml(data.expiresAtLabel)
+  const cartUrl = `${data.siteUrl}/carrito`
+
+  const content = `
+    <p style="margin:0 0 4px;font-size:11px;color:${BRAND.terra};text-transform:uppercase;letter-spacing:0.1em;font-weight:600;">
+      Última oportunidad
+    </p>
+    <h1 style="margin:0 0 8px;font-size:20px;font-weight:700;color:${BRAND.textPrimary};">
+      ${data.discountPercent}% OFF — se vence tu carrito${customerName ? `, ${customerName}` : ''}
+    </h1>
+    <p style="margin:0 0 24px;font-size:14px;color:${BRAND.textSecondary};line-height:1.6;">
+      Es la última vez que te escribimos por este pedido. Subimos el descuento al ${data.discountPercent}% para que te lo lleves hoy.
+    </p>
+
+    <table width="100%" cellpadding="0" cellspacing="0" style="background:linear-gradient(135deg,${BRAND.terra},#8A3D25);border-radius:16px;padding:24px;margin-bottom:24px;">
+      <tr>
+        <td style="text-align:center;">
+          <p style="margin:0 0 4px;font-size:11px;color:rgba(255,255,255,0.7);text-transform:uppercase;letter-spacing:0.15em;">
+            Tu código final
+          </p>
+          <p style="margin:0 0 8px;font-size:24px;font-weight:700;color:white;letter-spacing:0.12em;font-family:'Courier New',Courier,monospace;">
+            ${couponCode}
+          </p>
+          <p style="margin:0;font-size:12px;color:rgba(255,255,255,0.8);">
+            ${data.discountPercent}% OFF · vence ${expiresAtLabel}
+          </p>
+        </td>
+      </tr>
+    </table>
+
+    <p style="margin:0 0 12px;font-size:12px;color:${BRAND.textSecondary};text-transform:uppercase;letter-spacing:0.08em;font-weight:600;">
+      Tu selección
+    </p>
+    ${renderCartItems(data.items)}
+    ${cartSummaryFooter(data.subtotal)}
+
+    <table width="100%" cellpadding="0" cellspacing="0">
+      <tr>
+        <td align="center">
+          <a href="${cartUrl}" style="display:inline-block;background-color:${BRAND.volcanic};color:white;font-size:13px;font-weight:700;text-decoration:none;padding:14px 32px;border-radius:12px;letter-spacing:0.05em;text-transform:uppercase;">
+            Completar mi compra
+          </a>
+        </td>
+      </tr>
+    </table>
+
+    <p style="margin:20px 0 0;font-size:12px;color:${BRAND.textSecondary};line-height:1.6;text-align:center;">
+      Después de esto liberamos tu carrito — no volveremos a escribirte por este pedido.
+    </p>
+  `
+  return baseLayout(content, 'Recibís este email porque dejaste productos en tu carrito de SEISMILES.')
+}
