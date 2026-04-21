@@ -81,7 +81,7 @@ async function notifyBackInStockForVariant(
 
   if (!subscribers || subscribers.length === 0) return
 
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://seismiles.com'
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.seismilestextil.com.ar'
 
   if (process.env.RESEND_API_KEY) {
     const { Resend } = await import('resend')

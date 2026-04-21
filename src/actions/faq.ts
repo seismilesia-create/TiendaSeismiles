@@ -64,7 +64,7 @@ export async function submitFaqQuestion(formData: FormData) {
   if (adminEmail) {
     try {
       const resend = getResend()
-      const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://seismiles.com'
+      const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.seismilestextil.com.ar'
       // Subject is a header — strip CRLF (header injection) and cap length.
       const subject = sanitizeHeader(`Nueva pregunta de ${userName || userEmail}`).slice(0, 200)
       await resend.emails.send({

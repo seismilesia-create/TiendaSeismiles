@@ -118,7 +118,7 @@ export async function updateOrderStatusAction(
     const productName = (order.productos as unknown as { nombre: string })?.nombre ?? 'Producto'
 
     if (userEmail) {
-      const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://seismiles.com'
+      const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.seismilestextil.com.ar'
       const html = orderStatusUpdateEmail({
         customerName: userName,
         numeroPedido: order.numero_pedido,

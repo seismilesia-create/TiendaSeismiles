@@ -188,7 +188,7 @@ export async function submitArrepentimiento(
   // Emails — best-effort. Si fallan, NO tiramos el exito: la solicitud
   // ya quedo registrada y el admin la va a ver en el panel.
   if (process.env.RESEND_API_KEY) {
-    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://seismiles.com'
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.seismilestextil.com.ar'
     const adminEmail = process.env.ADMIN_NOTIFICATION_EMAIL
     const createdAtDisplay = new Date(inserted.created_at).toLocaleString('es-AR', {
       timeZone: 'America/Argentina/Buenos_Aires',

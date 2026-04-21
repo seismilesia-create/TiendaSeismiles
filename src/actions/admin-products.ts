@@ -301,7 +301,7 @@ async function notifyBackInStock(
 
   if (!product) return
 
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://seismiles.com'
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.seismilestextil.com.ar'
 
   for (const { color_id, talle } of restocked) {
     // Fetch color info

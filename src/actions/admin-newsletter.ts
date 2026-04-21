@@ -120,7 +120,7 @@ export async function sendCampaignAction(id: string): Promise<{ error?: string }
     .eq('id', id)
 
   // 4. Send emails one-by-one
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://seismiles.com'
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.seismilestextil.com.ar'
   const resend = getResend()
 
   for (const sub of subscribers) {

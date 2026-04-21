@@ -8,7 +8,7 @@ const SITE_NAME = 'SEISMILES'
 const SITE_DESCRIPTION = 'Indumentaria urbana premium nacida en la Ruta de los SEISMILES, Catamarca. Remeras de algodón, pique superior y buzos canguro super premium. Calidad forjada a 6000 metros de altura.'
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://seismilestextil.com'),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://www.seismilestextil.com.ar'),
   verification: {
     google: '-GF1fuZ1RmZEyq5wwNz8aY-5Hd0yuLzUCzYfg8guZ8c',
   },

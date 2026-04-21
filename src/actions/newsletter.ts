@@ -48,7 +48,7 @@ export async function subscribeNewsletter(email: string): Promise<{ error?: stri
 
   // Send welcome email with coupon (fire-and-forget)
   try {
-    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://seismiles.com'
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.seismilestextil.com.ar'
 
     const { data: newSub } = await service
       .from('newsletter_subscribers')
