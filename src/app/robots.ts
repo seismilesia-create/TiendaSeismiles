@@ -8,7 +8,19 @@ export default function robots(): MetadataRoute.Robots {
       {
         userAgent: '*',
         allow: '/',
-        disallow: ['/admin/', '/auth/', '/api/', '/perfil/'],
+        disallow: [
+          '/admin/',
+          '/auth/',
+          '/api/',
+          '/perfil/',
+          // Transactional / session pages — no SEO value and some leak state.
+          '/carrito',
+          '/carrito/resultado',
+          '/giftcards/resultado',
+          '/newsletter/unsub',
+          '/coming-soon',
+          '/update-password',
+        ],
       },
     ],
     sitemap: `${siteUrl}/sitemap.xml`,

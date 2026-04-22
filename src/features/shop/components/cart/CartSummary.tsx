@@ -7,6 +7,7 @@ import { useCartStore } from '@/features/shop/stores/cart-store'
 import { createCheckout } from '@/actions/checkout'
 import { validateGiftCardCode } from '@/actions/giftcard-redeem'
 import { validateCouponCode } from '@/actions/coupons'
+import { SHIPPING_OPTIONS, type ShippingMethod } from '@/lib/shipping'
 
 function ShieldIcon({ className }: { className?: string }) {
   return (
@@ -64,6 +65,10 @@ export function CartSummary({ userId }: CartSummaryProps) {
   const appliedCoupon = useCartStore((s) => s.appliedCoupon)
   const applyCoupon = useCartStore((s) => s.applyCoupon)
   const removeCoupon = useCartStore((s) => s.removeCoupon)
+  const shippingMethod = useCartStore((s) => s.shippingMethod)
+  const shippingAddress = useCartStore((s) => s.shippingAddress)
+  const setShippingMethod = useCartStore((s) => s.setShippingMethod)
+  const setShippingAddress = useCartStore((s) => s.setShippingAddress)
   const clearCart = useCartStore((s) => s.clearCart)
   const router = useRouter()
 
@@ -79,11 +84,22 @@ export function CartSummary({ userId }: CartSummaryProps) {
   const totalItems = getTotalItems()
   const totalPrice = getTotalPrice()
 
+  // 0. Cross-sell discount (already baked into each item's precio when added
+  //    via the upsell banner — precioOriginal stores the undiscounted value).
+  //    We compute the savings here only for display purposes. The totalPrice
+  //    above already reflects the discounted subtotal, so coupon/GC stack on
+  //    top correctly.
+  const subtotalSinDescuento = items.reduce(
+    (sum, i) => sum + (i.precioOriginal ?? i.precio) * i.cantidad,
+    0,
+  )
+  const descuentoCrossSell = subtotalSinDescuento - totalPrice
+
   // 1. Coupon discount (applied on subtotal)
   const descuentoCupon = appliedCoupon
     ? (appliedCoupon.tipo === 'porcentaje'
-        ? Math.round(totalPrice * appliedCoupon.valor / 100)
-        : Math.min(appliedCoupon.valor, totalPrice))
+      ? Math.round(totalPrice * appliedCoupon.valor / 100)
+      : Math.min(appliedCoupon.valor, totalPrice))
     : 0
   const subtotalDespuesCupon = totalPrice - descuentoCupon
 
@@ -96,7 +112,10 @@ export function CartSummary({ userId }: CartSummaryProps) {
   })
   const descuentoGcTotal = gcDescuentos.reduce((sum, d) => sum + d, 0)
   const saldoSobrante = appliedGiftCards.reduce((sum, gc) => sum + gc.saldo, 0) - descuentoGcTotal
-  const totalFinal = subtotalDespuesCupon - descuentoGcTotal
+
+  // 3. Shipping cost is added AFTER discounts — never discounted.
+  const costoEnvio = shippingMethod ? SHIPPING_OPTIONS[shippingMethod].cost : 0
+  const totalFinal = subtotalDespuesCupon - descuentoGcTotal + costoEnvio
 
   async function handleApplyCoupon() {
     const code = couponCode.trim().toUpperCase()
@@ -160,6 +179,18 @@ export function CartSummary({ userId }: CartSummaryProps) {
       return
     }
 
+    if (!shippingMethod) {
+      setError('Seleccioná un método de envío')
+      return
+    }
+
+    const needsAddress = SHIPPING_OPTIONS[shippingMethod].requiresAddress
+    const addressTrimmed = shippingAddress.trim()
+    if (needsAddress && !addressTrimmed) {
+      setError('Ingresá una dirección de entrega')
+      return
+    }
+
     setLoading(true)
     setError(null)
 
@@ -169,13 +200,22 @@ export function CartSummary({ userId }: CartSummaryProps) {
       productName: i.productName,
       cantidad: i.cantidad,
       precio: i.precio,
+      crossSellRuleId: i.crossSellRuleId,
     }))
 
     const codes = appliedGiftCards.length > 0
       ? appliedGiftCards.map((g) => g.code)
       : undefined
 
-    const result = await createCheckout(checkoutItems, codes, appliedCoupon?.code)
+    const result = await createCheckout(
+      checkoutItems,
+      codes,
+      appliedCoupon?.code,
+      {
+        method: shippingMethod,
+        address: needsAddress ? addressTrimmed : undefined,
+      },
+    )
 
     if (result.error) {
       setError(result.error)
@@ -209,13 +249,96 @@ export function CartSummary({ userId }: CartSummaryProps) {
             Subtotal ({totalItems} {totalItems === 1 ? 'producto' : 'productos'})
           </span>
           <span className="font-semibold text-volcanic-900 tabular-nums">
-            ${totalPrice.toLocaleString('es-AR')}
+            ${subtotalSinDescuento.toLocaleString('es-AR')}
           </span>
         </div>
+        {descuentoCrossSell > 0 && (
+          <div className="flex items-center justify-between">
+            <span className="text-terra-600 font-medium">Oferta cross-sell</span>
+            <span className="font-semibold text-terra-600 tabular-nums">
+              -${descuentoCrossSell.toLocaleString('es-AR')}
+            </span>
+          </div>
+        )}
         <div className="flex items-center justify-between">
           <span className="text-volcanic-500">Envío</span>
-          <span className="font-semibold text-emerald-600">Gratis</span>
+          <span className={`font-semibold tabular-nums ${costoEnvio === 0 && shippingMethod ? 'text-emerald-600' : 'text-volcanic-900'}`}>
+            {!shippingMethod
+              ? <span className="text-volcanic-400 font-normal">Seleccioná abajo</span>
+              : costoEnvio === 0
+                ? 'Gratis'
+                : `$${costoEnvio.toLocaleString('es-AR')}`}
+          </span>
         </div>
+      </div>
+
+      {/* ─── Shipping Section ─── */}
+      <div className="border-t border-sand-200 my-4" />
+      <div className="mb-1">
+        <p className="text-body-xs font-medium text-volcanic-600 mb-2">Método de envío</p>
+        <div className="space-y-2">
+          {(Object.keys(SHIPPING_OPTIONS) as ShippingMethod[]).map((key) => {
+            const opt = SHIPPING_OPTIONS[key]
+            const selected = shippingMethod === key
+            return (
+              <label
+                key={key}
+                className={`flex items-start gap-3 p-3 rounded-xl border cursor-pointer transition-colors ${selected
+                  ? 'border-terra-500 bg-terra-50'
+                  : 'border-sand-200 hover:border-sand-300 bg-white'
+                  }`}
+              >
+                <input
+                  type="radio"
+                  name="shipping-method"
+                  value={key}
+                  checked={selected}
+                  onChange={() => {
+                    setShippingMethod(key)
+                    if (error) setError(null)
+                  }}
+                  className="mt-1 accent-terra-500"
+                />
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-baseline justify-between gap-2">
+                    <span className="text-body-sm font-semibold text-volcanic-900">
+                      {opt.label}
+                    </span>
+                    <span className={`text-body-sm font-semibold tabular-nums shrink-0 ${opt.cost === 0 ? 'text-emerald-600' : 'text-volcanic-900'}`}>
+                      {opt.cost === 0 ? 'Gratis' : `$${opt.cost.toLocaleString('es-AR')}`}
+                    </span>
+                  </div>
+                  <p className="text-body-xs text-volcanic-500">{opt.sublabel}</p>
+                  {opt.note && (
+                    <p className="text-body-xs text-volcanic-400 mt-0.5">{opt.note}</p>
+                  )}
+                </div>
+              </label>
+            )
+          })}
+        </div>
+
+        {shippingMethod === 'cadeteria' && (
+          <div className="mt-3">
+            <label className="block text-body-xs font-medium text-volcanic-600 mb-1.5">
+              Dirección de entrega
+            </label>
+            <input
+              type="text"
+              value={shippingAddress}
+              onChange={(e) => {
+                setShippingAddress(e.target.value)
+                if (error) setError(null)
+              }}
+              placeholder="Calle, número, barrio, referencia"
+              className="w-full px-3 py-2.5 rounded-xl bg-white border border-sand-200 text-volcanic-900 text-body-sm focus:outline-none focus:border-terra-500 focus:ring-1 focus:ring-terra-500 transition-all placeholder:text-volcanic-300"
+            />
+          </div>
+        )}
+
+        <p className="mt-3 text-body-xs text-volcanic-600 leading-relaxed">
+          <span className="font-semibold text-volcanic-800">Próximamente:</span> ¡envíos a todo el país!
+        </p>
       </div>
 
       {/* ─── Coupon Section ─── */}
@@ -366,9 +489,9 @@ export function CartSummary({ userId }: CartSummaryProps) {
       <div className="flex items-center justify-between mb-1">
         <span className="text-body-md font-semibold text-volcanic-900">Total</span>
         <div className="text-right">
-          {(descuentoCupon > 0 || descuentoGcTotal > 0) && (
+          {(descuentoCupon > 0 || descuentoGcTotal > 0 || descuentoCrossSell > 0) && (
             <span className="text-body-xs text-volcanic-500 line-through tabular-nums mr-2">
-              ${totalPrice.toLocaleString('es-AR')}
+              ${(subtotalSinDescuento + costoEnvio).toLocaleString('es-AR')}
             </span>
           )}
           <span className="text-body-lg font-bold text-volcanic-900 tabular-nums">
@@ -439,7 +562,7 @@ export function CartSummary({ userId }: CartSummaryProps) {
       <div className="flex items-center gap-2 mt-5 pt-5 border-t border-sand-200">
         <ShieldIcon className="w-4 h-4 text-terra-500 shrink-0" />
         <p className="text-body-xs text-volcanic-500">
-          Compra segura · Envío gratis · Cambios por 30 días
+          Compra segura · Retiro gratis en Catamarca · Cambios por 30 días
         </p>
       </div>
     </div>

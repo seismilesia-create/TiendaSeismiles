@@ -98,6 +98,22 @@ export interface BlogItem {
   category: string
 }
 
+/**
+ * Regla de cross-sell / upsell en el carrito.
+ * Si el carrito contiene un producto que matchea el trigger (por linea y/o
+ * categoria), se sugiere un producto del target con un descuento porcentual.
+ */
+export interface CrossSellRule {
+  id: string
+  triggerLinea?: string
+  triggerCategoria?: string
+  targetLinea?: string
+  targetCategoria?: string
+  discountPercent: number
+  message: string
+  ctaLabel?: string
+}
+
 /** Producto destacado para la landing */
 export interface FeaturedProduct {
   name: string
@@ -142,6 +158,8 @@ export interface ShopConfig {
   }
 
   productTypeTabs: ProductTypeTab[]
+
+  crossSellRules: CrossSellRule[]
 
   origin: {
     coordinates: string

@@ -5,6 +5,8 @@ import { createClient, createServiceClient } from '@/lib/supabase/server'
 import { mpPreference, mpPayment } from '@/lib/mercadopago'
 import { sendOrderConfirmationEmails } from '@/lib/email/send-order-confirmation'
 import { markAbandonedCartConverted } from '@/actions/abandoned-cart'
+import { SHIPPING_OPTIONS, isValidShippingMethod, type ShippingMethod } from '@/lib/shipping'
+import { shopConfig } from '@/features/shop/config'
 
 interface CheckoutItem {
   variantId: string
@@ -12,6 +14,18 @@ interface CheckoutItem {
   productName: string
   cantidad: number
   precio: number
+  /**
+   * Si está seteado, el cliente declara que este item fue agregado vía una
+   * regla de cross-sell y debería recibir el descuento correspondiente. El
+   * servidor re-valida contra shopConfig.crossSellRules y contra el resto
+   * del carrito antes de aplicar el descuento.
+   */
+  crossSellRuleId?: string
+}
+
+export interface CheckoutShipping {
+  method: ShippingMethod
+  address?: string
 }
 
 interface CheckoutResult {
@@ -151,8 +165,26 @@ async function releaseOrderReservations(
   }
 }
 
-export async function createCheckout(items: CheckoutItem[], giftCardCodes?: string[], couponCode?: string): Promise<CheckoutResult> {
+export async function createCheckout(
+  items: CheckoutItem[],
+  giftCardCodes?: string[],
+  couponCode?: string,
+  shipping?: CheckoutShipping,
+): Promise<CheckoutResult> {
   if (!items.length) return { error: 'El carrito está vacío' }
+
+  // Validate shipping selection. Method is required and must be a known value;
+  // cadeteria additionally requires a non-empty address. Cost is ALWAYS taken
+  // from the server-side table — never trust a client-supplied amount.
+  if (!shipping || !isValidShippingMethod(shipping.method)) {
+    return { error: 'Seleccioná un método de envío' }
+  }
+  const shippingOption = SHIPPING_OPTIONS[shipping.method]
+  const direccionEnvio = shipping.address?.trim() ?? ''
+  if (shippingOption.requiresAddress && !direccionEnvio) {
+    return { error: 'Ingresá una dirección de entrega' }
+  }
+  const costoEnvio = shippingOption.cost
 
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -200,33 +232,78 @@ export async function createCheckout(items: CheckoutItem[], giftCardCodes?: stri
 
   // 1. Re-fetch authoritative prices from DB. NEVER trust the precio sent
   // by the client — it would let an attacker buy expensive items for $1.
+  // linea/categoria are fetched alongside so the cross-sell validator below
+  // can verify trigger/target matches without trusting the client.
   const productIds = Array.from(new Set(items.map((i) => i.productId)))
   const { data: dbProducts, error: priceError } = await service
     .from('productos')
-    .select('id, precio, activo')
+    .select('id, precio, activo, linea, categoria')
     .in('id', productIds)
 
   if (priceError || !dbProducts || dbProducts.length !== productIds.length) {
     return { error: 'No se pudieron validar los precios. Intentá de nuevo.' }
   }
 
-  const priceMap = new Map<string, number>()
+  interface ProductInfo {
+    precio: number
+    linea: string
+    categoria: string
+  }
+  const productMap = new Map<string, ProductInfo>()
   for (const p of dbProducts) {
     if (!p.activo) {
       return { error: 'Algunos productos ya no están disponibles.' }
     }
-    priceMap.set(p.id, Number(p.precio))
+    productMap.set(p.id, {
+      precio: Number(p.precio),
+      linea: p.linea,
+      categoria: p.categoria,
+    })
   }
 
-  // Replace each item's precio with the server-side value. Downstream code
+  // 1a. Replace each item's precio with the server-side value. Downstream code
   // (totalPedido, MP unit_price, RPC payload) must read from pricedItems.
   const pricedItems = items.map((i) => {
-    const precio = priceMap.get(i.productId)
-    if (precio === undefined) {
+    const info = productMap.get(i.productId)
+    if (!info) {
       throw new Error(`Producto ${i.productId} no encontrado`)
     }
-    return { ...i, precio }
+    return { ...i, precio: info.precio, linea: info.linea, categoria: info.categoria }
   })
+
+  // 1b. Cross-sell validation. Client tags items with crossSellRuleId; server
+  // verifies the rule exists, the item's taxonomy matches rule.target, and
+  // some other item in the cart matches rule.trigger. Only then does the
+  // discount land on the item's precio. Invalid tags are silently stripped
+  // (item keeps full price) — we never reject the whole checkout.
+  const discountedVariantIds = new Map<string, { ruleId: string; originalPrice: number }>()
+  for (const [idx, item] of pricedItems.entries()) {
+    if (!item.crossSellRuleId) continue
+    const rule = shopConfig.crossSellRules.find((r) => r.id === item.crossSellRuleId)
+    if (!rule) continue
+
+    const matchesTarget =
+      (!rule.targetLinea || item.linea === rule.targetLinea) &&
+      (!rule.targetCategoria || item.categoria === rule.targetCategoria) &&
+      Boolean(rule.targetLinea || rule.targetCategoria)
+    if (!matchesTarget) continue
+
+    const hasTrigger = pricedItems.some((other, otherIdx) => {
+      if (otherIdx === idx) return false
+      if (other.crossSellRuleId) return false
+      const tLineaOk = !rule.triggerLinea || other.linea === rule.triggerLinea
+      const tCatOk = !rule.triggerCategoria || other.categoria === rule.triggerCategoria
+      return tLineaOk && tCatOk && Boolean(rule.triggerLinea || rule.triggerCategoria)
+    })
+    if (!hasTrigger) continue
+
+    const originalPrice = item.precio
+    pricedItems[idx] = {
+      ...item,
+      precio: Math.round(item.precio * (100 - rule.discountPercent) / 100),
+    }
+    discountedVariantIds.set(item.variantId, { ruleId: rule.id, originalPrice })
+  }
 
   // 1b. Create orders in DB via existing RPC (decrements stock atomically).
   // The RPC also re-derives precio from productos as a defense in depth.
@@ -249,10 +326,30 @@ export async function createCheckout(items: CheckoutItem[], giftCardCodes?: stri
     return { error: 'Error al procesar el pedido. Intentá de nuevo.' }
   }
 
-  const orderNumbers = (pedidos as { numero_pedido: string; variant_id: string }[])
-    .map((p) => p.numero_pedido)
+  const orderRows = pedidos as { numero_pedido: string; variant_id: string }[]
+  const orderNumbers = orderRows.map((p) => p.numero_pedido)
 
   const externalRef = orderNumbers.join(',')
+
+  // 1c. Overwrite precio_unitario/total on compras rows that got a cross-sell
+  // discount. place_order writes full DB price by design; the discount has to
+  // be applied AFTER, per-variant. Without this, the UI would show the order
+  // at full price despite the client having been charged the discounted one.
+  if (discountedVariantIds.size > 0) {
+    for (const row of orderRows) {
+      const discount = discountedVariantIds.get(row.variant_id)
+      if (!discount) continue
+      const item = pricedItems.find((i) => i.variantId === row.variant_id)
+      if (!item) continue
+      await service
+        .from('compras')
+        .update({
+          precio_unitario: item.precio,
+          total: item.precio * item.cantidad,
+        })
+        .eq('numero_pedido', row.numero_pedido)
+    }
+  }
 
   // 2. Calculate total from server-side prices (never client-supplied)
   const totalPedido = pricedItems.reduce((sum, i) => sum + i.precio * i.cantidad, 0)
@@ -341,14 +438,25 @@ export async function createCheckout(items: CheckoutItem[], giftCardCodes?: stri
     }
   }
 
-  const totalAPagar = totalDespuesCupon - descuentoGc
+  // Discounts apply only to products — shipping is added AFTER.
+  const totalProductosAPagar = totalDespuesCupon - descuentoGc
+  const totalAPagar = totalProductosAPagar + costoEnvio
 
-  // Update orders with coupon info if applicable
-  if (cuponId) {
-    await service
-      .from('compras')
-      .update({ cupon_id: cuponId, cupon_descuento: descuentoCupon })
-      .in('numero_pedido', orderNumbers)
+  // Persist shipping info on every compras row of this checkout. Apply to
+  // all rows (one per variant) — easier than deciding which row "owns" the
+  // shipping, and lets admin reports aggregate per-order shipping costs
+  // consistently. Also attach coupon info while we're at it.
+  {
+    const update: Record<string, unknown> = {
+      metodo_envio: shipping.method,
+      costo_envio: costoEnvio,
+      direccion_envio: shippingOption.requiresAddress ? direccionEnvio : null,
+    }
+    if (cuponId) {
+      update.cupon_id = cuponId
+      update.cupon_descuento = descuentoCupon
+    }
+    await service.from('compras').update(update).in('numero_pedido', orderNumbers)
   }
 
   // 3a. Discounts cover the full amount — confirm directly without MP.
@@ -384,17 +492,35 @@ export async function createCheckout(items: CheckoutItem[], giftCardCodes?: stri
   let preferenceId: string
   let initPoint: string
 
-  // Adjust item prices proportionally for the amount to pay (server-side prices)
-  const ratio = totalAPagar / totalPedido
-  const mpItems = pricedItems.map((item) => ({
+  // Prorate product prices by the product-side discount ratio. Shipping is
+  // NOT discounted and goes through as a separate line item, so the ratio
+  // uses totalPedido (products only) as both numerator base and denominator.
+  const ratio = totalProductosAPagar / totalPedido
+  const mpItems: Array<{
+    id: string
+    title: string
+    quantity: number
+    unit_price: number
+    currency_id: 'ARS'
+  }> = pricedItems.map((item) => ({
     id: item.variantId,
     title: item.productName,
     quantity: item.cantidad,
     unit_price: (descuentoCupon > 0 || descuentoGc > 0)
       ? Math.round(item.precio * ratio)
       : item.precio,
-    currency_id: 'ARS' as const,
+    currency_id: 'ARS',
   }))
+
+  if (costoEnvio > 0) {
+    mpItems.push({
+      id: `shipping-${shipping.method}`,
+      title: `Envío - ${shippingOption.label}`,
+      quantity: 1,
+      unit_price: costoEnvio,
+      currency_id: 'ARS',
+    })
+  }
 
   // MP preference creation. Any failure throws up to the outer catch, which
   // runs the full rollback (release coupon, refund GCs, delete compras,

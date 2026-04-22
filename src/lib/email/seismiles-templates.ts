@@ -1369,3 +1369,129 @@ export function abandonedCartLastChanceEmail(data: AbandonedCartDiscountData): s
   `
   return baseLayout(content, 'Recibís este email porque dejaste productos en tu carrito de SEISMILES.')
 }
+
+// ── Reseña de baja puntuación: notificación al admin ──
+
+interface AdminLowRatingReviewData {
+  puntuacion: number
+  productName: string
+  productSlug: string
+  customerName: string
+  customerEmail: string
+  comentario: string | null
+  comodidad: number | null
+  calidad: number | null
+  ajuste: number | null
+  longitud: number | null
+  createdAtDisplay: string
+  siteUrl: string
+}
+
+export function adminLowRatingReviewEmail(data: AdminLowRatingReviewData): string {
+  const puntuacion = Math.max(1, Math.min(5, data.puntuacion))
+  const productName = escapeHtml(data.productName)
+  const productSlug = escapeHtml(data.productSlug)
+  const customerName = escapeHtml(data.customerName)
+  const customerEmail = escapeHtml(data.customerEmail)
+  const comentario = data.comentario
+    ? escapeHtml(data.comentario).replace(/\n/g, '<br>')
+    : null
+  const createdAtDisplay = escapeHtml(data.createdAtDisplay)
+  const adminUrl = `${data.siteUrl}/admin/resenas`
+  const productUrl = `${data.siteUrl}/catalogo/${productSlug}#reviews`
+
+  const stars = Array.from({ length: 5 }, (_, i) =>
+    i < puntuacion
+      ? `<span style="color:${BRAND.terra};font-size:18px;">★</span>`
+      : `<span style="color:${BRAND.sandDark};font-size:18px;">★</span>`
+  ).join('')
+
+  const AJUSTE = ['Muy ajustado', 'Algo ajustado', 'Perfecto', 'Algo holgado', 'Muy holgado']
+  const LONGITUD = ['Corto', 'Algo corto', 'Perfecto', 'Algo largo', 'Largo']
+
+  const detailRows: string[] = []
+  if (data.comodidad != null) {
+    detailRows.push(`<strong>Comodidad:</strong> ${data.comodidad}/5`)
+  }
+  if (data.calidad != null) {
+    detailRows.push(`<strong>Calidad:</strong> ${data.calidad}/5`)
+  }
+  if (data.ajuste != null && data.ajuste >= 1 && data.ajuste <= 5) {
+    detailRows.push(`<strong>Ajuste:</strong> ${escapeHtml(AJUSTE[data.ajuste - 1])}`)
+  }
+  if (data.longitud != null && data.longitud >= 1 && data.longitud <= 5) {
+    detailRows.push(`<strong>Longitud:</strong> ${escapeHtml(LONGITUD[data.longitud - 1])}`)
+  }
+
+  const content = `
+    <p style="margin:0 0 4px;font-size:11px;color:${BRAND.terra};text-transform:uppercase;letter-spacing:0.1em;font-weight:600;">
+      Reseña para moderar
+    </p>
+    <h1 style="margin:0 0 8px;font-size:20px;font-weight:700;color:${BRAND.textPrimary};">
+      Nueva reseña de ${puntuacion}★
+    </h1>
+    <p style="margin:0 0 24px;font-size:14px;color:${BRAND.textSecondary};line-height:1.6;">
+      Un comprador verificado dejó una puntuación baja en
+      <a href="${productUrl}" style="color:${BRAND.terra};text-decoration:underline;">${productName}</a>.
+      Revisala y decidí si corresponde mantenerla, contactar al cliente, o ocultarla.
+    </p>
+
+    <table width="100%" cellpadding="0" cellspacing="0" style="background-color:${BRAND.sand};border-radius:12px;padding:20px 24px;margin-bottom:24px;">
+      <tr>
+        <td>
+          <p style="margin:0 0 6px;font-size:11px;color:${BRAND.textSecondary};text-transform:uppercase;letter-spacing:0.08em;font-weight:600;">
+            Puntuación general
+          </p>
+          <p style="margin:0 0 16px;line-height:1;">
+            ${stars}
+            <span style="margin-left:8px;font-size:13px;color:${BRAND.textPrimary};font-weight:700;">${puntuacion}/5</span>
+          </p>
+          <p style="margin:0 0 4px;font-size:13px;color:${BRAND.textPrimary};line-height:1.6;"><strong>Producto:</strong> ${productName}</p>
+          <p style="margin:0 0 4px;font-size:13px;color:${BRAND.textPrimary};line-height:1.6;"><strong>Cliente:</strong> ${customerName}</p>
+          <p style="margin:0 0 4px;font-size:13px;color:${BRAND.textPrimary};line-height:1.6;"><strong>Email:</strong> <a href="mailto:${customerEmail}" style="color:${BRAND.terra};">${customerEmail}</a></p>
+          <p style="margin:0;font-size:13px;color:${BRAND.textPrimary};line-height:1.6;"><strong>Recibida:</strong> ${createdAtDisplay}</p>
+        </td>
+      </tr>
+    </table>
+
+    ${detailRows.length > 0 ? `
+    <table width="100%" cellpadding="0" cellspacing="0" style="background-color:white;border:1px solid ${BRAND.sandDark};border-radius:12px;padding:20px 24px;margin-bottom:24px;">
+      <tr>
+        <td>
+          <p style="margin:0 0 10px;font-size:11px;color:${BRAND.textSecondary};text-transform:uppercase;letter-spacing:0.08em;font-weight:600;">
+            Detalles
+          </p>
+          ${detailRows.map((r) => `<p style="margin:0 0 4px;font-size:13px;color:${BRAND.textPrimary};line-height:1.6;">${r}</p>`).join('')}
+        </td>
+      </tr>
+    </table>` : ''}
+
+    ${comentario ? `
+    <table width="100%" cellpadding="0" cellspacing="0" style="background-color:white;border:1px solid ${BRAND.sandDark};border-radius:12px;padding:20px 24px;margin-bottom:24px;">
+      <tr>
+        <td>
+          <p style="margin:0 0 8px;font-size:11px;color:${BRAND.textSecondary};text-transform:uppercase;letter-spacing:0.08em;font-weight:600;">
+            Comentario del cliente
+          </p>
+          <p style="margin:0;font-size:13px;color:${BRAND.textPrimary};line-height:1.6;font-style:italic;">
+            "${comentario}"
+          </p>
+        </td>
+      </tr>
+    </table>` : `
+    <p style="margin:0 0 24px;font-size:12px;color:${BRAND.textSecondary};font-style:italic;">
+      El cliente no dejó comentario.
+    </p>`}
+
+    <table width="100%" cellpadding="0" cellspacing="0">
+      <tr>
+        <td align="center">
+          <a href="${adminUrl}" style="display:inline-block;background-color:${BRAND.terra};color:white;font-size:13px;font-weight:700;text-decoration:none;padding:14px 32px;border-radius:12px;letter-spacing:0.05em;text-transform:uppercase;">
+            Moderar en el panel
+          </a>
+        </td>
+      </tr>
+    </table>
+  `
+  return baseLayout(content, 'Recibís este email porque sos administrador de SEISMILES.')
+}

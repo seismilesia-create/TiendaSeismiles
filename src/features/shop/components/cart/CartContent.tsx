@@ -6,7 +6,9 @@ import { useCartStore } from '@/features/shop/stores/cart-store'
 import { useCartHydrated } from '@/features/shop/hooks/useCartHydrated'
 import { CartItemCard } from './CartItemCard'
 import { CartSummary } from './CartSummary'
+import { UpsellBanner } from './UpsellBanner'
 import { ProductCard } from '@/features/shop/components/ProductCard'
+import { useCrossSell } from '@/features/shop/hooks/useCrossSell'
 import type { CatalogProductFromDB } from '@/features/shop/services/product-lines'
 
 function ShoppingBagIcon({ className }: { className?: string }) {
@@ -60,6 +62,7 @@ interface CartContentProps {
 export function CartContent({ allProducts, userId }: CartContentProps) {
   const items = useCartStore((s) => s.items)
   const hydrated = useCartHydrated()
+  const { suggestion } = useCrossSell(items, allProducts)
 
   const recommendations = useMemo(() => {
     if (items.length === 0) return allProducts.filter((p) => p.destacado).slice(0, 4)
@@ -95,6 +98,7 @@ export function CartContent({ allProducts, userId }: CartContentProps) {
             {items.map((item) => (
               <CartItemCard key={item.variantId} item={item} />
             ))}
+            {suggestion && <UpsellBanner suggestion={suggestion} />}
           </div>
 
           {/* Summary sidebar */}

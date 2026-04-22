@@ -32,6 +32,8 @@ const LINEA_LABELS: Record<string, string> = {
 
 const TALLE_ORDER = ['XS', 'S', 'M', 'L', 'XL', '2XL', '3XL', '4XL']
 
+const LOW_STOCK_THRESHOLD = 5
+
 // ── Icons ──
 
 function ChevronIcon({ className, open }: { className?: string; open?: boolean }) {
@@ -64,6 +66,14 @@ function ShoppingBagIcon({ className }: { className?: string }) {
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" className={className}>
       <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z" /><path d="M3 6h18" /><path d="M16 10a4 4 0 0 1-8 0" />
+    </svg>
+  )
+}
+
+function FlameIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" className={className}>
+      <path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5Z" />
     </svg>
   )
 }
@@ -154,7 +164,9 @@ export function ProductDetail({ product, mostViewedProducts, reviews, reviewSumm
     }
   }
 
-  const canAddToCart = selectedColorId && selectedSize && getStock(selectedColorId, selectedSize) > 0
+  const selectedStock = selectedColorId && selectedSize ? getStock(selectedColorId, selectedSize) : 0
+  const canAddToCart = selectedStock > 0
+  const showScarcityBadge = selectedStock > 0 && selectedStock < LOW_STOCK_THRESHOLD
 
   function handleAddToCart() {
     if (!selectedColorId || !selectedSize || !selectedColor) return
@@ -180,6 +192,8 @@ export function ProductDetail({ product, mostViewedProducts, reviews, reviewSumm
       precio: product.precio,
       imagenUrl: firstImage,
       maxStock: variant.stock,
+      linea: product.linea,
+      categoria: product.categoria,
     })
 
     setShowAddedToast(true)
@@ -297,6 +311,7 @@ export function ProductDetail({ product, mostViewedProducts, reviews, reviewSumm
                     const stock = selectedColorId ? getStock(selectedColorId, talle) : 0
                     const isSelected = selectedSize === talle
                     const isAvailable = stock > 0
+                    const isLowStock = isAvailable && stock < LOW_STOCK_THRESHOLD
                     return (
                       <div key={talle} className="relative">
                         <button
@@ -324,6 +339,14 @@ export function ProductDetail({ product, mostViewedProducts, reviews, reviewSumm
                             </svg>
                           </span>
                         )}
+                        {isLowStock && (
+                          <span
+                            title={`Quedan ${stock} en talle ${talle}`}
+                            className="absolute -top-1.5 -right-1.5 min-w-5 h-5 px-1 rounded-full bg-terra-500 ring-2 ring-white flex items-center justify-center pointer-events-none text-[10px] font-bold text-white leading-none"
+                          >
+                            {stock}
+                          </span>
+                        )}
                       </div>
                     )
                   })}
@@ -338,6 +361,21 @@ export function ProductDetail({ product, mostViewedProducts, reviews, reviewSumm
                   </svg>
                   <span className="underline underline-offset-2 group-hover:decoration-terra-500">Guía de talles</span>
                 </button>
+              </div>
+            )}
+
+            {/* Scarcity badge — low stock urgency */}
+            {showScarcityBadge && (
+              <div className="mb-6 flex items-center gap-2.5 bg-terra-50 border border-terra-200 rounded-xl px-4 py-3 animate-fade-in">
+                <FlameIcon className="w-5 h-5 text-terra-500 flex-shrink-0" />
+                <p className="text-body-sm text-volcanic-800">
+                  <span className="font-semibold text-terra-600">
+                    {selectedStock === 1
+                      ? '¡Última unidad'
+                      : `¡Últimas ${selectedStock} unidades`}
+                  </span>{' '}
+                  en talle {selectedSize}!
+                </p>
               </div>
             )}
 
@@ -359,7 +397,7 @@ export function ProductDetail({ product, mostViewedProducts, reviews, reviewSumm
             <div className="flex flex-col gap-3 py-6 border-t border-sand-200 mb-6">
               <div className="flex items-center gap-3">
                 <TruckIcon className="w-5 h-5 text-terra-500 flex-shrink-0" />
-                <span className="text-body-sm text-volcanic-600">Envío gratis a todo el país</span>
+                <span className="text-body-sm text-volcanic-600">Retiro gratis en Catamarca · Cadetería Valle Central</span>
               </div>
               <div className="flex items-center gap-3">
                 <RefreshIcon className="w-5 h-5 text-terra-500 flex-shrink-0" />

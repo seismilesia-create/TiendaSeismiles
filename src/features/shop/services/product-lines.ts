@@ -300,6 +300,12 @@ export interface ReviewSummary {
   avgLongitud: number
 }
 
+/** Row used by the admin moderation table — includes product + hidden flag. */
+export interface AdminReviewRow extends ReviewFromDB {
+  oculta: boolean
+  productos: { nombre: string; slug: string }
+}
+
 /** Fetch all reviews for a product (newest first) + summary */
 export async function getProductReviews(productoId: string): Promise<{
   reviews: ReviewFromDB[]
@@ -363,6 +369,38 @@ export async function getProductReviews(productoId: string): Promise<{
         avgComodidad: 0, avgCalidad: 0, avgAjuste: 0, avgLongitud: 0,
       },
     }
+  }
+}
+
+/**
+ * Fetch ALL reviews (including hidden) with product info for the admin
+ * moderation panel. Uses the service role to bypass RLS — the admin
+ * route is already guarded upstream by requireAdmin().
+ */
+export async function getAdminReviews(limit = 500): Promise<AdminReviewRow[]> {
+  try {
+    const { createServiceClient } = await import('@/lib/supabase/server')
+    const supabase = createServiceClient()
+    const { data, error } = await supabase
+      .from('resenas')
+      .select(`
+        id, producto_id, user_id, puntuacion, comodidad, calidad, ajuste, longitud,
+        comentario, created_at, oculta,
+        profiles(full_name, email),
+        productos(nombre, slug)
+      `)
+      .order('created_at', { ascending: false })
+      .limit(limit)
+
+    if (error) throw error
+
+    return (data ?? []).map((r) => ({
+      ...r,
+      profiles: Array.isArray(r.profiles) ? r.profiles[0] : r.profiles,
+      productos: Array.isArray(r.productos) ? r.productos[0] : r.productos,
+    })) as AdminReviewRow[]
+  } catch {
+    return []
   }
 }
 

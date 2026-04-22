@@ -226,7 +226,7 @@ function CatalogInner({ products, favoriteProductIds = [], isLoggedIn = false }:
                   </p>
                   <p className="max-w-md text-center text-body-sm leading-relaxed text-volcanic-500">
                     Todas nuestras prendas están hechas con materiales premium de primera calidad.
-                    Envío gratis a todo el país.
+                    Retiro gratis en Catamarca capital y cadetería en el Valle Central.
                   </p>
                 </div>
               </div>

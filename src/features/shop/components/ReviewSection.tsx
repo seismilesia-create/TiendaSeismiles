@@ -1,8 +1,22 @@
 'use client'
 
-import { useState, useTransition } from 'react'
+import { useMemo, useState, useTransition } from 'react'
 import { submitReview, deleteReview } from '@/actions/reviews'
+import { ConfirmDialog } from '@/features/shop/components/ConfirmDialog'
 import type { ReviewFromDB, ReviewSummary } from '@/features/shop/services/product-lines'
+
+// ── Filter / sort types ──
+
+type RatingFilter = 'all' | 1 | 2 | 3 | 4 | 5
+type SortOption = 'recent' | 'oldest' | 'highest' | 'lowest' | 'longest'
+
+const SORT_LABELS: Record<SortOption, string> = {
+  recent: 'Más recientes',
+  oldest: 'Más antiguas',
+  highest: 'Mejor puntuadas',
+  lowest: 'Peor puntuadas',
+  longest: 'Más detalladas',
+}
 
 // ── Star Icons ──
 
@@ -155,6 +169,7 @@ function DistributionBar({ star, count, total }: { star: number; count: number; 
 
 function ReviewCard({ review, isOwn, slug }: { review: ReviewFromDB; isOwn: boolean; slug: string }) {
   const [isPending, startTransition] = useTransition()
+  const [confirmOpen, setConfirmOpen] = useState(false)
   const displayName = review.profiles?.full_name || review.profiles?.email?.split('@')[0] || 'Usuario'
   const date = new Date(review.created_at).toLocaleDateString('es-AR', {
     year: 'numeric',
@@ -163,15 +178,29 @@ function ReviewCard({ review, isOwn, slug }: { review: ReviewFromDB; isOwn: bool
   })
 
   function handleDelete() {
-    if (!confirm('Seguro que queres eliminar tu reseña?')) return
     const fd = new FormData()
     fd.set('review_id', review.id)
     fd.set('slug', slug)
-    startTransition(() => { deleteReview(fd) })
+    startTransition(async () => {
+      await deleteReview(fd)
+      setConfirmOpen(false)
+    })
   }
 
   return (
     <div className={`py-6 ${isPending ? 'opacity-50' : ''}`}>
+      <ConfirmDialog
+        open={confirmOpen}
+        title="Eliminar tu reseña"
+        description="Tu reseña se eliminará definitivamente. Esta acción no se puede deshacer."
+        confirmLabel="Sí, eliminar"
+        cancelLabel="Volver"
+        variant="danger"
+        isPending={isPending}
+        onConfirm={handleDelete}
+        onCancel={() => setConfirmOpen(false)}
+      />
+
       <div className="flex items-start justify-between gap-4 mb-2">
         <div>
           <div className="flex items-center gap-3 mb-1">
@@ -181,7 +210,11 @@ function ReviewCard({ review, isOwn, slug }: { review: ReviewFromDB; isOwn: bool
           <p className="text-body-xs text-volcanic-500">{date}</p>
         </div>
         {isOwn && (
-          <button onClick={handleDelete} disabled={isPending} className="text-body-xs text-volcanic-500 hover:text-red-500 transition-colors">
+          <button
+            onClick={() => setConfirmOpen(true)}
+            disabled={isPending}
+            className="text-body-xs text-volcanic-500 hover:text-red-500 transition-colors disabled:opacity-40"
+          >
             Eliminar
           </button>
         )}
@@ -329,6 +362,118 @@ function ReviewForm({ productoId, slug, existingReview }: {
   )
 }
 
+// ── Filter bar ──
+
+interface FilterBarProps {
+  total: number
+  visibleCount: number
+  distribution: Record<number, number>
+  commentsCount: number
+  ratingFilter: RatingFilter
+  onRatingChange: (f: RatingFilter) => void
+  onlyWithComment: boolean
+  onToggleComments: () => void
+  sortBy: SortOption
+  onSortChange: (s: SortOption) => void
+  hasActiveFilter: boolean
+  onClear: () => void
+}
+
+function FilterBar({
+  total, visibleCount, distribution, commentsCount,
+  ratingFilter, onRatingChange,
+  onlyWithComment, onToggleComments,
+  sortBy, onSortChange,
+  hasActiveFilter, onClear,
+}: FilterBarProps) {
+  return (
+    <div className="mb-6 space-y-3">
+      {/* Rating chips */}
+      <div className="flex flex-wrap gap-2">
+        <button
+          onClick={() => onRatingChange('all')}
+          className={`px-3 py-1.5 rounded-lg text-body-xs font-semibold transition-all border ${
+            ratingFilter === 'all'
+              ? 'bg-volcanic-900 text-white border-volcanic-900'
+              : 'bg-white text-volcanic-700 border-sand-200 hover:border-volcanic-300'
+          }`}
+        >
+          Todas <span className="opacity-60">({total})</span>
+        </button>
+        {([5, 4, 3, 2, 1] as const).map((n) => {
+          const count = distribution[n] ?? 0
+          const active = ratingFilter === n
+          const disabled = count === 0
+          return (
+            <button
+              key={n}
+              onClick={() => !disabled && onRatingChange(n)}
+              disabled={disabled}
+              className={`flex items-center gap-1 px-3 py-1.5 rounded-lg text-body-xs font-semibold transition-all border ${
+                active
+                  ? 'bg-volcanic-900 text-white border-volcanic-900'
+                  : disabled
+                    ? 'bg-white text-volcanic-300 border-sand-200 cursor-not-allowed'
+                    : 'bg-white text-volcanic-700 border-sand-200 hover:border-volcanic-300'
+              }`}
+            >
+              {n}
+              <StarIcon filled className={`w-3 h-3 ${active ? 'text-white' : disabled ? 'text-volcanic-300' : 'text-terra-500'}`} />
+              <span className="opacity-60">({count})</span>
+            </button>
+          )
+        })}
+      </div>
+
+      {/* Comment filter + sort */}
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <label className={`inline-flex items-center gap-2 text-body-xs font-semibold cursor-pointer select-none ${
+          commentsCount === 0 ? 'opacity-40 cursor-not-allowed' : 'text-volcanic-700'
+        }`}>
+          <input
+            type="checkbox"
+            checked={onlyWithComment}
+            disabled={commentsCount === 0}
+            onChange={onToggleComments}
+            className="w-4 h-4 rounded border-sand-300 text-volcanic-900 focus:ring-terra-500/30 cursor-pointer disabled:cursor-not-allowed"
+          />
+          Solo con comentario ({commentsCount})
+        </label>
+
+        <div className="flex items-center gap-2">
+          {hasActiveFilter && (
+            <button
+              onClick={onClear}
+              className="text-body-xs font-semibold text-volcanic-500 hover:text-terra-500 underline underline-offset-2 transition-colors"
+            >
+              Limpiar filtros
+            </button>
+          )}
+          <label className="inline-flex items-center gap-2 text-body-xs text-volcanic-500">
+            Ordenar:
+            <select
+              value={sortBy}
+              onChange={(e) => onSortChange(e.target.value as SortOption)}
+              className="px-2.5 py-1.5 bg-white border border-sand-200 rounded-lg text-body-xs font-semibold text-volcanic-900 focus:outline-none focus:ring-2 focus:ring-terra-500/30"
+            >
+              {Object.entries(SORT_LABELS).map(([value, label]) => (
+                <option key={value} value={value}>{label}</option>
+              ))}
+            </select>
+          </label>
+        </div>
+      </div>
+
+      {/* Count hint when filtered */}
+      {hasActiveFilter && visibleCount > 0 && (
+        <p className="text-body-xs text-volcanic-500">
+          Mostrando <strong>{visibleCount}</strong> de {total} reseñas.
+        </p>
+      )}
+    </div>
+  )
+}
+
 // ── Main Section ──
 
 interface ReviewSectionProps {
@@ -342,7 +487,42 @@ interface ReviewSectionProps {
 
 export function ReviewSection({ productoId, slug, reviews, summary, currentUserId, canReview }: ReviewSectionProps) {
   const [showForm, setShowForm] = useState(false)
+  const [ratingFilter, setRatingFilter] = useState<RatingFilter>('all')
+  const [onlyWithComment, setOnlyWithComment] = useState(false)
+  const [sortBy, setSortBy] = useState<SortOption>('recent')
   const existingReview = currentUserId ? reviews.find((r) => r.user_id === currentUserId) : undefined
+
+  const visibleReviews = useMemo(() => {
+    let list = reviews
+    if (ratingFilter !== 'all') list = list.filter((r) => r.puntuacion === ratingFilter)
+    if (onlyWithComment) list = list.filter((r) => r.comentario && r.comentario.trim().length > 0)
+
+    const sorted = [...list]
+    switch (sortBy) {
+      case 'recent':
+        sorted.sort((a, b) => +new Date(b.created_at) - +new Date(a.created_at))
+        break
+      case 'oldest':
+        sorted.sort((a, b) => +new Date(a.created_at) - +new Date(b.created_at))
+        break
+      case 'highest':
+        sorted.sort((a, b) => b.puntuacion - a.puntuacion || +new Date(b.created_at) - +new Date(a.created_at))
+        break
+      case 'lowest':
+        sorted.sort((a, b) => a.puntuacion - b.puntuacion || +new Date(b.created_at) - +new Date(a.created_at))
+        break
+      case 'longest':
+        sorted.sort((a, b) => (b.comentario?.length ?? 0) - (a.comentario?.length ?? 0))
+        break
+    }
+    return sorted
+  }, [reviews, ratingFilter, onlyWithComment, sortBy])
+
+  const hasActiveFilter = ratingFilter !== 'all' || onlyWithComment
+  const commentsCount = useMemo(
+    () => reviews.filter((r) => r.comentario && r.comentario.trim().length > 0).length,
+    [reviews]
+  )
 
   return (
     <section id="reviews" className="mt-16 lg:mt-24 scroll-mt-8">
@@ -433,15 +613,42 @@ export function ReviewSection({ productoId, slug, reviews, summary, currentUserI
             </div>
           )}
 
-          {reviews.length > 0 ? (
-            <div className="divide-y divide-sand-200">
-              {reviews.map((review) => (
-                <ReviewCard key={review.id} review={review} isOwn={review.user_id === currentUserId} slug={slug} />
-              ))}
-            </div>
-          ) : (
+          {reviews.length > 0 && (
+            <FilterBar
+              total={reviews.length}
+              visibleCount={visibleReviews.length}
+              distribution={summary.distribution}
+              commentsCount={commentsCount}
+              ratingFilter={ratingFilter}
+              onRatingChange={setRatingFilter}
+              onlyWithComment={onlyWithComment}
+              onToggleComments={() => setOnlyWithComment((v) => !v)}
+              sortBy={sortBy}
+              onSortChange={setSortBy}
+              hasActiveFilter={hasActiveFilter}
+              onClear={() => { setRatingFilter('all'); setOnlyWithComment(false) }}
+            />
+          )}
+
+          {reviews.length === 0 ? (
             <div className="flex items-center justify-center py-16 text-volcanic-500 text-body-sm">
               Todavia no hay reseñas para este producto.
+            </div>
+          ) : visibleReviews.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-12 text-center text-volcanic-500 text-body-sm gap-3">
+              <p>Ninguna reseña coincide con el filtro seleccionado.</p>
+              <button
+                onClick={() => { setRatingFilter('all'); setOnlyWithComment(false) }}
+                className="text-body-sm text-terra-500 hover:text-terra-600 font-semibold underline underline-offset-2"
+              >
+                Mostrar todas las reseñas
+              </button>
+            </div>
+          ) : (
+            <div className="divide-y divide-sand-200">
+              {visibleReviews.map((review) => (
+                <ReviewCard key={review.id} review={review} isOwn={review.user_id === currentUserId} slug={slug} />
+              ))}
             </div>
           )}
         </div>

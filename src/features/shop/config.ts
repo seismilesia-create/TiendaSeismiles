@@ -27,7 +27,8 @@ export const shopConfig: ShopConfig = {
   },
 
   marqueeMessages: [
-    { text: 'Envío gratis a todo el país' },
+    { text: 'Retiro gratis en Catamarca capital' },
+    { text: 'Cadetería local Valle Central' },
     { text: 'Calidad de altura' },
     { text: 'Calidad premium garantizada' },
   ],
@@ -130,6 +131,19 @@ export const shopConfig: ShopConfig = {
     },
   ],
 
+  crossSellRules: [
+    {
+      id: 'buzo-tres-cruces-remera-arista',
+      triggerLinea: 'tres-cruces',
+      triggerCategoria: 'buzos',
+      targetLinea: 'arista',
+      targetCategoria: 'remeras-lisas',
+      discountPercent: 15,
+      message: 'Llevaste un buzo Tres Cruces, sumá una remera Arista con 15% OFF',
+      ctaLabel: 'Sumar con 15% OFF',
+    },
+  ],
+
   origin: {
     coordinates: "27° 07' S  68° 32' W",
     location: 'Paso de San Francisco',
@@ -181,8 +195,8 @@ export const shopConfig: ShopConfig = {
   benefits: [
     {
       icon: 'truck',
-      title: 'Envíos a todo el país',
-      description: 'Entregas rápidas y seguras',
+      title: 'Retiro y cadetería en Catamarca',
+      description: 'Envíos al resto del país próximamente',
     },
     {
       icon: 'credit-card',
@@ -209,12 +223,12 @@ export const shopConfig: ShopConfig = {
       {
         section: 'Envíos',
         question: '¿Hacen envíos a todo el país?',
-        answer: 'Sí, realizamos envíos a todo el territorio argentino a través de correo y servicios de mensajería. Los tiempos de entrega varían según la localidad, pero generalmente son de 3 a 7 días hábiles.',
+        answer: 'Por ahora solo realizamos entregas en Catamarca: retiro en persona en la capital (sin costo) o cadetería local en el Valle Central. Los envíos al resto del país estarán disponibles próximamente; mientras tanto podemos cotizarlos manualmente por WhatsApp con número de seguimiento.',
       },
       {
         section: 'Envíos',
         question: '¿Cuánto tarda en llegar mi pedido?',
-        answer: 'Los pedidos dentro de Catamarca capital llegan en 24-48 horas. Para el resto del país, el plazo es de 3 a 7 días hábiles dependiendo de la localidad. Recibirás un código de seguimiento por email.',
+        answer: 'Retiro en persona en Catamarca capital: coordinamos el momento al confirmar el pedido. Cadetería local en el Valle Central: entrega en el día o al día siguiente hábil. Para consultas fuera de la zona, escribinos por WhatsApp.',
       },
       {
         section: 'Pagos',

@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
+import type { ShippingMethod } from '@/lib/shipping'
 
 export interface CartItem {
   variantId: string
@@ -10,10 +11,19 @@ export interface CartItem {
   colorName: string
   colorHex: string
   talle: string
+  /** Precio unitario actual (puede estar con descuento si cross-sell aplicó). */
   precio: number
   cantidad: number
   imagenUrl: string | null
   maxStock: number
+  /** Taxonomía para reglas de cross-sell (coincide con productos.linea). */
+  linea?: string
+  /** Taxonomía para reglas de cross-sell (coincide con productos.categoria). */
+  categoria?: string
+  /** Precio original sin descuento — solo presente si precio está descontado. */
+  precioOriginal?: number
+  /** ID de la regla de cross-sell que aplicó el descuento en este item. */
+  crossSellRuleId?: string
 }
 
 export interface AppliedGiftCard {
@@ -36,9 +46,12 @@ interface CartState {
   pendingOrderRef: string | null
   appliedGiftCards: AppliedGiftCard[]
   appliedCoupon: AppliedCoupon | null
+  shippingMethod: ShippingMethod | null
+  shippingAddress: string
   addItem: (item: Omit<CartItem, 'cantidad'>) => void
   removeItem: (variantId: string) => void
   updateQuantity: (variantId: string, cantidad: number) => void
+  clearCrossSellDiscounts: (ruleId?: string) => void
   clearCart: () => void
   setPendingOrderRef: (ref: string) => void
   clearPendingOrderRef: () => void
@@ -46,6 +59,8 @@ interface CartState {
   removeGiftCard: (code: string) => void
   applyCoupon: (coupon: AppliedCoupon) => void
   removeCoupon: () => void
+  setShippingMethod: (method: ShippingMethod | null) => void
+  setShippingAddress: (address: string) => void
   getTotalItems: () => number
   getTotalPrice: () => number
 }
@@ -57,6 +72,8 @@ export const useCartStore = create<CartState>()(
       pendingOrderRef: null,
       appliedGiftCards: [],
       appliedCoupon: null,
+      shippingMethod: null,
+      shippingAddress: '',
 
       addItem: (item) =>
         set((state) => {
@@ -92,7 +109,27 @@ export const useCartStore = create<CartState>()(
           }
         }),
 
-      clearCart: () => set({ items: [], pendingOrderRef: null, appliedGiftCards: [], appliedCoupon: null }),
+      clearCrossSellDiscounts: (ruleId) =>
+        set((state) => ({
+          items: state.items.map((i) => {
+            if (!i.crossSellRuleId) return i
+            if (ruleId && i.crossSellRuleId !== ruleId) return i
+            const { precioOriginal, crossSellRuleId: _ruleId, ...rest } = i
+            return {
+              ...rest,
+              precio: precioOriginal ?? i.precio,
+            }
+          }),
+        })),
+
+      clearCart: () => set({
+        items: [],
+        pendingOrderRef: null,
+        appliedGiftCards: [],
+        appliedCoupon: null,
+        shippingMethod: null,
+        shippingAddress: '',
+      }),
 
       setPendingOrderRef: (ref) => set({ pendingOrderRef: ref }),
       clearPendingOrderRef: () => set({ pendingOrderRef: null }),
@@ -110,6 +147,14 @@ export const useCartStore = create<CartState>()(
       applyCoupon: (coupon) => set({ appliedCoupon: coupon }),
       removeCoupon: () => set({ appliedCoupon: null }),
 
+      setShippingMethod: (method) =>
+        set((state) => ({
+          shippingMethod: method,
+          // Clear address when switching away from cadeteria.
+          shippingAddress: method === 'cadeteria' ? state.shippingAddress : '',
+        })),
+      setShippingAddress: (address) => set({ shippingAddress: address }),
+
       getTotalItems: () => get().items.reduce((sum, i) => sum + i.cantidad, 0),
 
       getTotalPrice: () =>
@@ -117,7 +162,7 @@ export const useCartStore = create<CartState>()(
     }),
     {
       name: 'seismiles-cart',
-      version: 5,
+      version: 7,
       migrate: (persisted, version) => {
         const state = persisted as Record<string, unknown>
         if (version < 4) {
@@ -133,6 +178,26 @@ export const useCartStore = create<CartState>()(
           return {
             ...state,
             appliedCoupon: null,
+          }
+        }
+        if (version < 6) {
+          return {
+            ...state,
+            shippingMethod: null,
+            shippingAddress: '',
+          }
+        }
+        if (version < 7) {
+          // Drop any stale cross-sell markers from carts persisted before the
+          // feature existed — they would have no matching rule in config.
+          const items = Array.isArray(state.items) ? state.items : []
+          return {
+            ...state,
+            items: items.map((i) => {
+              const item = i as Record<string, unknown>
+              const { crossSellRuleId: _r, precioOriginal: _p, ...rest } = item
+              return rest
+            }),
           }
         }
         return state

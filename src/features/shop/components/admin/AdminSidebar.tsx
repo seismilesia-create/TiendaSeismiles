@@ -103,6 +103,14 @@ function ArrepentimientoIcon({ className }: { className?: string }) {
   )
 }
 
+function ReviewIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" className={className}>
+      <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+    </svg>
+  )
+}
+
 function MenuIcon({ className }: { className?: string }) {
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className={className}>
@@ -124,6 +132,7 @@ const NAV_ITEMS = [
   { href: '/admin/pedidos', label: 'Pedidos', icon: OrdersIcon },
   { href: '/admin/arrepentimientos', label: 'Arrepentimientos', icon: ArrepentimientoIcon },
   { href: '/admin/productos', label: 'Productos', icon: ProductIcon },
+  { href: '/admin/resenas', label: 'Reseñas', icon: ReviewIcon },
   { href: '/admin/inventario', label: 'Inventario', icon: InventoryIcon },
   { href: '/admin/gift-cards', label: 'Gift Cards', icon: GiftCardIcon },
   { href: '/admin/cupones', label: 'Cupones', icon: CouponIcon },

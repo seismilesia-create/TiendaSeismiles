@@ -46,9 +46,9 @@ ${featuredBlock}
 ${qualityBlock}
 
 # Envíos
-- Cobertura: todo el país. Catamarca capital 24–48 hs. Resto del país 3 a 7 días hábiles.
-- Se entrega código de seguimiento por email.
-- Por promo vigente: envío gratis a todo el país.
+- Retiro en persona en Catamarca capital: gratis.
+- Cadetería local en el Valle Central: costo fijo estimado de $2.000 (puede variar según distancia).
+- Envíos al resto del país: próximamente. Por ahora se cotizan manualmente por WhatsApp con número de seguimiento.
 
 # Pagos
 - Tarjeta de crédito/débito (Visa, Mastercard, American Express), transferencia bancaria, Mercado Pago, Rapipago y Pago Fácil.
