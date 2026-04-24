@@ -324,6 +324,17 @@ npm run test -- --clearCache    # Limpiar cache de Jest
 npm run test -- --verbose       # Ver detalles
 ```
 
+### Content Security Policy (CSP)
+
+El CSP vive en `next.config.ts` (async headers()). Orígenes externos permitidos hoy:
+
+- **scripts**: `connect.facebook.net` (Meta Pixel)
+- **styles/fonts**: `fonts.googleapis.com`, `fonts.gstatic.com`
+- **images**: `images.unsplash.com`, Supabase storage, `www.facebook.com` (Meta Pixel noscript)
+- **connect (XHR/fetch)**: Supabase, `api.mercadopago.com`, `www.facebook.com`, `connect.facebook.net`, `graph.facebook.com` (Meta Pixel + futura API de Conversiones)
+
+Si agregás un nuevo origen externo (nuevo pixel, CDN, API), extendé la directiva correspondiente sin usar `*`.
+
 ## 🎯 Próximos Pasos
 
 1. **Lee CLAUDE.md** - Principios y convenciones completas
