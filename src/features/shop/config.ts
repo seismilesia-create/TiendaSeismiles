@@ -127,6 +127,13 @@ export const shopConfig: ShopConfig = {
           gradientTo: '#1A1614',
           imageUrl: '/images/Buzo.jpg',
         },
+        {
+          title: 'Línea Veladero',
+          subtitle: 'Rústico de alta densidad',
+          slug: 'linea-veladero',
+          gradientFrom: '#5C4434',
+          gradientTo: '#2C2420',
+        },
       ],
     },
   ],
