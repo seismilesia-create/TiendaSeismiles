@@ -7,7 +7,6 @@ import { useScrolled } from '../hooks/useScrolled'
 import { useCartStore } from '../stores/cart-store'
 import { useCartHydrated } from '../hooks/useCartHydrated'
 import { MobileMenu } from './MobileMenu'
-import { shopConfig } from '../config'
 import type { ProductLineRow } from '../services/product-lines'
 
 interface NavbarUser {
@@ -90,8 +89,7 @@ export function Navbar({ productLines, user }: NavbarProps) {
             {/* Desktop Navigation */}
             <div className="hidden lg:flex items-center gap-1">
               {NAV_CATEGORIES.map((cat) => {
-                const lines =
-                  shopConfig.productTypeTabs.find((t) => t.id === cat.catalogType)?.categories ?? []
+                const lines = productLines.filter((l) => l.categoria === cat.catalogType)
                 return (
                   <div key={cat.slug} className="relative group">
                     <Link
@@ -106,18 +104,15 @@ export function Navbar({ productLines, user }: NavbarProps) {
                     {lines.length > 0 && (
                       <div className="absolute left-0 top-full pt-2 opacity-0 -translate-y-2 pointer-events-none group-hover:opacity-100 group-hover:translate-y-0 group-hover:pointer-events-auto transition-all duration-300 ease-out z-50">
                         <div className="min-w-[240px] bg-white/95 backdrop-blur-xl shadow-elevated rounded-xl border border-sand-200/60 py-2 overflow-hidden">
-                          {lines.map((line) => {
-                            const lineaSlug = line.slug.replace(/^linea-/, '')
-                            return (
-                              <Link
-                                key={line.slug}
-                                href={`/catalogo?type=${cat.catalogType}&linea=${lineaSlug}`}
-                                className="block px-4 py-2 text-body-sm font-medium text-volcanic-900 border-l-2 border-transparent hover:border-terra-500 hover:bg-terra-100/70 hover:pl-5 hover:text-terra-600 transition-all duration-200"
-                              >
-                                {line.title}
-                              </Link>
-                            )
-                          })}
+                          {lines.map((line) => (
+                            <Link
+                              key={line.slug}
+                              href={`/catalogo?type=${cat.catalogType}&linea=${line.slug}`}
+                              className="block px-4 py-2 text-body-sm font-medium text-volcanic-900 border-l-2 border-transparent hover:border-terra-500 hover:bg-terra-100/70 hover:pl-5 hover:text-terra-600 transition-all duration-200"
+                            >
+                              {line.name}
+                            </Link>
+                          ))}
                           <Link
                             href={`/catalogo?type=${cat.catalogType}`}
                             className="block px-4 py-2.5 mt-1 border-t border-sand-200/60 text-body-xs font-semibold text-volcanic-700 hover:text-terra-600 hover:bg-sand-100 transition-colors"

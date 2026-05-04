@@ -1,6 +1,6 @@
 import { createClient } from '@supabase/supabase-js'
-import { shopConfig } from '../config'
 import { type Season, getSeasonCategoryPriority } from '../utils/season'
+import { formatLineaLabel } from '../utils/linea'
 
 /** Client anonimo sin cookies - seguro para Server Components y build estatico */
 function createAnonClient() {
@@ -20,6 +20,7 @@ export interface ProductLineRow {
   display_order: number
   is_active: boolean
   image_url: string | null
+  categoria: string
 }
 
 /** Maximum number of products that can be marked as "destacado" simultaneously. */
@@ -270,10 +271,6 @@ export async function getProductBySlug(slug: string): Promise<ProductDetailFromD
   }
 }
 
-/**
- * Derive product lines from config for Navbar/Footer.
- * Since product_lines table was removed, we generate them from shopConfig.productTypeTabs.
- */
 // ── Reviews types ──
 
 export interface ReviewFromDB {
@@ -462,26 +459,45 @@ export async function getUserFavoriteProducts(userId: string): Promise<CatalogPr
   }
 }
 
+/**
+ * Build the line list dynamically from the productos table so newly created
+ * lines (assigned to a product via the admin) automatically show up in the
+ * navbar dropdowns and footer without code changes.
+ */
 export async function getProductLines(): Promise<ProductLineRow[]> {
-  let order = 0
-  const lines: ProductLineRow[] = []
+  try {
+    const supabase = createAnonClient()
+    const { data, error } = await supabase
+      .from('productos')
+      .select('linea, categoria')
+      .eq('activo', true)
+      .not('linea', 'is', null)
 
-  for (const tab of shopConfig.productTypeTabs) {
-    for (const cat of tab.categories) {
-      // Config slugs carry a decorative `linea-` prefix; the catalog filter
-      // expects the bare value (e.g. `arista`, not `linea-arista`).
-      const lineaSlug = cat.slug.replace(/^linea-/, '')
-      lines.push({
-        id: lineaSlug,
-        name: cat.title,
-        slug: lineaSlug,
-        description: cat.subtitle,
+    if (error) throw error
+    if (!data) return []
+
+    // Dedupe by linea slug; keep the first categoria seen for each.
+    const seen = new Map<string, string>()
+    for (const row of data) {
+      if (row.linea && !seen.has(row.linea)) {
+        seen.set(row.linea, row.categoria ?? '')
+      }
+    }
+
+    let order = 0
+    return Array.from(seen.entries())
+      .map(([slug, categoria]) => ({
+        id: slug,
+        name: formatLineaLabel(slug),
+        slug,
+        description: null,
         display_order: order++,
         is_active: true,
-        image_url: cat.imageUrl ?? null,
-      })
-    }
+        image_url: null,
+        categoria,
+      }))
+      .sort((a, b) => a.name.localeCompare(b.name, 'es'))
+  } catch {
+    return []
   }
-
-  return lines
 }

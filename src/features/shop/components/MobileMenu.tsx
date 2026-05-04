@@ -5,7 +5,6 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { useCartStore } from '../stores/cart-store'
 import { useCartHydrated } from '../hooks/useCartHydrated'
-import { shopConfig } from '../config'
 import type { ProductLineRow } from '../services/product-lines'
 
 interface MobileMenuUser {
@@ -43,7 +42,7 @@ const NAV_CATEGORIES = [
   { label: 'Buzos', slug: 'buzos', catalogType: 'buzos' },
 ]
 
-export function MobileMenu({ open, onClose, user }: MobileMenuProps) {
+export function MobileMenu({ open, onClose, productLines, user }: MobileMenuProps) {
   const totalItems = useCartStore((s) => s.getTotalItems())
   const hydrated = useCartHydrated()
   const cartCount = hydrated ? totalItems : 0
@@ -92,8 +91,7 @@ export function MobileMenu({ open, onClose, user }: MobileMenuProps) {
         {/* Navigation */}
         <div className="px-6 py-6 space-y-1 overflow-y-auto max-h-[calc(100vh-80px)]">
           {NAV_CATEGORIES.map((cat) => {
-            const lines =
-              shopConfig.productTypeTabs.find((t) => t.id === cat.catalogType)?.categories ?? []
+            const lines = productLines.filter((l) => l.categoria === cat.catalogType)
             const isExpanded = expandedCategory === cat.slug
             const hasLines = lines.length > 0
 
@@ -128,19 +126,16 @@ export function MobileMenu({ open, onClose, user }: MobileMenuProps) {
                 >
                   <div className="overflow-hidden">
                     <div className="pl-3 pb-2 space-y-0.5 border-l-2 border-sand-200 ml-1">
-                      {lines.map((line) => {
-                        const lineaSlug = line.slug.replace(/^linea-/, '')
-                        return (
-                          <Link
-                            key={line.slug}
-                            href={`/catalogo?type=${cat.catalogType}&linea=${lineaSlug}`}
-                            onClick={onClose}
-                            className="block px-3 py-2 rounded-lg text-body-sm font-medium text-volcanic-700 hover:bg-terra-100/70 hover:text-terra-600 transition-colors"
-                          >
-                            {line.title}
-                          </Link>
-                        )
-                      })}
+                      {lines.map((line) => (
+                        <Link
+                          key={line.slug}
+                          href={`/catalogo?type=${cat.catalogType}&linea=${line.slug}`}
+                          onClick={onClose}
+                          className="block px-3 py-2 rounded-lg text-body-sm font-medium text-volcanic-700 hover:bg-terra-100/70 hover:text-terra-600 transition-colors"
+                        >
+                          {line.name}
+                        </Link>
+                      ))}
                       <Link
                         href={`/catalogo?type=${cat.catalogType}`}
                         onClick={onClose}
