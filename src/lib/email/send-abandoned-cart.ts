@@ -165,5 +165,19 @@ export async function sendAbandonedCartEmail(
     return { sent: false, couponCode }
   }
 
+  // Append-only log row. Drives the cross-cycle cooldown in the cron — see
+  // abandoned_cart_email_log table comment. A failure here is non-fatal:
+  // the email already went out and we'd rather lose cooldown enforcement
+  // for one user than break the whole sweep.
+  const { error: logErr } = await service.from('abandoned_cart_email_log').insert({
+    user_id: cart.user_id,
+    stage,
+    coupon_code: couponCode ?? null,
+    cart_subtotal: Number(cart.subtotal),
+  })
+  if (logErr) {
+    console.error('[abandoned-cart] log insert failed for cart', cart.id, ':', logErr)
+  }
+
   return { sent: true, couponCode }
 }

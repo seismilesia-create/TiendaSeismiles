@@ -14,21 +14,10 @@ import { SizeGuideDrawer } from '@/features/shop/components/SizeGuideDrawer'
 import { ProductGallery } from './ProductGallery'
 import { ImageLightbox } from './ImageLightbox'
 import { StockNotifyModal } from './StockNotifyModal'
+import { formatLineaLabel } from '@/features/shop/utils/linea'
 import type { ProductDetailFromDB, CatalogProductFromDB, ReviewFromDB, ReviewSummary } from '@/features/shop/services/product-lines'
 
 // ── Constants ──
-
-const LINEA_LABELS: Record<string, string> = {
-  arista: 'Línea Arista',
-  pissis: 'Línea Pissis',
-  origen: 'Línea Origen',
-  terreno: 'Línea Terreno',
-  veta: 'Línea Veta',
-  'tres-cruces': 'Línea Tres Cruces',
-  nacimiento: 'Línea Nacimiento',
-  veladero: 'Línea Veladero',
-  'san-francisco': 'Línea San Francisco',
-}
 
 const TALLE_ORDER = ['XS', 'S', 'M', 'L', 'XL', '2XL', '3XL', '4XL']
 
@@ -136,7 +125,7 @@ export function ProductDetail({ product, mostViewedProducts, reviews, reviewSumm
   }, [product.id])
 
   const selectedColor = product.colores.find((c) => c.id === selectedColorId)
-  const lineLabel = LINEA_LABELS[product.linea] ?? product.linea
+  const lineLabel = formatLineaLabel(product.linea) || product.linea
 
   // Derive gallery images: use imagenes table, fallback to imagen_url
   const colorImages = selectedColor?.imagenes?.length

@@ -159,46 +159,51 @@ export function HeroSection() {
         </div>
       </div>
 
-      {/* ── SLIDE 2: Seasonal collection (Arista line) ── */}
+      {/* ── SLIDE 2: Seasonal collection (Arista line) — split layout, image right ── */}
       <div
         className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${active === 2 ? 'opacity-100' : 'opacity-0 pointer-events-none'
           }`}
         aria-hidden={active !== 2}
       >
-        <Image
-          src="/images/Temporada.jpg"
-          alt="Ropa de temporada — línea Arista"
-          fill
-          className="object-cover"
-        />
-        {/* Dark overlay for readability */}
-        <div className="absolute inset-0 bg-gradient-to-r from-volcanic-900/85 via-volcanic-900/60 to-volcanic-900/20" />
-        <div className="absolute inset-0 bg-gradient-to-t from-volcanic-900/70 via-transparent to-transparent" />
+        <div className="absolute inset-0 bg-volcanic-900" />
+        <div className="absolute inset-x-0 top-0 h-[42vh] lg:inset-y-0 lg:right-0 lg:left-auto lg:h-auto lg:w-1/2">
+          <Image
+            src="/images/Hero.jpg"
+            alt="Ropa de temporada — línea Arista"
+            fill
+            className="object-cover object-[50%_30%] lg:object-center"
+          />
+          <div className="hidden lg:block absolute inset-y-0 left-0 w-32 bg-gradient-to-r from-volcanic-900 to-transparent" />
+          <div className="lg:hidden absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-volcanic-900 to-transparent" />
+        </div>
 
-        <div className="relative z-10 flex items-center min-h-[90vh] lg:min-h-screen max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-28 lg:py-0">
-          <div className="max-w-3xl">
-            <div className="inline-flex items-center gap-2 px-3 py-1.5 lg:px-4 lg:py-2 rounded-full bg-white/10 backdrop-blur-sm border border-white/10 mb-5 lg:mb-8">
-              <MountainIcon className="w-4 h-4 text-terra-400" />
-              <span className="text-body-xs uppercase tracking-widest font-semibold text-white/70">
-                Nueva temporada
-              </span>
-            </div>
-            <h1 className="font-display text-[2.25rem] sm:text-[3.25rem] md:text-[4.5rem] lg:text-[6rem] leading-[0.95] tracking-[0.04em] uppercase text-white mb-4 lg:mb-6">
-              Lo mejor para<br />esta temporada
-            </h1>
-            <p className="text-body-md lg:text-xl leading-relaxed text-white/70 max-w-xl mb-6 lg:mb-10">
-              Descubrí la Línea Arista. Piezas pensadas para acompañarte en cada aventura.
-            </p>
-            <div className="flex flex-col sm:flex-row items-start gap-3 lg:gap-4">
-              <MagneticButton>
-                <Link
-                  href="/catalogo?linea=arista"
-                  className="group flex items-center gap-2 px-6 py-3 lg:px-8 lg:py-4 text-body-sm lg:text-body-md font-semibold rounded-xl bg-white hover:bg-sand-100 text-volcanic-900 transition-all duration-300 hover:shadow-warm-lg"
-                >
-                  Ver colección
-                  <ArrowRightIcon className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-300" />
-                </Link>
-              </MagneticButton>
+        <div className="relative z-10 flex min-h-[90vh] lg:min-h-screen flex-col lg:flex-row-reverse">
+          <div className="w-full lg:w-1/2 h-[42vh] lg:h-auto lg:min-h-0" />
+          <div className="flex items-center w-full lg:w-1/2 px-6 sm:px-10 lg:px-16 xl:px-20 pt-6 pb-28 lg:py-0">
+            <div className="max-w-xl">
+              <div className="inline-flex items-center gap-2 px-3 py-1.5 lg:px-4 lg:py-2 rounded-full bg-white/10 backdrop-blur-sm border border-white/10 mb-5 lg:mb-8">
+                <MountainIcon className="w-4 h-4 text-terra-400" />
+                <span className="text-body-xs uppercase tracking-widest font-semibold text-white/70">
+                  Nueva temporada
+                </span>
+              </div>
+              <h1 className="font-display text-[2.25rem] sm:text-[3.5rem] lg:text-[4.5rem] xl:text-[5.5rem] leading-[0.95] tracking-[0.04em] uppercase text-white mb-4 lg:mb-6">
+                Lo mejor para<br />esta temporada
+              </h1>
+              <p className="text-body-md lg:text-xl leading-relaxed text-white/60 max-w-lg mb-6 lg:mb-10">
+                Descubrí la Línea Arista. Piezas pensadas para acompañarte en cada aventura.
+              </p>
+              <div className="flex flex-col sm:flex-row items-start gap-3 lg:gap-4">
+                <MagneticButton>
+                  <Link
+                    href="/catalogo?linea=arista"
+                    className="group flex items-center gap-2 px-6 py-3 lg:px-8 lg:py-4 text-body-sm lg:text-body-md font-semibold rounded-xl bg-white hover:bg-sand-100 text-volcanic-900 transition-all duration-300 hover:shadow-warm-lg"
+                  >
+                    Ver colección
+                    <ArrowRightIcon className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-300" />
+                  </Link>
+                </MagneticButton>
+              </div>
             </div>
           </div>
         </div>

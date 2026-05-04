@@ -27,7 +27,6 @@ const LINEAS: Record<string, { value: string; label: string }[]> = {
     { value: 'arista', label: 'Linea Arista' },
     { value: 'pissis', label: 'Linea Pissis' },
     { value: 'origen', label: 'Linea Origen' },
-    { value: 'terreno', label: 'Linea Terreno' },
   ],
   estampadas: [
     { value: 'veta', label: 'Linea Veta' },

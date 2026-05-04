@@ -1,10 +1,11 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { useCartStore } from '../stores/cart-store'
 import { useCartHydrated } from '../hooks/useCartHydrated'
+import { shopConfig } from '../config'
 import type { ProductLineRow } from '../services/product-lines'
 
 interface MobileMenuUser {
@@ -31,6 +32,12 @@ function ShoppingBagIcon({ className }: { className?: string }) {
   )
 }
 
+function ChevronDownIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" className={className}><polyline points="6 9 12 15 18 9" /></svg>
+  )
+}
+
 const NAV_CATEGORIES = [
   { label: 'Remeras', slug: 'remeras', catalogType: 'remeras-lisas' },
   { label: 'Buzos', slug: 'buzos', catalogType: 'buzos' },
@@ -40,12 +47,14 @@ export function MobileMenu({ open, onClose, user }: MobileMenuProps) {
   const totalItems = useCartStore((s) => s.getTotalItems())
   const hydrated = useCartHydrated()
   const cartCount = hydrated ? totalItems : 0
+  const [expandedCategory, setExpandedCategory] = useState<string | null>(null)
 
   useEffect(() => {
     if (open) {
       document.body.style.overflow = 'hidden'
     } else {
       document.body.style.overflow = ''
+      setExpandedCategory(null)
     }
     return () => { document.body.style.overflow = '' }
   }, [open])
@@ -82,16 +91,69 @@ export function MobileMenu({ open, onClose, user }: MobileMenuProps) {
 
         {/* Navigation */}
         <div className="px-6 py-6 space-y-1 overflow-y-auto max-h-[calc(100vh-80px)]">
-          {NAV_CATEGORIES.map((cat) => (
-            <Link
-              key={cat.slug}
-              href={`/catalogo?type=${cat.catalogType}`}
-              onClick={onClose}
-              className="block py-3 text-body-md font-medium text-volcanic-900 hover:text-terra-500 transition-colors"
-            >
-              {cat.label}
-            </Link>
-          ))}
+          {NAV_CATEGORIES.map((cat) => {
+            const lines =
+              shopConfig.productTypeTabs.find((t) => t.id === cat.catalogType)?.categories ?? []
+            const isExpanded = expandedCategory === cat.slug
+            const hasLines = lines.length > 0
+
+            if (!hasLines) {
+              return (
+                <Link
+                  key={cat.slug}
+                  href={`/catalogo?type=${cat.catalogType}`}
+                  onClick={onClose}
+                  className="block py-3 text-body-md font-medium text-volcanic-900 hover:text-terra-500 transition-colors"
+                >
+                  {cat.label}
+                </Link>
+              )
+            }
+
+            return (
+              <div key={cat.slug}>
+                <button
+                  type="button"
+                  onClick={() => setExpandedCategory(isExpanded ? null : cat.slug)}
+                  aria-expanded={isExpanded}
+                  className="w-full flex items-center justify-between py-3 text-body-md font-medium text-volcanic-900 hover:text-terra-500 transition-colors"
+                >
+                  <span>{cat.label}</span>
+                  <ChevronDownIcon
+                    className={`w-4 h-4 transition-transform duration-300 ease-out ${isExpanded ? 'rotate-180' : ''}`}
+                  />
+                </button>
+                <div
+                  className={`grid transition-all duration-300 ease-out ${isExpanded ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'}`}
+                >
+                  <div className="overflow-hidden">
+                    <div className="pl-3 pb-2 space-y-0.5 border-l-2 border-sand-200 ml-1">
+                      {lines.map((line) => {
+                        const lineaSlug = line.slug.replace(/^linea-/, '')
+                        return (
+                          <Link
+                            key={line.slug}
+                            href={`/catalogo?type=${cat.catalogType}&linea=${lineaSlug}`}
+                            onClick={onClose}
+                            className="block px-3 py-2 rounded-lg text-body-sm font-medium text-volcanic-700 hover:bg-terra-100/70 hover:text-terra-600 transition-colors"
+                          >
+                            {line.title}
+                          </Link>
+                        )
+                      })}
+                      <Link
+                        href={`/catalogo?type=${cat.catalogType}`}
+                        onClick={onClose}
+                        className="block px-3 py-2 rounded-lg text-body-sm font-semibold text-terra-600 hover:bg-sand-100 transition-colors"
+                      >
+                        Ver todos →
+                      </Link>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )
+          })}
 
           <div className="border-t border-sand-200 pt-3 space-y-1">
             <Link

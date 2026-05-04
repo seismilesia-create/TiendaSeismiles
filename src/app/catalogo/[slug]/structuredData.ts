@@ -1,16 +1,5 @@
+import { formatLineaLabel } from '@/features/shop/utils/linea'
 import type { ProductDetailFromDB, ReviewFromDB, ReviewSummary } from '@/features/shop/services/product-lines'
-
-export const LINEA_LABELS: Record<string, string> = {
-  arista: 'Línea Arista',
-  pissis: 'Línea Pissis',
-  origen: 'Línea Origen',
-  terreno: 'Línea Terreno',
-  veta: 'Línea Veta',
-  'tres-cruces': 'Línea Tres Cruces',
-  nacimiento: 'Línea Nacimiento',
-  veladero: 'Línea Veladero',
-  'san-francisco': 'Línea San Francisco',
-}
 
 /**
  * Escape `<` in JSON so the payload cannot close the surrounding <script> tag.
@@ -64,7 +53,7 @@ export function productJsonLd({ product, reviews, summary, siteUrl }: ProductJso
     .toISOString()
     .slice(0, 10)
 
-  const lineLabel = LINEA_LABELS[product.linea] ?? product.linea
+  const lineLabel = formatLineaLabel(product.linea) || product.linea
 
   // Include up to 5 reviews with comments — enough for Google's review snippet
   // without bloating the HTML payload.
@@ -133,7 +122,7 @@ interface BreadcrumbInput {
 }
 
 export function productBreadcrumbJsonLd({ product, siteUrl }: BreadcrumbInput): string {
-  const lineLabel = LINEA_LABELS[product.linea] ?? product.linea
+  const lineLabel = formatLineaLabel(product.linea) || product.linea
   const payload = {
     '@context': 'https://schema.org',
     '@type': 'BreadcrumbList',

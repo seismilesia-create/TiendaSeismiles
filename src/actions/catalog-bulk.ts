@@ -41,7 +41,7 @@ export interface BulkUpdateResult {
 const VALID_CATEGORIAS = ['remeras-lisas', 'estampadas', 'buzos']
 const VALID_GENEROS = ['hombres', 'mujeres']
 const VALID_LINEAS = [
-  'arista', 'pissis', 'origen', 'terreno',
+  'arista', 'pissis', 'origen',
   'veta',
   'tres-cruces', 'nacimiento', 'veladero', 'san-francisco',
 ]

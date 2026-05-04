@@ -7,6 +7,7 @@ import { useScrolled } from '../hooks/useScrolled'
 import { useCartStore } from '../stores/cart-store'
 import { useCartHydrated } from '../hooks/useCartHydrated'
 import { MobileMenu } from './MobileMenu'
+import { shopConfig } from '../config'
 import type { ProductLineRow } from '../services/product-lines'
 
 interface NavbarUser {
@@ -33,6 +34,12 @@ function ShoppingBagIcon({ className }: { className?: string }) {
 function MenuIcon({ className }: { className?: string }) {
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className={className}><line x1="4" x2="20" y1="6" y2="6" /><line x1="4" x2="20" y1="12" y2="12" /><line x1="4" x2="20" y1="18" y2="18" /></svg>
+  )
+}
+
+function ChevronDownIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" className={className}><polyline points="6 9 12 15 18 9" /></svg>
   )
 }
 
@@ -82,15 +89,47 @@ export function Navbar({ productLines, user }: NavbarProps) {
 
             {/* Desktop Navigation */}
             <div className="hidden lg:flex items-center gap-1">
-              {NAV_CATEGORIES.map((cat) => (
-                <Link
-                  key={cat.slug}
-                  href={`/catalogo?type=${cat.catalogType}`}
-                  className="px-4 py-2 text-body-sm font-medium text-volcanic-700 hover:text-terra-500 transition-colors"
-                >
-                  {cat.label}
-                </Link>
-              ))}
+              {NAV_CATEGORIES.map((cat) => {
+                const lines =
+                  shopConfig.productTypeTabs.find((t) => t.id === cat.catalogType)?.categories ?? []
+                return (
+                  <div key={cat.slug} className="relative group">
+                    <Link
+                      href={`/catalogo?type=${cat.catalogType}`}
+                      className="inline-flex items-center gap-1 px-4 py-2 text-body-sm font-medium text-volcanic-700 hover:text-terra-500 transition-colors"
+                    >
+                      {cat.label}
+                      {lines.length > 0 && (
+                        <ChevronDownIcon className="w-3.5 h-3.5 transition-transform duration-300 ease-out group-hover:rotate-180" />
+                      )}
+                    </Link>
+                    {lines.length > 0 && (
+                      <div className="absolute left-0 top-full pt-2 opacity-0 -translate-y-2 pointer-events-none group-hover:opacity-100 group-hover:translate-y-0 group-hover:pointer-events-auto transition-all duration-300 ease-out z-50">
+                        <div className="min-w-[240px] bg-white/95 backdrop-blur-xl shadow-elevated rounded-xl border border-sand-200/60 py-2 overflow-hidden">
+                          {lines.map((line) => {
+                            const lineaSlug = line.slug.replace(/^linea-/, '')
+                            return (
+                              <Link
+                                key={line.slug}
+                                href={`/catalogo?type=${cat.catalogType}&linea=${lineaSlug}`}
+                                className="block px-4 py-2 text-body-sm font-medium text-volcanic-900 border-l-2 border-transparent hover:border-terra-500 hover:bg-terra-100/70 hover:pl-5 hover:text-terra-600 transition-all duration-200"
+                              >
+                                {line.title}
+                              </Link>
+                            )
+                          })}
+                          <Link
+                            href={`/catalogo?type=${cat.catalogType}`}
+                            className="block px-4 py-2.5 mt-1 border-t border-sand-200/60 text-body-xs font-semibold text-volcanic-700 hover:text-terra-600 hover:bg-sand-100 transition-colors"
+                          >
+                            Ver todos →
+                          </Link>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )
+              })}
 
               <Link
                 href="/giftcards"

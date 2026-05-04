@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { deleteProductAction, duplicateProductAction, toggleProductActiveAction, toggleProductDestacadoAction } from '@/actions/admin-products'
 import { bulkUpdateCatalogAction } from '@/actions/catalog-bulk'
+import { formatLineaLabel } from '@/features/shop/utils/linea'
 
 interface Producto {
   id: string
@@ -19,18 +20,6 @@ interface Producto {
   destacado: boolean
   colores: { id: string; nombre: string; hex: string; imagen_url: string | null }[]
   variantes: { id: string }[]
-}
-
-const LINEA_LABELS: Record<string, string> = {
-  arista: 'Línea Arista',
-  pissis: 'Línea Pissis',
-  origen: 'Línea Origen',
-  terreno: 'Línea Terreno',
-  veta: 'Línea Veta',
-  'tres-cruces': 'Línea Tres Cruces',
-  nacimiento: 'Línea Nacimiento',
-  veladero: 'Línea Veladero',
-  'san-francisco': 'Línea San Francisco',
 }
 
 const GENERO_LABELS: Record<string, string> = {
@@ -50,7 +39,6 @@ const LINEAS_ALL = [
   { value: 'arista', label: 'Arista' },
   { value: 'pissis', label: 'Pissis' },
   { value: 'origen', label: 'Origen' },
-  { value: 'terreno', label: 'Terreno' },
   { value: 'veta', label: 'Veta' },
   { value: 'tres-cruces', label: 'Tres Cruces' },
   { value: 'nacimiento', label: 'Nacimiento' },
@@ -258,7 +246,7 @@ export function ProductsTable({ products, featuredLimit }: ProductsTableProps) {
         >
           <option value="">Todas las líneas</option>
           {lineas.map((l) => (
-            <option key={l} value={l}>{LINEA_LABELS[l] ?? l}</option>
+            <option key={l} value={l}>{formatLineaLabel(l) || l}</option>
           ))}
         </select>
         <select
@@ -546,7 +534,7 @@ export function ProductsTable({ products, featuredLimit }: ProductsTableProps) {
             {/* Info */}
             <div className="p-4">
               <p className="text-body-xs text-volcanic-500 uppercase tracking-wide mb-0.5">
-                {LINEA_LABELS[product.linea] ?? product.linea}
+                {formatLineaLabel(product.linea) || product.linea}
               </p>
               <h3 className="font-heading text-body-md text-volcanic-900 mb-1">{product.nombre}</h3>
               <div className="flex items-center justify-between mb-3">

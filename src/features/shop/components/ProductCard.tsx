@@ -4,18 +4,7 @@ import { useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { HeartButton } from './HeartButton'
-
-const LINEA_LABELS: Record<string, string> = {
-  arista: 'Línea Arista',
-  pissis: 'Línea Pissis',
-  origen: 'Línea Origen',
-  terreno: 'Línea Terreno',
-  veta: 'Línea Veta',
-  'tres-cruces': 'Línea Tres Cruces',
-  nacimiento: 'Línea Nacimiento',
-  veladero: 'Línea Veladero',
-  'san-francisco': 'Línea San Francisco',
-}
+import { formatLineaLabel } from '../utils/linea'
 
 export interface Product {
   id: string
@@ -36,7 +25,7 @@ interface ProductCardProps {
 export function ProductCard({ product, isFavorited = false, isLoggedIn = false }: ProductCardProps) {
   const [isHovered, setIsHovered] = useState(false)
   const imageUrl = product.colores[0]?.imagen_url
-  const lineLabel = LINEA_LABELS[product.linea] ?? product.linea
+  const lineLabel = formatLineaLabel(product.linea) || product.linea
 
   return (
     <Link

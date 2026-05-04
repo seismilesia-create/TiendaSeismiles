@@ -5,7 +5,8 @@ import { useSearchParams } from 'next/navigation'
 import { ProductCard } from '@/features/shop/components/ProductCard'
 import { MountainIcon } from '@/features/shop/components'
 import { CatalogHeader } from './CatalogHeader'
-import { MobileFilters, DesktopFilters, DesktopToolbar, type FilterColor } from './CatalogFilters'
+import { MobileFilters, DesktopFilters, DesktopToolbar, type FilterColor, type FilterLine } from './CatalogFilters'
+import { formatLineaLabel } from '@/features/shop/utils/linea'
 import type { CatalogProductFromDB } from '@/features/shop/services/product-lines'
 
 /* ─── Derive available filter options from products ─── */
@@ -24,6 +25,18 @@ function deriveColors(products: CatalogProductFromDB[]): FilterColor[] {
     }
   }
   return Array.from(map.entries()).map(([, { hex, label }]) => ({ hex, label }))
+}
+
+function deriveLines(products: CatalogProductFromDB[]): FilterLine[] {
+  const map = new Map<string, string>() // linea slug → categoria
+  for (const p of products) {
+    if (p.linea && !map.has(p.linea)) {
+      map.set(p.linea, p.categoria)
+    }
+  }
+  return Array.from(map.entries())
+    .map(([value, type]) => ({ value, label: formatLineaLabel(value), type }))
+    .sort((a, b) => a.label.localeCompare(b.label, 'es'))
 }
 
 function deriveSizes(products: CatalogProductFromDB[]): string[] {
@@ -113,6 +126,7 @@ function CatalogInner({ products, favoriteProductIds = [], isLoggedIn = false }:
 
   const availableColors = useMemo(() => deriveColors(products), [products])
   const availableSizes = useMemo(() => deriveSizes(products), [products])
+  const availableLines = useMemo(() => deriveLines(products), [products])
 
   function handleTypeChange(type: string) {
     setActiveType(type)
@@ -157,6 +171,7 @@ function CatalogInner({ products, favoriteProductIds = [], isLoggedIn = false }:
     onClearAll: handleClearAll,
     availableColors,
     availableSizes,
+    availableLines,
   }
 
   return (

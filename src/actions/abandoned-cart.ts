@@ -78,7 +78,8 @@ export async function syncAbandonedCart(
 
 /**
  * Mark the current user's abandoned cart as converted when they complete an
- * order. Prevents the cron from continuing to chase them after purchase.
+ * order. Also wipes the email log for the user so the cooldown resets — a
+ * legitimate purchase earns a fresh cycle on the next abandonment.
  */
 export async function markAbandonedCartConverted(userId: string): Promise<void> {
   try {
@@ -88,6 +89,10 @@ export async function markAbandonedCartConverted(userId: string): Promise<void> 
       .update({ converted_at: new Date().toISOString() })
       .eq('user_id', userId)
       .is('converted_at', null)
+    await service
+      .from('abandoned_cart_email_log')
+      .delete()
+      .eq('user_id', userId)
   } catch (err) {
     console.error('[markAbandonedCartConverted] failed:', err)
   }

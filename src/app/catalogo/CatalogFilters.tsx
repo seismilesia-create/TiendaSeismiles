@@ -10,14 +10,6 @@ const PRODUCT_TYPES = [
   { value: 'buzos', label: 'Buzos' },
 ]
 
-const PRODUCT_LINES = [
-  { value: 'arista', label: 'Línea Arista', type: 'remeras-lisas' },
-  { value: 'pissis', label: 'Línea Pissis', type: 'remeras-lisas' },
-  { value: 'origen', label: 'Línea Origen', type: 'remeras-lisas' },
-  { value: 'terreno', label: 'Línea Terreno', type: 'remeras-lisas' },
-  { value: 'tres-cruces', label: 'Línea Tres Cruces', type: 'buzos' },
-]
-
 const SORT_OPTIONS = [
   { value: 'destacados', label: 'Destacados' },
   { value: 'precio-asc', label: 'Precio: menor a mayor' },
@@ -58,6 +50,12 @@ export interface FilterColor {
   label: string
 }
 
+export interface FilterLine {
+  value: string
+  label: string
+  type: string
+}
+
 export interface CatalogFiltersProps {
   activeType: string
   onTypeChange: (type: string) => void
@@ -73,6 +71,7 @@ export interface CatalogFiltersProps {
   onClearAll: () => void
   availableColors: FilterColor[]
   availableSizes: string[]
+  availableLines: FilterLine[]
 }
 
 /* ─── Mobile Filters ─── */
@@ -133,7 +132,7 @@ export function MobileFilters(props: CatalogFiltersProps) {
           </div>
           <div className="px-4 py-6 space-y-6 overflow-y-auto max-h-[calc(100vh-140px)]">
             <TypeFilter activeType={props.activeType} onChange={props.onTypeChange} />
-            <LineFilter activeType={props.activeType} activeLine={props.activeLine} onChange={props.onLineChange} />
+            <LineFilter activeType={props.activeType} activeLine={props.activeLine} onChange={props.onLineChange} lines={props.availableLines} />
             <ColorFilter activeColor={props.activeColor} onChange={props.onColorChange} colors={props.availableColors} />
             <SizeFilter activeSizes={props.activeSizes} onToggle={props.onSizeToggle} sizes={props.availableSizes} />
           </div>
@@ -176,7 +175,7 @@ export function DesktopFilters(props: CatalogFiltersProps) {
         </div>
 
         <TypeFilter activeType={props.activeType} onChange={props.onTypeChange} />
-        <LineFilter activeType={props.activeType} activeLine={props.activeLine} onChange={props.onLineChange} />
+        <LineFilter activeType={props.activeType} activeLine={props.activeLine} onChange={props.onLineChange} lines={props.availableLines} />
         <ColorFilter activeColor={props.activeColor} onChange={props.onColorChange} colors={props.availableColors} />
         <SizeFilter activeSizes={props.activeSizes} onToggle={props.onSizeToggle} sizes={props.availableSizes} />
       </div>
@@ -223,7 +222,7 @@ function ActiveFilterPills(props: CatalogFiltersProps) {
     if (t) pills.push({ label: t.label, onRemove: () => props.onTypeChange('todos') })
   }
   if (props.activeLine !== 'todos') {
-    const l = PRODUCT_LINES.find((l) => l.value === props.activeLine)
+    const l = props.availableLines.find((l) => l.value === props.activeLine)
     if (l) pills.push({ label: l.label, onRemove: () => props.onLineChange('todos') })
   }
   if (props.activeColor) {
@@ -311,10 +310,10 @@ function TypeFilter({ activeType, onChange }: { activeType: string; onChange: (v
   )
 }
 
-function LineFilter({ activeType, activeLine, onChange }: { activeType: string; activeLine: string; onChange: (v: string) => void }) {
+function LineFilter({ activeType, activeLine, onChange, lines }: { activeType: string; activeLine: string; onChange: (v: string) => void; lines: FilterLine[] }) {
   const visibleLines = activeType === 'todos'
-    ? PRODUCT_LINES
-    : PRODUCT_LINES.filter((l) => l.type === activeType)
+    ? lines
+    : lines.filter((l) => l.type === activeType)
 
   if (visibleLines.length === 0) return null
 

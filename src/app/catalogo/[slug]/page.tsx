@@ -4,7 +4,8 @@ import { notFound } from 'next/navigation'
 import { getProductBySlug, getMostViewedProducts, getProductReviews } from '@/features/shop/services/product-lines'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
 import { ProductDetail } from './ProductDetail'
-import { productJsonLd, productBreadcrumbJsonLd, LINEA_LABELS } from './structuredData'
+import { productJsonLd, productBreadcrumbJsonLd } from './structuredData'
+import { formatLineaLabel } from '@/features/shop/utils/linea'
 
 // Dedupe the product fetch between generateMetadata and the page render.
 const loadProduct = cache(getProductBySlug)
@@ -27,7 +28,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     ?? product.colores[0]?.imagen_url
     ?? null
 
-  const lineLabel = LINEA_LABELS[product.linea] ?? product.linea
+  const lineLabel = formatLineaLabel(product.linea) || product.linea
   const rawDescription = product.descripcion?.trim()
     || `${product.nombre} — ${lineLabel} · Indumentaria premium SEISMILES, Catamarca.`
   const description = rawDescription.length > 160
