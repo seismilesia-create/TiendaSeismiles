@@ -120,14 +120,6 @@ export const shopConfig: ShopConfig = {
       label: 'Buzos',
       categories: [
         {
-          title: 'Línea Tres Cruces',
-          subtitle: 'Frisa invisible peinada premium',
-          slug: 'linea-tres-cruces',
-          gradientFrom: '#2C2420',
-          gradientTo: '#1A1614',
-          imageUrl: '/images/Buzo.jpg',
-        },
-        {
           title: 'Línea Veladero',
           subtitle: 'Rústico de alta densidad',
           slug: 'linea-veladero',
