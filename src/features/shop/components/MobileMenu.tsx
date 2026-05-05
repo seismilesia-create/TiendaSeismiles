@@ -37,9 +37,16 @@ function ChevronDownIcon({ className }: { className?: string }) {
   )
 }
 
-const NAV_CATEGORIES = [
+interface NavCategory {
+  label: string
+  slug: string
+  catalogType: string
+  comingSoon?: boolean
+}
+
+const NAV_CATEGORIES: NavCategory[] = [
   { label: 'Remeras', slug: 'remeras', catalogType: 'remeras-lisas' },
-  { label: 'Buzos', slug: 'buzos', catalogType: 'buzos' },
+  { label: 'Buzos', slug: 'buzos', catalogType: 'buzos', comingSoon: true },
 ]
 
 export function MobileMenu({ open, onClose, productLines, user }: MobileMenuProps) {
@@ -91,6 +98,19 @@ export function MobileMenu({ open, onClose, productLines, user }: MobileMenuProp
         {/* Navigation */}
         <div className="px-6 py-6 space-y-1 overflow-y-auto max-h-[calc(100vh-80px)]">
           {NAV_CATEGORIES.map((cat) => {
+            if (cat.comingSoon) {
+              return (
+                <div
+                  key={cat.slug}
+                  className="flex items-center justify-between py-3 text-body-md font-medium text-volcanic-400 cursor-not-allowed select-none"
+                >
+                  <span>{cat.label}</span>
+                  <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-terra-100 text-terra-600">
+                    Pronto
+                  </span>
+                </div>
+              )
+            }
             const lines = productLines.filter((l) => l.categoria === cat.catalogType)
             const isExpanded = expandedCategory === cat.slug
             const hasLines = lines.length > 0

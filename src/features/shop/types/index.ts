@@ -29,6 +29,10 @@ export interface ProductTypeTab {
   id: string
   label: string
   categories: CategoryCard[]
+  /** Si está activo, el tab se muestra con overlay "Próximamente" y sin links a catálogo */
+  comingSoon?: boolean
+  /** Mensaje opcional a mostrar bajo el badge cuando comingSoon = true */
+  comingSoonMessage?: string
 }
 
 /** Feature de calidad numerado */
@@ -62,7 +66,8 @@ export interface MarqueeMessage {
 export interface ShopNavItem {
   label: string
   href: string
-  children?: { label: string; href: string }[]
+  children?: { label: string; href: string; comingSoon?: boolean }[]
+  comingSoon?: boolean
 }
 
 /** Columna del footer */

@@ -40,7 +40,7 @@ export const shopConfig: ShopConfig = {
       href: '/catalogo',
       children: [
         { label: 'Remeras Algodón', href: '/catalogo?type=remeras-lisas' },
-        { label: 'Buzos', href: '/catalogo?type=buzos' },
+        { label: 'Buzos', href: '/catalogo?type=buzos', comingSoon: true },
         { label: 'Todos los productos', href: '/catalogo' },
       ],
     },
@@ -62,15 +62,6 @@ export const shopConfig: ShopConfig = {
         price: '$18.500',
         imageUrl: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=600&h=800&fit=crop&crop=center',
         tag: 'Más vendida',
-      },
-      {
-        name: 'Buzo Tres Cruces',
-        slug: 'buzo-tres-cruces',
-        href: '/catalogo?line=linea-tres-cruces',
-        line: 'Línea Tres Cruces',
-        price: '$32.900',
-        imageUrl: 'https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=600&h=800&fit=crop&crop=center',
-        tag: 'Nuevo',
       },
       {
         name: 'Remera Pissis',
@@ -118,30 +109,13 @@ export const shopConfig: ShopConfig = {
     {
       id: 'buzos',
       label: 'Buzos',
-      categories: [
-        {
-          title: 'Línea Veladero',
-          subtitle: 'Rústico de alta densidad',
-          slug: 'linea-veladero',
-          gradientFrom: '#5C4434',
-          gradientTo: '#2C2420',
-        },
-      ],
+      comingSoon: true,
+      comingSoonMessage: 'Estamos preparando nuestra línea de buzos. Suscribite al newsletter y enterate primero cuando estén disponibles.',
+      categories: [],
     },
   ],
 
-  crossSellRules: [
-    {
-      id: 'buzo-tres-cruces-remera-arista',
-      triggerLinea: 'tres-cruces',
-      triggerCategoria: 'buzos',
-      targetLinea: 'arista',
-      targetCategoria: 'remeras-lisas',
-      discountPercent: 15,
-      message: 'Llevaste un buzo Tres Cruces, sumá una remera Arista con 15% OFF',
-      ctaLabel: 'Sumar con 15% OFF',
-    },
-  ],
+  crossSellRules: [],
 
   origin: {
     coordinates: "27° 07' S  68° 32' W",
@@ -320,8 +294,6 @@ export const shopConfig: ShopConfig = {
         title: 'Tienda',
         links: [
           { label: 'Remeras Lisas', href: '/catalogo?type=remeras-lisas' },
-          { label: 'Estampadas', href: '/catalogo?type=estampadas' },
-          { label: 'Buzos', href: '/catalogo?type=buzos' },
           { label: 'Todos los productos', href: '/catalogo' },
         ],
       },

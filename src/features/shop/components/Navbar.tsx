@@ -19,9 +19,16 @@ interface NavbarProps {
   user: NavbarUser | null
 }
 
-const NAV_CATEGORIES = [
+interface NavCategory {
+  label: string
+  slug: string
+  catalogType: string
+  comingSoon?: boolean
+}
+
+const NAV_CATEGORIES: NavCategory[] = [
   { label: 'Remeras', slug: 'remeras', catalogType: 'remeras-lisas' },
-  { label: 'Buzos', slug: 'buzos', catalogType: 'buzos' },
+  { label: 'Buzos', slug: 'buzos', catalogType: 'buzos', comingSoon: true },
 ]
 
 function ShoppingBagIcon({ className }: { className?: string }) {
@@ -89,6 +96,20 @@ export function Navbar({ productLines, user }: NavbarProps) {
             {/* Desktop Navigation */}
             <div className="hidden lg:flex items-center gap-1">
               {NAV_CATEGORIES.map((cat) => {
+                if (cat.comingSoon) {
+                  return (
+                    <span
+                      key={cat.slug}
+                      className="inline-flex items-center gap-1.5 px-4 py-2 text-body-sm font-medium text-volcanic-400 cursor-not-allowed select-none"
+                      title="Próximamente"
+                    >
+                      {cat.label}
+                      <span className="text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full bg-terra-100 text-terra-600">
+                        Pronto
+                      </span>
+                    </span>
+                  )
+                }
                 const lines = productLines.filter((l) => l.categoria === cat.catalogType)
                 return (
                   <div key={cat.slug} className="relative group">

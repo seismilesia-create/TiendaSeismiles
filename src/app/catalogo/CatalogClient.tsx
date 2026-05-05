@@ -96,7 +96,7 @@ interface CatalogClientProps {
 }
 
 /* Valid type param values that map to catalog filter */
-const VALID_TYPES = ['remeras-lisas', 'buzos']
+const VALID_TYPES = ['remeras-lisas']
 
 function CatalogInner({ products, favoriteProductIds = [], isLoggedIn = false }: CatalogClientProps) {
   const favoriteSet = useMemo(() => new Set(favoriteProductIds), [favoriteProductIds])

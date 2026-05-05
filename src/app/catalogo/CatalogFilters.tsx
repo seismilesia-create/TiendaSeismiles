@@ -7,7 +7,6 @@ import { useState } from 'react'
 const PRODUCT_TYPES = [
   { value: 'todos', label: 'Todos' },
   { value: 'remeras-lisas', label: 'Remeras Lisas' },
-  { value: 'buzos', label: 'Buzos' },
 ]
 
 const SORT_OPTIONS = [

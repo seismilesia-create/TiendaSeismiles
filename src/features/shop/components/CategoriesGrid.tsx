@@ -101,19 +101,62 @@ export function CategoriesGrid({ defaultTab }: CategoriesGridProps) {
                 key={tab.id}
                 data-tab-id={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`relative z-10 px-4 sm:px-6 py-2.5 rounded-full text-body-sm font-medium transition-colors duration-300 whitespace-nowrap ${
+                className={`relative z-10 px-4 sm:px-6 py-2.5 rounded-full text-body-sm font-medium transition-colors duration-300 whitespace-nowrap inline-flex items-center gap-2 ${
                   activeTab === tab.id
                     ? 'text-white'
                     : 'text-volcanic-600 hover:text-terra-500'
                 }`}
               >
                 {tab.label}
+                {tab.comingSoon && (
+                  <span
+                    className={`text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full transition-colors ${
+                      activeTab === tab.id
+                        ? 'bg-white/25 text-white'
+                        : 'bg-terra-100 text-terra-600'
+                    }`}
+                  >
+                    Pronto
+                  </span>
+                )}
               </button>
             ))}
           </div>
         </div>
 
-        {/* Grid — re-mounted on tab change to trigger entrance animation */}
+        {/* Coming soon panel — replaces the grid for tabs flagged as not yet available */}
+        {currentTab.comingSoon ? (
+          <div key={activeTab} className="max-w-2xl mx-auto animate-fade-in-up">
+            <div className="relative aspect-[16/10] sm:aspect-[2/1] rounded-2xl overflow-hidden bg-gradient-to-br from-volcanic-900 via-volcanic-800 to-terra-900">
+              {/* Subtle topo pattern */}
+              <div
+                className="absolute inset-0 opacity-10"
+                style={{
+                  backgroundImage:
+                    'radial-gradient(circle at 20% 30%, white 1px, transparent 1px), radial-gradient(circle at 70% 70%, white 1px, transparent 1px)',
+                  backgroundSize: '40px 40px',
+                }}
+              />
+              <div className="absolute bottom-0 left-0 right-0 h-[3px] bg-terra-500" />
+
+              <div className="relative h-full flex flex-col items-center justify-center text-center px-8 py-10 lg:px-12">
+                <span className="inline-flex items-center gap-2 px-3 py-1 mb-5 bg-terra-500/20 border border-terra-400/30 backdrop-blur-sm rounded-full text-body-xs font-semibold uppercase tracking-widest text-terra-200">
+                  <span className="w-1.5 h-1.5 bg-terra-400 rounded-full animate-pulse" />
+                  Próximamente
+                </span>
+                <h3 className="font-heading text-display-md lg:text-display-lg text-white mb-3">
+                  {currentTab.label}
+                </h3>
+                {currentTab.comingSoonMessage && (
+                  <p className="text-body-sm lg:text-body-md text-white/70 max-w-md">
+                    {currentTab.comingSoonMessage}
+                  </p>
+                )}
+              </div>
+            </div>
+          </div>
+        ) : (
+        /* Grid — re-mounted on tab change to trigger entrance animation */
         <div
           key={activeTab}
           className={`flex flex-wrap justify-center gap-4 lg:gap-6 ${
@@ -189,6 +232,7 @@ export function CategoriesGrid({ defaultTab }: CategoriesGridProps) {
             )
           })}
         </div>
+        )}
       </div>
     </section>
   )
