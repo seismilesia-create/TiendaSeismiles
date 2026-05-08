@@ -4,6 +4,10 @@ declare global {
     fbq: (...args: any[]) => void
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     _fbq: any
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    gtag: (...args: any[]) => void
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    dataLayer: any[]
   }
 }
 
