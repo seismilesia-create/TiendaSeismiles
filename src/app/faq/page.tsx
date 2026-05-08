@@ -11,6 +11,7 @@ import { FaqContactForm } from './FaqContactForm'
 export const metadata: Metadata = {
   title: 'Preguntas Frecuentes',
   description: 'Respuestas a las preguntas mas comunes sobre SEISMILES. Envios, talles, medios de pago, cambios y mas.',
+  alternates: { canonical: '/faq' },
 }
 
 function HelpCircleIcon({ className }: { className?: string }) {

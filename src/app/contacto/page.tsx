@@ -8,6 +8,7 @@ import { shopConfig } from '@/features/shop/config'
 export const metadata: Metadata = {
   title: 'Contacto | SEISMILES',
   description: 'Contactanos para consultas, pedidos mayoristas o personalización empresarial. Estamos en Catamarca, Argentina.',
+  alternates: { canonical: '/contacto' },
 }
 
 function MailIcon({ className }: { className?: string }) {
@@ -172,7 +173,7 @@ export default async function ContactoPage() {
                         Catamarca, Argentina
                       </p>
                       <p className="text-body-xs text-volcanic-500 mt-1">
-                        Diseñamos y confeccionamos desde el corazón del noroeste argentino.
+                        Diseñamos y estampamos desde el corazón del noroeste argentino.
                       </p>
                     </div>
                   </div>

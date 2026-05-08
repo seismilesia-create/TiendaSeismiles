@@ -7,6 +7,7 @@ import { createClient, createServiceClient } from '@/lib/supabase/server'
 export const metadata: Metadata = {
   title: 'Cambios y Devoluciones | SEISMILES',
   description: 'Política de cambios y devoluciones de SEISMILES. Proceso simple, transparente y sin complicaciones.',
+  alternates: { canonical: '/cambios-y-devoluciones' },
 }
 
 function RefreshIcon({ className }: { className?: string }) {

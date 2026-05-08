@@ -6,6 +6,7 @@ import Image from 'next/image'
 import { useAuth } from '@/hooks/useAuth'
 import { useCartStore } from '@/features/shop/stores/cart-store'
 import { trackProductView } from '@/actions/track-view'
+import { trackViewContent, trackAddToCart } from '@/features/analytics/lib/fbq'
 import { ProductCard } from '@/features/shop/components/ProductCard'
 import { MagneticButton } from '@/features/shop/components/MagneticButton'
 import { HeartButton } from '@/features/shop/components/HeartButton'
@@ -121,8 +122,16 @@ export function ProductDetail({ product, mostViewedProducts, reviews, reviewSumm
     if (!tracked.current) {
       tracked.current = true
       trackProductView(product.id)
+      trackViewContent({
+        content_ids: [product.id],
+        content_name: product.nombre,
+        content_type: 'product',
+        content_category: product.linea,
+        value: product.precio,
+        currency: 'ARS',
+      })
     }
-  }, [product.id])
+  }, [product.id, product.nombre, product.linea, product.precio])
 
   const selectedColor = product.colores.find((c) => c.id === selectedColorId)
   const lineLabel = formatLineaLabel(product.linea) || product.linea
@@ -183,6 +192,16 @@ export function ProductDetail({ product, mostViewedProducts, reviews, reviewSumm
       maxStock: variant.stock,
       linea: product.linea,
       categoria: product.categoria,
+    })
+
+    trackAddToCart({
+      content_ids: [product.id],
+      content_name: product.nombre,
+      content_type: 'product',
+      content_category: product.linea,
+      contents: [{ id: product.id, quantity: 1, item_price: product.precio }],
+      value: product.precio,
+      currency: 'ARS',
     })
 
     setShowAddedToast(true)

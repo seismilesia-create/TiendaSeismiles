@@ -3,6 +3,7 @@ import { ResultadoGiftcard } from './ResultadoGiftcard'
 
 export const metadata: Metadata = {
   title: 'Resultado Gift Card | SEISMILES',
+  robots: { index: false, follow: true },
 }
 
 export default async function ResultadoGiftcardPage({

@@ -27,6 +27,20 @@ export const metadata: Metadata = {
     locale: 'es_AR',
     siteName: SITE_NAME,
     type: 'website',
+    images: [
+      {
+        url: '/og_image.png',
+        width: 1200,
+        height: 630,
+        alt: 'SEISMILES — Calidad de altura, indumentaria premium',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: `${SITE_NAME} | Indumentaria Premium - Catamarca, Argentina`,
+    description: SITE_DESCRIPTION,
+    images: ['/og_image.png'],
   },
   robots: {
     index: true,

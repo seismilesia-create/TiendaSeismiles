@@ -4,6 +4,7 @@ import { useEffect, useRef } from 'react'
 import Link from 'next/link'
 import { useCartStore } from '@/features/shop/stores/cart-store'
 import { confirmPayment } from '@/actions/checkout'
+import { trackPurchase } from '@/features/analytics/lib/fbq'
 
 function CheckCircleIcon({ className }: { className?: string }) {
   return (
@@ -41,6 +42,8 @@ interface Props {
 
 export function ResultadoContent({ status, paymentId, externalReference }: Props) {
   const clearCart = useCartStore((s) => s.clearCart)
+  const pendingPurchase = useCartStore((s) => s.pendingPurchase)
+  const clearPendingPurchase = useCartStore((s) => s.clearPendingPurchase)
   const didRun = useRef(false)
 
   const isApproved = status === 'approved'
@@ -60,10 +63,33 @@ export function ResultadoContent({ status, paymentId, externalReference }: Props
       if (isApproved || isPending) {
         clearCart()
       }
+
+      // Disparar Purchase del Pixel sólo en aprobados, una vez. Si no hay
+      // snapshot (refresh tras vaciar, navegación directa) no se dispara.
+      // Si el estado es final no aprobado, igual limpiamos el snapshot
+      // para no arrastrarlo entre checkouts.
+      if (pendingPurchase) {
+        if (isApproved) {
+          trackPurchase(
+            {
+              content_ids: pendingPurchase.contentIds,
+              contents: pendingPurchase.contents,
+              content_type: 'product',
+              num_items: pendingPurchase.numItems,
+              value: pendingPurchase.value,
+              currency: pendingPurchase.currency,
+            },
+            externalReference || pendingPurchase.externalRef,
+          )
+          clearPendingPurchase()
+        } else if (!isPending) {
+          clearPendingPurchase()
+        }
+      }
     }
 
     processPayment()
-  }, [status, paymentId, externalReference, isApproved, isPending, clearCart])
+  }, [status, paymentId, externalReference, isApproved, isPending, clearCart, pendingPurchase, clearPendingPurchase])
 
   return (
     <div className="max-w-lg mx-auto px-4 py-16 text-center">

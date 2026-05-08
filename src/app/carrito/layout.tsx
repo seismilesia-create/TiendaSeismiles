@@ -1,7 +1,12 @@
+import type { Metadata } from 'next'
 import { MarqueeBanner, Navbar, Footer } from '@/features/shop/components'
 import { PendingOrderChecker } from '@/features/shop/components/cart/PendingOrderChecker'
 import { getProductLines } from '@/features/shop/services/product-lines'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
+
+export const metadata: Metadata = {
+  robots: { index: false, follow: true },
+}
 
 export default async function CarritoLayout({
   children,

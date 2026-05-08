@@ -46,6 +46,38 @@ export async function sendOrderConfirmationEmails(orderNumbers: string[]): Promi
       }
     }
 
+    // Detect guest checkouts and generate one-click sign-in links. A
+    // "guest" here is a user who never completed an interactive sign-in,
+    // i.e. last_sign_in_at IS NULL. We generate one magic link per unique
+    // user (not per order) — Supabase invalidates previously-issued tokens
+    // on each generateLink call, so issuing N links for one user inside a
+    // loop would only leave the last one usable.
+    const userIds = Array.from(new Set(orders.map((o) => o.user_id).filter(Boolean) as string[]))
+    const magicLinkByUser = new Map<string, string>()
+    for (const uid of userIds) {
+      const { data: userResp } = await service.auth.admin.getUserById(uid)
+      const u = userResp?.user
+      if (!u || u.last_sign_in_at) continue
+      if (!u.email) continue
+
+      const { data: linkResp, error: linkErr } = await service.auth.admin.generateLink({
+        type: 'magiclink',
+        email: u.email,
+        options: {
+          // Land them on /perfil (the orders list) — they may have multiple
+          // compras rows from this checkout, so pointing at one specific
+          // order would be arbitrary.
+          redirectTo: `${siteUrl}/auth/callback?next=/perfil`,
+        },
+      })
+      if (linkErr) {
+        console.error('[order-confirmation] generateLink failed for', uid, linkErr)
+        continue
+      }
+      const link = linkResp?.properties?.action_link
+      if (link) magicLinkByUser.set(uid, link)
+    }
+
     const resend = getResend()
 
     for (const order of orders) {
@@ -54,6 +86,8 @@ export async function sendOrderConfirmationEmails(orderNumbers: string[]): Promi
       const variant = order.variante_id ? variantMap.get(order.variante_id) : null
 
       if (!profile?.email) continue
+
+      const magicLink = order.user_id ? magicLinkByUser.get(order.user_id) ?? null : null
 
       const html = orderConfirmationEmail({
         customerName: profile.full_name,
@@ -67,6 +101,7 @@ export async function sendOrderConfirmationEmails(orderNumbers: string[]): Promi
         total: Number(order.total),
         metodoPago: order.metodo_pago ?? 'mercadopago',
         siteUrl,
+        magicLink,
       })
 
       const result = await resend.emails.send({

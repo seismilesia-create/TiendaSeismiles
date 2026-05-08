@@ -9,6 +9,7 @@ import { GiftCardGrid } from './GiftCardGrid'
 export const metadata: Metadata = {
   title: 'Gift Cards',
   description: 'Regala calidad SEISMILES. Tarjetas de regalo con distintos montos para que elijan lo que mas les guste.',
+  alternates: { canonical: '/giftcards' },
 }
 
 function GiftIcon({ className }: { className?: string }) {

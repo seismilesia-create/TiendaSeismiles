@@ -87,7 +87,7 @@ export interface CatalogProductFromDB {
   destacado: boolean
   created_at: string
   colores: { nombre: string; hex: string; color_base: string | null; color_base_hex: string | null; imagen_url: string | null }[]
-  variantes: { talle: string }[]
+  variantes: { talle: string; stock: number }[]
 }
 
 /** Fetch most viewed products (excludes a given product) */
@@ -99,7 +99,7 @@ export async function getMostViewedProducts(excludeId?: string, limit = 4): Prom
       .select(`
         id, nombre, slug, precio, categoria, linea, genero, destacado, created_at,
         colores(nombre, hex, color_base, color_base_hex, imagen_url),
-        variantes(talle)
+        variantes(talle, stock)
       `)
       .eq('activo', true)
       .order('visualizaciones', { ascending: false })
@@ -130,7 +130,7 @@ export async function getAdminFeaturedProducts(limit = FEATURED_PRODUCTS_LIMIT):
       .select(`
         id, nombre, slug, precio, categoria, linea, genero, destacado, created_at,
         colores(nombre, hex, color_base, color_base_hex, imagen_url),
-        variantes(talle)
+        variantes(talle, stock)
       `)
       .eq('destacado', true)
       .eq('activo', true)
@@ -150,7 +150,7 @@ export async function getAdminFeaturedProducts(limit = FEATURED_PRODUCTS_LIMIT):
       .select(`
         id, nombre, slug, precio, categoria, linea, genero, destacado, created_at,
         colores(nombre, hex, color_base, color_base_hex, imagen_url),
-        variantes(talle)
+        variantes(talle, stock)
       `)
       .eq('activo', true)
       .order('visualizaciones', { ascending: false })
@@ -178,7 +178,7 @@ export async function getSeasonalFeaturedProducts(season: Season, limit = 4): Pr
       .select(`
         id, nombre, slug, precio, categoria, linea, genero, destacado, created_at,
         colores(nombre, hex, color_base, color_base_hex, imagen_url),
-        variantes(talle)
+        variantes(talle, stock)
       `)
       .eq('activo', true)
       .order('visualizaciones', { ascending: false })
@@ -214,7 +214,7 @@ export async function getCatalogProducts(): Promise<CatalogProductFromDB[]> {
       .select(`
         id, nombre, slug, precio, categoria, linea, genero, destacado, created_at,
         colores(nombre, hex, color_base, color_base_hex, imagen_url),
-        variantes(talle)
+        variantes(talle, stock)
       `)
       .eq('activo', true)
       .order('created_at', { ascending: false })
@@ -442,7 +442,7 @@ export async function getUserFavoriteProducts(userId: string): Promise<CatalogPr
       .select(`
         id, nombre, slug, precio, categoria, linea, genero, destacado, created_at,
         colores(nombre, hex, color_base, color_base_hex, imagen_url),
-        variantes(talle)
+        variantes(talle, stock)
       `)
       .in('id', productIds)
       .eq('activo', true)

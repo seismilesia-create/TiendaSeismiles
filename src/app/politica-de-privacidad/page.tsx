@@ -7,6 +7,7 @@ import { createClient, createServiceClient } from '@/lib/supabase/server'
 export const metadata: Metadata = {
   title: 'Política de Privacidad | SEISMILES',
   description: 'Política de privacidad de SEISMILES. Conocé cómo recopilamos, usamos y protegemos tu información personal.',
+  alternates: { canonical: '/politica-de-privacidad' },
 }
 
 function ShieldIcon({ className }: { className?: string }) {

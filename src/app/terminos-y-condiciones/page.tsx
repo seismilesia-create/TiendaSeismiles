@@ -7,6 +7,7 @@ import { createClient, createServiceClient } from '@/lib/supabase/server'
 export const metadata: Metadata = {
   title: 'Términos y Condiciones | SEISMILES',
   description: 'Términos y condiciones de uso de la tienda online SEISMILES. Condiciones de compra, pagos, responsabilidades y más.',
+  alternates: { canonical: '/terminos-y-condiciones' },
 }
 
 function FileTextIcon({ className }: { className?: string }) {

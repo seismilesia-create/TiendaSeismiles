@@ -8,6 +8,7 @@ import { createClient, createServiceClient } from '@/lib/supabase/server'
 export const metadata: Metadata = {
   title: 'Nosotros | SEISMILES',
   description: 'Nacidos en la inmensidad del altiplano catamarqueño. Conoce la historia de SEISMILES, nuestra esencia y la ruta que nos inspira.',
+  alternates: { canonical: '/nosotros' },
 }
 
 function MountainIcon({ className }: { className?: string }) {
@@ -139,7 +140,7 @@ export default async function NosotrosPage() {
                 {
                   number: '02',
                   title: 'Raíces catamarqueñas',
-                  description: 'Diseñamos y confeccionamos en Catamarca. Nuestra identidad nace de la tierra, de sus colores, de su fuerza. Cada prenda lleva el ADN del altiplano.',
+                  description: 'Diseñamos, curamos y estampamos en Catamarca. Nuestra identidad nace de la tierra, de sus colores, de su fuerza. Cada prenda lleva el ADN del altiplano.',
                 },
                 {
                   number: '03',

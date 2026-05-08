@@ -356,6 +356,10 @@ interface OrderConfirmationData {
   total: number
   metodoPago: string
   siteUrl: string
+  /** When set (guest checkout), replaces the "Ver mis pedidos" CTA with a
+   * one-click sign-in link. The token is single-use and expires per the
+   * Supabase auth config. */
+  magicLink?: string | null
 }
 
 const PAYMENT_DISPLAY: Record<string, string> = {
@@ -373,6 +377,15 @@ export function orderConfirmationEmail(data: OrderConfirmationData): string {
   const colorName = data.colorName ? escapeHtml(data.colorName) : null
   const colorHex = safeColor(data.colorHex)
   const perfilUrl = `${data.siteUrl}/perfil`
+  // Guest checkouts get a magic-link CTA instead of the perfil button. The
+  // link is generated server-side and is safe to drop into HTML as-is — the
+  // value space (URL with token) doesn't include `<` or `"`.
+  const magicLink = data.magicLink && /^https?:\/\//.test(data.magicLink) ? data.magicLink : null
+  const ctaUrl = magicLink ?? perfilUrl
+  const ctaLabel = magicLink ? 'Acceder a mi cuenta' : 'Ver mis pedidos'
+  const ctaHelperText = magicLink
+    ? 'Hacé click en el botón para acceder con un solo click. El link expira pronto, así que no tardes.'
+    : 'Podés seguir el estado de tu pedido desde tu perfil.'
   const paymentLabel = escapeHtml(PAYMENT_DISPLAY[data.metodoPago] ?? data.metodoPago)
 
   const colorBlock = colorName && data.colorHex
@@ -468,15 +481,15 @@ export function orderConfirmationEmail(data: OrderConfirmationData): string {
     <table width="100%" cellpadding="0" cellspacing="0">
       <tr>
         <td align="center">
-          <a href="${perfilUrl}" style="display:inline-block;background-color:${BRAND.volcanic};color:white;font-size:13px;font-weight:700;text-decoration:none;padding:14px 32px;border-radius:12px;letter-spacing:0.05em;text-transform:uppercase;">
-            Ver mis pedidos
+          <a href="${ctaUrl}" style="display:inline-block;background-color:${BRAND.volcanic};color:white;font-size:13px;font-weight:700;text-decoration:none;padding:14px 32px;border-radius:12px;letter-spacing:0.05em;text-transform:uppercase;">
+            ${ctaLabel}
           </a>
         </td>
       </tr>
     </table>
 
     <p style="margin:20px 0 0;font-size:13px;color:${BRAND.textSecondary};line-height:1.6;text-align:center;">
-      Podés seguir el estado de tu pedido desde tu perfil.
+      ${ctaHelperText}
     </p>
   `
   return baseLayout(content, 'Recibís este email porque realizaste una compra en SEISMILES.')

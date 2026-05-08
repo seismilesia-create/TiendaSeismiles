@@ -4,10 +4,13 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { useCartStore } from '@/features/shop/stores/cart-store'
-import { createCheckout } from '@/actions/checkout'
+import { createCheckout, createGuestCheckout } from '@/actions/checkout'
 import { validateGiftCardCode } from '@/actions/giftcard-redeem'
 import { validateCouponCode } from '@/actions/coupons'
 import { SHIPPING_OPTIONS, type ShippingMethod } from '@/lib/shipping'
+import { trackInitiateCheckout } from '@/features/analytics/lib/fbq'
+
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
 function ShieldIcon({ className }: { className?: string }) {
   return (
@@ -59,6 +62,7 @@ export function CartSummary({ userId }: CartSummaryProps) {
   const getTotalItems = useCartStore((s) => s.getTotalItems)
   const getTotalPrice = useCartStore((s) => s.getTotalPrice)
   const setPendingOrderRef = useCartStore((s) => s.setPendingOrderRef)
+  const setPendingPurchase = useCartStore((s) => s.setPendingPurchase)
   const appliedGiftCards = useCartStore((s) => s.appliedGiftCards)
   const applyGiftCard = useCartStore((s) => s.applyGiftCard)
   const removeGiftCard = useCartStore((s) => s.removeGiftCard)
@@ -74,12 +78,18 @@ export function CartSummary({ userId }: CartSummaryProps) {
 
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [emailExists, setEmailExists] = useState(false)
   const [gcCode, setGcCode] = useState('')
   const [gcLoading, setGcLoading] = useState(false)
   const [gcError, setGcError] = useState<string | null>(null)
   const [couponCode, setCouponCode] = useState('')
   const [couponLoading, setCouponLoading] = useState(false)
   const [couponError, setCouponError] = useState<string | null>(null)
+  // Guest-checkout fields. Only used when userId is null. We collect them
+  // inline on the cart so unauthenticated visitors don't need to bounce
+  // through /registro before paying.
+  const [guestEmail, setGuestEmail] = useState('')
+  const [guestName, setGuestName] = useState('')
 
   const totalItems = getTotalItems()
   const totalPrice = getTotalPrice()
@@ -174,11 +184,6 @@ export function CartSummary({ userId }: CartSummaryProps) {
   }
 
   async function handleCheckout() {
-    if (!userId) {
-      router.push('/login?redirect=/carrito')
-      return
-    }
-
     if (!shippingMethod) {
       setError('Seleccioná un método de envío')
       return
@@ -191,8 +196,24 @@ export function CartSummary({ userId }: CartSummaryProps) {
       return
     }
 
+    // Guest path: validate email + name before kicking off the request, so
+    // we don't bounce off the server for trivial input mistakes.
+    const emailTrimmed = guestEmail.trim().toLowerCase()
+    const nameTrimmed = guestName.trim()
+    if (!userId) {
+      if (!emailTrimmed || !EMAIL_REGEX.test(emailTrimmed)) {
+        setError('Ingresá un email válido')
+        return
+      }
+      if (nameTrimmed.length < 2) {
+        setError('Ingresá tu nombre completo')
+        return
+      }
+    }
+
     setLoading(true)
     setError(null)
+    setEmailExists(false)
 
     const checkoutItems = items.map((i) => ({
       variantId: i.variantId,
@@ -203,25 +224,71 @@ export function CartSummary({ userId }: CartSummaryProps) {
       crossSellRuleId: i.crossSellRuleId,
     }))
 
+    // Snapshot del carrito para los eventos InitiateCheckout/Purchase del
+    // Pixel. content_ids/contents usan productId para que coincidan con el
+    // feed de catálogo cuando se configure.
+    const pixelContentIds = items.map((i) => i.productId)
+    const pixelContents = items.map((i) => ({
+      id: i.productId,
+      quantity: i.cantidad,
+      item_price: i.precio,
+    }))
+
+    trackInitiateCheckout({
+      content_ids: pixelContentIds,
+      contents: pixelContents,
+      num_items: totalItems,
+      value: totalFinal,
+      currency: 'ARS',
+    })
+
     const codes = appliedGiftCards.length > 0
       ? appliedGiftCards.map((g) => g.code)
       : undefined
 
-    const result = await createCheckout(
-      checkoutItems,
-      codes,
-      appliedCoupon?.code,
-      {
-        method: shippingMethod,
-        address: needsAddress ? addressTrimmed : undefined,
-      },
-    )
+    const shipping = {
+      method: shippingMethod,
+      address: needsAddress ? addressTrimmed : undefined,
+    }
+
+    const result = userId
+      ? await createCheckout(checkoutItems, codes, appliedCoupon?.code, shipping)
+      : await createGuestCheckout({
+        email: emailTrimmed,
+        fullName: nameTrimmed,
+        items: checkoutItems,
+        giftCardCodes: codes,
+        couponCode: appliedCoupon?.code,
+        shipping,
+      })
+
+    // Email already registered: cart persists in localStorage, so sending
+    // the visitor to /login is a clean handoff — they come back authed and
+    // the same cart is still there.
+    if (!userId && 'emailExists' in result && result.emailExists) {
+      setEmailExists(true)
+      setLoading(false)
+      return
+    }
 
     if (result.error) {
       setError(result.error)
       setLoading(false)
       return
     }
+
+    // Persistir snapshot ANTES de clearCart/redirect a MP. /carrito/resultado
+    // lo consume para disparar el evento Purchase con el monto real pagado y
+    // los items, ya que para entonces el carrito está vacío. eventID =
+    // externalRef permite deduplicar con CAPI server-side si se agrega luego.
+    setPendingPurchase({
+      externalRef: result.externalRef ?? `gc:${Date.now()}`,
+      value: totalFinal,
+      currency: 'ARS',
+      contentIds: pixelContentIds,
+      contents: pixelContents,
+      numItems: totalItems,
+    })
 
     // If gift cards covered the full amount, order was confirmed directly
     if (result.directConfirm) {
@@ -516,8 +583,61 @@ export function CartSummary({ userId }: CartSummaryProps) {
         </div>
       )}
 
+      {!userId && (
+        <>
+          <div className="border-t border-sand-200 my-4" />
+          <div className="mb-1">
+            <p className="text-body-xs font-medium text-volcanic-600 mb-2">Tus datos</p>
+            <div className="space-y-2">
+              <input
+                type="email"
+                value={guestEmail}
+                onChange={(e) => {
+                  setGuestEmail(e.target.value)
+                  if (error) setError(null)
+                  if (emailExists) setEmailExists(false)
+                }}
+                placeholder="Email"
+                autoComplete="email"
+                className="w-full px-3 py-2.5 rounded-xl bg-white border border-sand-200 text-volcanic-900 text-body-sm focus:outline-none focus:border-terra-500 focus:ring-1 focus:ring-terra-500 transition-all placeholder:text-volcanic-300"
+              />
+              <input
+                type="text"
+                value={guestName}
+                onChange={(e) => {
+                  setGuestName(e.target.value)
+                  if (error) setError(null)
+                }}
+                placeholder="Nombre y apellido"
+                autoComplete="name"
+                className="w-full px-3 py-2.5 rounded-xl bg-white border border-sand-200 text-volcanic-900 text-body-sm focus:outline-none focus:border-terra-500 focus:ring-1 focus:ring-terra-500 transition-all placeholder:text-volcanic-300"
+              />
+            </div>
+            <p className="mt-2 text-body-xs text-volcanic-500">
+              Te enviamos la confirmación a este email. Podés acceder a tu cuenta más tarde con
+              {' '}
+              <Link href="/login" className="text-terra-500 hover:text-terra-600 font-medium">
+                Olvidé mi contraseña
+              </Link>.
+            </p>
+          </div>
+        </>
+      )}
+
+      {emailExists && (
+        <div className="mb-4 mt-4 p-3 bg-amber-50 border border-amber-200 rounded-xl">
+          <p className="text-body-sm text-amber-800">
+            Ya existe una cuenta con ese email.{' '}
+            <Link href="/login" className="font-semibold underline">
+              Ingresá para continuar
+            </Link>
+            .
+          </p>
+        </div>
+      )}
+
       {error && (
-        <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-xl">
+        <div className="mb-4 mt-4 p-3 bg-red-50 border border-red-200 rounded-xl">
           <p className="text-body-sm text-red-700">{error}</p>
         </div>
       )}
@@ -525,7 +645,7 @@ export function CartSummary({ userId }: CartSummaryProps) {
       <button
         onClick={handleCheckout}
         disabled={loading}
-        className="w-full flex items-center justify-center gap-2 py-4 bg-volcanic-900 hover:bg-volcanic-800 disabled:bg-volcanic-400 text-white text-body-md font-semibold rounded-xl transition-colors mb-3"
+        className="w-full flex items-center justify-center gap-2 py-4 bg-volcanic-900 hover:bg-volcanic-800 disabled:bg-volcanic-400 text-white text-body-md font-semibold rounded-xl transition-colors mt-4 mb-3"
       >
         {loading ? (
           <>
@@ -540,17 +660,26 @@ export function CartSummary({ userId }: CartSummaryProps) {
             {totalFinal > 0 ? (
               <>
                 <CreditCardIcon className="w-5 h-5" />
-                {userId ? 'Pagar con Mercado Pago' : 'Ingresar para comprar'}
+                {userId ? 'Pagar con Mercado Pago' : 'Pagar como invitado'}
               </>
             ) : (
               <>
                 <GiftIcon className="w-5 h-5" />
-                {userId ? 'Confirmar pedido' : 'Ingresar para comprar'}
+                Confirmar pedido
               </>
             )}
           </>
         )}
       </button>
+
+      {!userId && (
+        <p className="text-center text-body-xs text-volcanic-500 mb-3">
+          ¿Ya tenés cuenta?{' '}
+          <Link href="/login" className="font-semibold text-terra-500 hover:text-terra-600">
+            Iniciá sesión
+          </Link>
+        </p>
+      )}
 
       <Link
         href="/catalogo"

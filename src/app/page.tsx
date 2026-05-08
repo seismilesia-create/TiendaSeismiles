@@ -1,3 +1,4 @@
+import type { Metadata } from 'next'
 import {
   MarqueeBanner, Navbar, HeroSection, FeaturedProducts,
   LookbookSection, CategoriesGrid, QualitySection, BenefitsBar,
@@ -6,6 +7,10 @@ import {
 import { getAdminFeaturedProducts, getProductLines } from '@/features/shop/services/product-lines'
 import { getSeason, getSeasonDefaultTab, getSeasonSubtitle } from '@/features/shop/utils/season'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
+
+export const metadata: Metadata = {
+  alternates: { canonical: '/' },
+}
 
 export default async function HomePage() {
   const season = getSeason()

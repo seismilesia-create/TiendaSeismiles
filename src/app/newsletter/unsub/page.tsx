@@ -1,7 +1,10 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 
-export const metadata: Metadata = { title: 'Desuscripción | SEISMILES' }
+export const metadata: Metadata = {
+  title: 'Desuscripción | SEISMILES',
+  robots: { index: false, follow: true },
+}
 
 const MESSAGES: Record<string, { heading: string; body: string }> = {
   success: {

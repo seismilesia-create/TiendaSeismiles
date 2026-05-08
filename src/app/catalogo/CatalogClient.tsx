@@ -40,10 +40,12 @@ function deriveLines(products: CatalogProductFromDB[]): FilterLine[] {
 }
 
 function deriveSizes(products: CatalogProductFromDB[]): string[] {
+  // Only surface sizes that have at least one product with stock — otherwise the
+  // filter shows options that always return zero results.
   const set = new Set<string>()
   for (const p of products) {
     for (const v of p.variantes) {
-      set.add(v.talle)
+      if (v.stock > 0) set.add(v.talle)
     }
   }
   return Array.from(set).sort((a, b) => {
@@ -66,7 +68,7 @@ function filterProducts(
     if (type !== 'todos' && p.categoria !== type) return false
     if (line !== 'todos' && p.linea !== line) return false
     if (color && !p.colores.some((c) => c.color_base_hex === color)) return false
-    if (sizes.length > 0 && !p.variantes.some((v) => sizes.includes(v.talle))) return false
+    if (sizes.length > 0 && !p.variantes.some((v) => v.stock > 0 && sizes.includes(v.talle))) return false
     return true
   })
 }
@@ -124,9 +126,34 @@ function CatalogInner({ products, favoriteProductIds = [], isLoggedIn = false }:
     setActiveSizes([])
   }, [searchParams])
 
-  const availableColors = useMemo(() => deriveColors(products), [products])
-  const availableSizes = useMemo(() => deriveSizes(products), [products])
+  // Faceted color/size pickers: each one shrinks to what's actually available
+  // given the OTHER active filters (line, type, etc.). Lines are intentionally
+  // NOT facetado — siempre se muestran completas para que un usuario distraído
+  // no piense que una línea "desapareció" por un filtro lateral.
+  const availableColors = useMemo(
+    () => deriveColors(filterProducts(products, activeType, activeLine, null, activeSizes)),
+    [products, activeType, activeLine, activeSizes],
+  )
+  const availableSizes = useMemo(
+    () => deriveSizes(filterProducts(products, activeType, activeLine, activeColor, [])),
+    [products, activeType, activeLine, activeColor],
+  )
   const availableLines = useMemo(() => deriveLines(products), [products])
+
+  // Auto-clear color/size selections that are no longer valid after another
+  // filter changed (e.g. switched to a line that doesn't have the picked color).
+  useEffect(() => {
+    if (activeColor && !availableColors.some((c) => c.hex === activeColor)) {
+      setActiveColor(null)
+    }
+  }, [availableColors, activeColor])
+
+  useEffect(() => {
+    setActiveSizes((prev) => {
+      const valid = prev.filter((s) => availableSizes.includes(s))
+      return valid.length === prev.length ? prev : valid
+    })
+  }, [availableSizes])
 
   function handleTypeChange(type: string) {
     setActiveType(type)

@@ -7,6 +7,7 @@ import { sendOrderConfirmationEmails } from '@/lib/email/send-order-confirmation
 import { markAbandonedCartConverted } from '@/actions/abandoned-cart'
 import { SHIPPING_OPTIONS, isValidShippingMethod, type ShippingMethod } from '@/lib/shipping'
 import { shopConfig } from '@/features/shop/config'
+import { checkRateLimit, getClientIp } from '@/lib/rate-limit'
 
 interface CheckoutItem {
   variantId: string
@@ -171,6 +172,28 @@ export async function createCheckout(
   couponCode?: string,
   shipping?: CheckoutShipping,
 ): Promise<CheckoutResult> {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'Debés iniciar sesión para comprar' }
+
+  return runCheckout(user.id, items, giftCardCodes, couponCode, shipping)
+}
+
+/**
+ * Inner checkout pipeline that takes an explicit user_id. Used by both
+ * `createCheckout` (for authed users) and `createGuestCheckout` (for guests
+ * whose account was just provisioned). All DB operations go through the
+ * service client; `place_order` is SECURITY DEFINER and uses `p_user_id`
+ * directly, so it doesn't matter that we're not running in the user's auth
+ * context.
+ */
+async function runCheckout(
+  userId: string,
+  items: CheckoutItem[],
+  giftCardCodes?: string[],
+  couponCode?: string,
+  shipping?: CheckoutShipping,
+): Promise<CheckoutResult> {
   if (!items.length) return { error: 'El carrito está vacío' }
 
   // Validate shipping selection. Method is required and must be a known value;
@@ -186,11 +209,6 @@ export async function createCheckout(
   }
   const costoEnvio = shippingOption.cost
 
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-
-  if (!user) return { error: 'Debés iniciar sesión para comprar' }
-
   // Cleanup of abandoned checkouts. DELETE … RETURNING claims the rows
   // atomically, so two concurrent createCheckout calls by the same user
   // can't both "release" the same reservations.
@@ -198,7 +216,7 @@ export async function createCheckout(
   const { data: reclaimed } = await service
     .from('compras')
     .delete()
-    .eq('user_id', user.id)
+    .eq('user_id', userId)
     .eq('estado', 'pendiente_pago')
     .select('numero_pedido, variante_id, cantidad, cupon_id, gift_cards_applied')
 
@@ -314,8 +332,8 @@ export async function createCheckout(
     precio: i.precio,
   }))
 
-  const { data: pedidos, error: orderError } = await supabase.rpc('place_order', {
-    p_user_id: user.id,
+  const { data: pedidos, error: orderError } = await service.rpc('place_order', {
+    p_user_id: userId,
     p_items: rpcItems,
   })
 
@@ -382,7 +400,7 @@ export async function createCheckout(
 
       const { data: reserved } = await service.rpc('reserve_coupon', {
         p_coupon_id: coupon.id,
-        p_user_id: user.id,
+        p_user_id: userId,
         p_total_pedido: totalPedido,
         p_compra_ids: orderNumbers,
         p_descuento: tentativeDescuento,
@@ -477,7 +495,7 @@ export async function createCheckout(
       .in('numero_pedido', orderNumbers)
 
     await sendOrderConfirmationEmails(orderNumbers)
-    await markAbandonedCartConverted(user.id)
+    await markAbandonedCartConverted(userId)
 
     revalidatePath('/catalogo')
     revalidatePath('/admin/inventario')
@@ -571,6 +589,113 @@ export async function createCheckout(
     await rollbackCheckout(service, orderNumbers, cuponId, gcList)
     return { error: 'Error al procesar el pedido. Intentá de nuevo.' }
   }
+}
+
+/* ─── Guest checkout (auto-provisions an account) ─── */
+
+interface GuestCheckoutInput {
+  email: string
+  fullName: string
+  items: CheckoutItem[]
+  giftCardCodes?: string[]
+  couponCode?: string
+  shipping?: CheckoutShipping
+}
+
+interface GuestCheckoutResult extends CheckoutResult {
+  /** True iff the email already belongs to a registered user. The client
+   * should redirect to /login (cart persists in localStorage). */
+  emailExists?: boolean
+}
+
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+
+/**
+ * Same flow as createCheckout, but for visitors without an account: silently
+ * provisions a Supabase user from email + name, then runs the standard
+ * checkout pipeline against that new user. The user is created with
+ * `email_confirm: true` and no password, so the customer can later access
+ * their account via "forgot password" on /login.
+ *
+ * Why we don't allow checkout when the email already exists: re-using a
+ * known email under the guest path would let an attacker spawn orders
+ * attached to someone else's account. We surface emailExists=true and the
+ * client redirects to /login.
+ */
+export async function createGuestCheckout(
+  input: GuestCheckoutInput,
+): Promise<GuestCheckoutResult> {
+  const email = input.email?.trim().toLowerCase()
+  const fullName = input.fullName?.trim()
+
+  if (!email || !EMAIL_REGEX.test(email)) {
+    return { error: 'Ingresá un email válido' }
+  }
+  if (!fullName || fullName.length < 2) {
+    return { error: 'Ingresá tu nombre completo' }
+  }
+  if (fullName.length > 100) {
+    return { error: 'El nombre es demasiado largo' }
+  }
+
+  // Rate limits: per-IP to throttle scrapers, per-email to throttle attempts
+  // to spawn accounts under a target address. Both fail open if the rate
+  // limit table is broken (consistent with the rest of the codebase).
+  const ip = await getClientIp()
+  const ipLimit = await checkRateLimit(`guest-checkout:ip:${ip}`, 10, 3600)
+  if (!ipLimit.allowed) {
+    return { error: 'Demasiados intentos. Probá en unos minutos.' }
+  }
+  const emailLimit = await checkRateLimit(`guest-checkout:email:${email}`, 3, 3600)
+  if (!emailLimit.allowed) {
+    return { error: 'Demasiados intentos para este email. Probá más tarde.' }
+  }
+
+  const service = createServiceClient()
+
+  // Account-existence check via profiles (mirrors auth.users.email through
+  // the handle_new_user trigger). If the email is already registered we
+  // refuse to spawn a guest order under it — the client will redirect to
+  // login. This is a known account-enumeration vector, but the existing
+  // signup flow leaks the same signal, so we're not making things worse.
+  const { data: existingProfile } = await service
+    .from('profiles')
+    .select('id')
+    .eq('email', email)
+    .maybeSingle()
+
+  if (existingProfile) {
+    return { emailExists: true }
+  }
+
+  // Create the auth user. email_confirm:true skips the verification email —
+  // we don't want to block checkout on a click-the-link step. The customer
+  // can still set a password later via /login → "Olvidé mi contraseña".
+  // The handle_new_user trigger inserts profiles(id, email, full_name) for
+  // us using raw_user_meta_data.full_name, so no extra insert is needed.
+  const { data: created, error: createErr } = await service.auth.admin.createUser({
+    email,
+    email_confirm: true,
+    user_metadata: { full_name: fullName },
+  })
+
+  if (createErr || !created.user) {
+    // If somehow another call raced us between the existence check and the
+    // create call, surface emailExists rather than a generic error.
+    if (createErr?.message?.toLowerCase().includes('already')) {
+      return { emailExists: true }
+    }
+    console.error('[createGuestCheckout] createUser failed:', createErr)
+    return { error: 'No se pudo crear tu cuenta. Intentá de nuevo.' }
+  }
+
+  return runCheckout(
+    created.user.id,
+    input.items,
+    input.giftCardCodes,
+    input.couponCode,
+    input.shipping,
+  )
 }
 
 /* ─── Verify payment when user returns from MP ─── */

@@ -8,6 +8,7 @@ export const metadata: Metadata = {
   title: 'Boton de Arrepentimiento | SEISMILES',
   description:
     'Ejerce tu derecho de arrepentimiento dentro de los 10 días corridos de la compra. Resolucion 424/2020 - Ley 24.240.',
+  alternates: { canonical: '/arrepentimiento' },
 }
 
 export default async function ArrepentimientoPage() {

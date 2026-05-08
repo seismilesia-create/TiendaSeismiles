@@ -21,7 +21,7 @@ export const shopConfig: ShopConfig = {
     badge: 'Catamarca, Argentina',
     headline: 'Calidad de Altura',
     subheadline:
-      'Desde el corazón de Catamarca, diseñamos y confeccionamos ropa de alta gama. Inspirados en la solidez de nuestros SEISMILES, creamos prendas que honran nuestra tierra y están hechas para durar.',
+      'Desde el corazón de Catamarca, diseñamos y estampamos ropa de alta gama. Inspirados en la solidez de nuestros SEISMILES, creamos prendas que honran nuestra tierra y están hechas para durar.',
     ctaPrimary: { text: 'Ver colección', href: '/catalogo' },
     ctaSecondary: { text: 'Nuestro origen', href: '/nosotros' },
   },
@@ -216,7 +216,7 @@ export const shopConfig: ShopConfig = {
       {
         section: 'Productos',
         question: '¿De dónde son las prendas?',
-        answer: 'Todas nuestras prendas son diseñadas y confeccionadas en Catamarca, Argentina. Usamos materiales premium seleccionados: algodón de fibra larga, piqué superior y frisas peinadas de primera calidad.',
+        answer: 'Todas nuestras prendas son diseñadas, curadas y estampadas en Catamarca, Argentina. Usamos materiales premium seleccionados: algodón de fibra larga, piqué superior y frisas peinadas de primera calidad.',
       },
       {
         section: 'Cambios y Devoluciones',

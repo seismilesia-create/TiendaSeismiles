@@ -41,9 +41,25 @@ export interface AppliedCoupon {
   descuento: number
 }
 
+/**
+ * Snapshot guardado al iniciar el checkout y consumido en /carrito/resultado
+ * para disparar el evento Purchase del Meta Pixel con los datos correctos
+ * (los items del carrito ya se limpian al volver de MP). Sobrevive a clearCart
+ * a propósito — se borra explícitamente vía clearPendingPurchase().
+ */
+export interface PendingPurchase {
+  externalRef: string
+  value: number
+  currency: 'ARS'
+  contentIds: string[]
+  contents: Array<{ id: string; quantity: number; item_price: number }>
+  numItems: number
+}
+
 interface CartState {
   items: CartItem[]
   pendingOrderRef: string | null
+  pendingPurchase: PendingPurchase | null
   appliedGiftCards: AppliedGiftCard[]
   appliedCoupon: AppliedCoupon | null
   shippingMethod: ShippingMethod | null
@@ -55,6 +71,8 @@ interface CartState {
   clearCart: () => void
   setPendingOrderRef: (ref: string) => void
   clearPendingOrderRef: () => void
+  setPendingPurchase: (p: PendingPurchase) => void
+  clearPendingPurchase: () => void
   applyGiftCard: (gc: AppliedGiftCard) => void
   removeGiftCard: (code: string) => void
   applyCoupon: (coupon: AppliedCoupon) => void
@@ -70,6 +88,7 @@ export const useCartStore = create<CartState>()(
     (set, get) => ({
       items: [],
       pendingOrderRef: null,
+      pendingPurchase: null,
       appliedGiftCards: [],
       appliedCoupon: null,
       shippingMethod: null,
@@ -122,6 +141,10 @@ export const useCartStore = create<CartState>()(
           }),
         })),
 
+      // pendingPurchase se preserva a propósito: se setea antes de redirigir
+      // a MP y se consume al volver al sitio (/carrito/resultado), donde sí
+      // se limpia con clearPendingPurchase. Sin esto el snapshot moriría
+      // entre el redirect a MP y la confirmación.
       clearCart: () => set({
         items: [],
         pendingOrderRef: null,
@@ -133,6 +156,9 @@ export const useCartStore = create<CartState>()(
 
       setPendingOrderRef: (ref) => set({ pendingOrderRef: ref }),
       clearPendingOrderRef: () => set({ pendingOrderRef: null }),
+
+      setPendingPurchase: (p) => set({ pendingPurchase: p }),
+      clearPendingPurchase: () => set({ pendingPurchase: null }),
 
       applyGiftCard: (gc) =>
         set((state) => {
@@ -162,7 +188,7 @@ export const useCartStore = create<CartState>()(
     }),
     {
       name: 'seismiles-cart',
-      version: 7,
+      version: 8,
       migrate: (persisted, version) => {
         const state = persisted as Record<string, unknown>
         if (version < 4) {
@@ -198,6 +224,12 @@ export const useCartStore = create<CartState>()(
               const { crossSellRuleId: _r, precioOriginal: _p, ...rest } = item
               return rest
             }),
+          }
+        }
+        if (version < 8) {
+          return {
+            ...state,
+            pendingPurchase: null,
           }
         }
         return state
