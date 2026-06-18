@@ -22,6 +22,17 @@ export interface CategoryCard {
   imageUrl?: string
   gradientFrom: string
   gradientTo: string
+  /**
+   * Texto destacado que se muestra antes del subtítulo, con color de acento
+   * (ej. "Edición limitada"). Opcional.
+   */
+  badge?: string
+  /**
+   * Clases extra para la imagen de la tarjeta (ej. ajustar posición vertical
+   * cuando la prenda queda cortada). Se agregan al final del className de la
+   * imagen, así que pueden sobreescribir la posición por defecto.
+   */
+  imageClassName?: string
 }
 
 /** Tab de tipo de producto con sus lineas */

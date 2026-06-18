@@ -7,6 +7,7 @@ import { MountainIcon } from '@/features/shop/components'
 import { CatalogHeader } from './CatalogHeader'
 import { MobileFilters, DesktopFilters, DesktopToolbar, type FilterColor, type FilterLine } from './CatalogFilters'
 import { formatLineaLabel } from '@/features/shop/utils/linea'
+import { getSeason, getSeasonCategoryPriority } from '@/features/shop/utils/season'
 import type { CatalogProductFromDB } from '@/features/shop/services/product-lines'
 
 /* ─── Derive available filter options from products ─── */
@@ -73,15 +74,22 @@ function filterProducts(
   })
 }
 
-function sortProducts(products: CatalogProductFromDB[], sort: string): CatalogProductFromDB[] {
+function sortProducts(products: CatalogProductFromDB[], sort: string, seasonPriority: string[]): CatalogProductFromDB[] {
   const sorted = [...products]
   switch (sort) {
     case 'precio-asc':
       return sorted.sort((a, b) => a.precio - b.precio)
     case 'precio-desc':
       return sorted.sort((a, b) => b.precio - a.precio)
-    case 'nuevos':
-      return sorted.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+    case 'temporada': {
+      // Ordena por la prioridad de categorías de la temporada actual
+      // (ej: en invierno, buzos antes que remeras). Lo no listado va al final.
+      const rank = (categoria: string) => {
+        const i = seasonPriority.indexOf(categoria)
+        return i === -1 ? seasonPriority.length : i
+      }
+      return sorted.sort((a, b) => rank(a.categoria) - rank(b.categoria))
+    }
     case 'destacados':
       return sorted.sort((a, b) => (b.destacado ? 1 : 0) - (a.destacado ? 1 : 0))
     default:
@@ -98,7 +106,7 @@ interface CatalogClientProps {
 }
 
 /* Valid type param values that map to catalog filter */
-const VALID_TYPES = ['remeras-lisas']
+const VALID_TYPES = ['remeras-lisas', 'buzos']
 
 function CatalogInner({ products, favoriteProductIds = [], isLoggedIn = false }: CatalogClientProps) {
   const favoriteSet = useMemo(() => new Set(favoriteProductIds), [favoriteProductIds])
@@ -178,10 +186,12 @@ function CatalogInner({ products, favoriteProductIds = [], isLoggedIn = false }:
     setActiveSizes([])
   }
 
+  const seasonPriority = useMemo(() => getSeasonCategoryPriority(getSeason()), [])
+
   const filteredProducts = useMemo(() => {
     const filtered = filterProducts(products, activeType, activeLine, activeColor, activeSizes)
-    return sortProducts(filtered, activeSort)
-  }, [products, activeType, activeLine, activeSort, activeColor, activeSizes])
+    return sortProducts(filtered, activeSort, seasonPriority)
+  }, [products, activeType, activeLine, activeSort, activeColor, activeSizes, seasonPriority])
 
   const filterProps = {
     activeType,

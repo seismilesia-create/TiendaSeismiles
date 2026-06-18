@@ -1,19 +1,20 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 
 /* ─── Filter data matching site taxonomy ─── */
 
 const PRODUCT_TYPES = [
   { value: 'todos', label: 'Todos' },
-  { value: 'remeras-lisas', label: 'Remeras Lisas' },
+  { value: 'remeras-lisas', label: 'Remeras' },
+  { value: 'buzos', label: 'Buzos' },
 ]
 
 const SORT_OPTIONS = [
   { value: 'destacados', label: 'Destacados' },
   { value: 'precio-asc', label: 'Precio: menor a mayor' },
   { value: 'precio-desc', label: 'Precio: mayor a menor' },
-  { value: 'nuevos', label: 'Más recientes' },
+  { value: 'temporada', label: 'Temporada' },
 ]
 
 /* ─── Icons ─── */
@@ -73,6 +74,82 @@ export interface CatalogFiltersProps {
   availableLines: FilterLine[]
 }
 
+/* ─── Custom Sort Select (matches site styling, replaces native <select>) ─── */
+
+function SortSelect({
+  value,
+  onChange,
+  className = '',
+}: {
+  value: string
+  onChange: (v: string) => void
+  className?: string
+}) {
+  const [open, setOpen] = useState(false)
+  const ref = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (!open) return
+    function handlePointer(e: MouseEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false)
+    }
+    function handleKey(e: KeyboardEvent) {
+      if (e.key === 'Escape') setOpen(false)
+    }
+    document.addEventListener('mousedown', handlePointer)
+    document.addEventListener('keydown', handleKey)
+    return () => {
+      document.removeEventListener('mousedown', handlePointer)
+      document.removeEventListener('keydown', handleKey)
+    }
+  }, [open])
+
+  const current = SORT_OPTIONS.find((o) => o.value === value) ?? SORT_OPTIONS[0]
+
+  return (
+    <div ref={ref} className={`relative ${className}`}>
+      <button
+        type="button"
+        onClick={() => setOpen((o) => !o)}
+        aria-haspopup="listbox"
+        aria-expanded={open}
+        className="flex items-center justify-between gap-2 w-full text-body-sm font-medium text-volcanic-700 bg-white px-4 py-2.5 rounded-xl border border-sand-200 hover:border-volcanic-400 focus:outline-none focus:border-terra-500/50 transition-all cursor-pointer"
+      >
+        <span className="truncate">{current.label}</span>
+        <ChevronIcon className="w-4 h-4 text-volcanic-500 shrink-0" open={open} />
+      </button>
+      {open && (
+        <ul
+          role="listbox"
+          className="absolute z-50 mt-2 right-0 w-full min-w-[210px] bg-white rounded-xl border border-sand-200 shadow-elevated py-1.5 animate-fade-in"
+        >
+          {SORT_OPTIONS.map((opt) => {
+            const isActive = opt.value === value
+            return (
+              <li key={opt.value} role="option" aria-selected={isActive}>
+                <button
+                  type="button"
+                  onClick={() => {
+                    onChange(opt.value)
+                    setOpen(false)
+                  }}
+                  className={`flex items-center justify-between w-full px-4 py-2.5 text-body-sm text-left transition-colors ${isActive
+                    ? 'bg-terra-500/10 text-terra-600 font-medium'
+                    : 'text-volcanic-600 hover:bg-sand-50 hover:text-volcanic-900'
+                    }`}
+                >
+                  {opt.label}
+                  {isActive && <span className="w-1.5 h-1.5 rounded-full bg-terra-500 shrink-0" />}
+                </button>
+              </li>
+            )
+          })}
+        </ul>
+      )}
+    </div>
+  )
+}
+
 /* ─── Mobile Filters ─── */
 
 export function MobileFilters(props: CatalogFiltersProps) {
@@ -93,15 +170,7 @@ export function MobileFilters(props: CatalogFiltersProps) {
           {props.totalProducts === 1 ? 'producto' : 'productos'}
         </p>
         <div className="flex items-center justify-between gap-3">
-          <select
-            value={props.activeSort}
-            onChange={(e) => props.onSortChange(e.target.value)}
-            className="flex-1 text-body-sm text-volcanic-700 bg-white px-4 py-2.5 rounded-xl border border-sand-200 focus:outline-none focus:border-terra-500/50 cursor-pointer transition-all"
-          >
-            {SORT_OPTIONS.map((opt) => (
-              <option key={opt.value} value={opt.value}>{opt.label}</option>
-            ))}
-          </select>
+          <SortSelect value={props.activeSort} onChange={props.onSortChange} className="flex-1" />
           <button
             onClick={() => setOpen(true)}
             className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-sand-200 text-body-sm font-medium text-volcanic-700 hover:border-volcanic-400 transition-colors whitespace-nowrap"
@@ -197,15 +266,7 @@ export function DesktopToolbar({
       </p>
       <div className="flex items-center gap-2">
         <span className="text-body-xs text-volcanic-500">Ordenar por:</span>
-        <select
-          value={activeSort}
-          onChange={(e) => onSortChange(e.target.value)}
-          className="text-body-sm font-medium text-volcanic-700 bg-white px-4 py-2 rounded-xl border border-sand-200 focus:outline-none focus:border-terra-500/50 cursor-pointer transition-all"
-        >
-          {SORT_OPTIONS.map((opt) => (
-            <option key={opt.value} value={opt.value}>{opt.label}</option>
-          ))}
-        </select>
+        <SortSelect value={activeSort} onChange={onSortChange} className="w-56" />
       </div>
     </div>
   )

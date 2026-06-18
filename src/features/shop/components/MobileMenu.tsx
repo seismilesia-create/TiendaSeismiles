@@ -5,6 +5,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { useCartStore } from '../stores/cart-store'
 import { useCartHydrated } from '../hooks/useCartHydrated'
+import { isLimitedEditionLinea } from '../utils/linea'
 import type { ProductLineRow } from '../services/product-lines'
 
 interface MobileMenuUser {
@@ -46,7 +47,7 @@ interface NavCategory {
 
 const NAV_CATEGORIES: NavCategory[] = [
   { label: 'Remeras', slug: 'remeras', catalogType: 'remeras-lisas' },
-  { label: 'Buzos', slug: 'buzos', catalogType: 'buzos', comingSoon: true },
+  { label: 'Buzos', slug: 'buzos', catalogType: 'buzos' },
 ]
 
 export function MobileMenu({ open, onClose, productLines, user }: MobileMenuProps) {
@@ -151,9 +152,14 @@ export function MobileMenu({ open, onClose, productLines, user }: MobileMenuProp
                           key={line.slug}
                           href={`/catalogo?type=${cat.catalogType}&linea=${line.slug}`}
                           onClick={onClose}
-                          className="block px-3 py-2 rounded-lg text-body-sm font-medium text-volcanic-700 hover:bg-terra-100/70 hover:text-terra-600 transition-colors"
+                          className="flex items-center justify-between gap-2 px-3 py-2 rounded-lg text-body-sm font-medium text-volcanic-700 hover:bg-terra-100/70 hover:text-terra-600 transition-colors"
                         >
-                          {line.name}
+                          <span>{line.name}</span>
+                          {isLimitedEditionLinea(line.slug) && (
+                            <span className="text-[8px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full bg-volcanic-900 text-white whitespace-nowrap shrink-0">
+                              Edición limitada
+                            </span>
+                          )}
                         </Link>
                       ))}
                       <Link

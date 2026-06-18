@@ -4,6 +4,10 @@ import {
   LookbookSection, CategoriesGrid, QualitySection, BenefitsBar,
   NewsletterSection, Footer, ScrollReveal, WelcomeDiscountModal,
 } from '@/features/shop/components'
+// LineShowcase + SHOWCASE_LINES: sección interactiva oculta temporalmente.
+// Para reactivar: descomentar estos imports y el bloque <ScrollReveal> de abajo.
+// import { LineShowcase } from '@/features/shop/components'
+// import { SHOWCASE_LINES } from '@/features/shop/components/showcase-lines'
 import { getAdminFeaturedProducts, getProductLines } from '@/features/shop/services/product-lines'
 import { getSeason, getSeasonDefaultTab, getSeasonSubtitle } from '@/features/shop/utils/season'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
@@ -40,6 +44,13 @@ export default async function HomePage() {
 
       <main>
         <HeroSection />
+        {/* Sección interactiva LineShowcase: oculta temporalmente.
+            Para reactivar, descomentar este bloque + los imports de arriba. */}
+        {/* <ScrollReveal>
+          <section className="relative h-screen min-h-[720px] overflow-hidden">
+            <LineShowcase lines={SHOWCASE_LINES} />
+          </section>
+        </ScrollReveal> */}
         <ScrollReveal stagger>
           <FeaturedProducts dbProducts={featuredProducts} seasonSubtitle={getSeasonSubtitle(season)} />
         </ScrollReveal>

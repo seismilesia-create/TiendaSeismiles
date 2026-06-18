@@ -4,7 +4,7 @@ import { useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { HeartButton } from './HeartButton'
-import { formatLineaLabel } from '../utils/linea'
+import { formatLineaLabel, isLimitedEditionLinea } from '../utils/linea'
 
 export interface Product {
   id: string
@@ -26,6 +26,7 @@ export function ProductCard({ product, isFavorited = false, isLoggedIn = false }
   const [isHovered, setIsHovered] = useState(false)
   const imageUrl = product.colores[0]?.imagen_url
   const lineLabel = formatLineaLabel(product.linea) || product.linea
+  const isLimitedEdition = isLimitedEditionLinea(product.linea)
 
   return (
     <div
@@ -56,6 +57,11 @@ export function ProductCard({ product, isFavorited = false, isLoggedIn = false }
 
           {/* Tags */}
           <div className="absolute left-2 top-2 sm:left-3 sm:top-3 flex flex-col gap-1.5">
+            {isLimitedEdition && (
+              <span className="bg-volcanic-900 px-2.5 py-1 text-[9px] font-bold uppercase tracking-widest text-white rounded-md">
+                Edición limitada
+              </span>
+            )}
             {product.destacado && (
               <span className="bg-terra-500 px-2.5 py-1 text-[9px] font-bold uppercase tracking-widest text-white rounded-md">
                 Destacado

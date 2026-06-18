@@ -7,6 +7,7 @@ import { useAuth } from '@/hooks/useAuth'
 import { useCartStore } from '@/features/shop/stores/cart-store'
 import { trackProductView } from '@/actions/track-view'
 import { trackViewContent, trackAddToCart } from '@/features/analytics/lib/fbq'
+import { gtag } from '@/features/analytics/lib/gtag'
 import { ProductCard } from '@/features/shop/components/ProductCard'
 import { MagneticButton } from '@/features/shop/components/MagneticButton'
 import { HeartButton } from '@/features/shop/components/HeartButton'
@@ -15,7 +16,7 @@ import { SizeGuideDrawer } from '@/features/shop/components/SizeGuideDrawer'
 import { ProductGallery } from './ProductGallery'
 import { ImageLightbox } from './ImageLightbox'
 import { StockNotifyModal } from './StockNotifyModal'
-import { formatLineaLabel } from '@/features/shop/utils/linea'
+import { formatLineaLabel, isLimitedEditionLinea } from '@/features/shop/utils/linea'
 import type { ProductDetailFromDB, CatalogProductFromDB, ReviewFromDB, ReviewSummary } from '@/features/shop/services/product-lines'
 
 // ── Constants ──
@@ -130,11 +131,23 @@ export function ProductDetail({ product, mostViewedProducts, reviews, reviewSumm
         value: product.precio,
         currency: 'ARS',
       })
+      gtag.trackViewItem({
+        currency: 'ARS',
+        value: product.precio,
+        items: [{
+          item_id: product.id,
+          item_name: product.nombre,
+          item_category: product.linea,
+          price: product.precio,
+          quantity: 1,
+        }],
+      })
     }
   }, [product.id, product.nombre, product.linea, product.precio])
 
   const selectedColor = product.colores.find((c) => c.id === selectedColorId)
   const lineLabel = formatLineaLabel(product.linea) || product.linea
+  const isLimitedEdition = isLimitedEditionLinea(product.linea)
 
   // Derive gallery images: use imagenes table, fallback to imagen_url
   const colorImages = selectedColor?.imagenes?.length
@@ -203,6 +216,17 @@ export function ProductDetail({ product, mostViewedProducts, reviews, reviewSumm
       value: product.precio,
       currency: 'ARS',
     })
+    gtag.trackAddToCart({
+      currency: 'ARS',
+      value: product.precio,
+      items: [{
+        item_id: product.id,
+        item_name: product.nombre,
+        item_category: product.linea,
+        price: product.precio,
+        quantity: 1,
+      }],
+    })
 
     setShowAddedToast(true)
     setTimeout(() => setShowAddedToast(false), 3500)
@@ -236,9 +260,16 @@ export function ProductDetail({ product, mostViewedProducts, reviews, reviewSumm
           {/* ── Right: Product Info ── */}
           <div className="mt-8 lg:mt-0">
             {/* Line + Name + Price */}
-            <p className="text-body-xs uppercase tracking-widest text-terra-500 font-semibold mb-2">
-              {lineLabel}
-            </p>
+            <div className="flex flex-wrap items-center gap-2 mb-2">
+              <p className="text-body-xs uppercase tracking-widest text-terra-500 font-semibold">
+                {lineLabel}
+              </p>
+              {isLimitedEdition && (
+                <span className="inline-flex items-center bg-volcanic-900 px-2.5 py-1 text-[9px] font-bold uppercase tracking-widest text-white rounded-md">
+                  Edición limitada
+                </span>
+              )}
+            </div>
             <div className="flex items-start justify-between gap-4 mb-3">
               <h1 className="font-heading text-display-xs sm:text-display-sm text-volcanic-900">
                 {product.nombre}

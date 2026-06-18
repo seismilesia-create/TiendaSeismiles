@@ -32,14 +32,13 @@ const SEASON_CATEGORY_PRIORITY: Record<Season, string[]> = {
 
 /**
  * Tab ID default para el grid de categorías según la temporada.
- * Mientras los buzos estén marcados como "Próximamente", el default
- * para otoño/invierno se mantiene en remeras-lisas para no abrir la home
- * directamente en un tab sin productos.
+ * En otoño/invierno la home abre directamente en buzos, siguiendo la
+ * prioridad estacional; en primavera/verano arranca en remeras.
  */
 const SEASON_DEFAULT_TAB: Record<Season, string> = {
   verano: 'remeras-lisas',
-  otono: 'remeras-lisas',
-  invierno: 'remeras-lisas',
+  otono: 'buzos',
+  invierno: 'buzos',
   primavera: 'remeras-lisas',
 }
 

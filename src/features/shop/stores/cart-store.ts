@@ -41,18 +41,30 @@ export interface AppliedCoupon {
   descuento: number
 }
 
+export interface PendingPurchaseItem {
+  productId: string
+  productName: string
+  /** Línea del producto si está disponible — GA4 lo usa como item_category. */
+  category?: string
+  quantity: number
+  unitPrice: number
+}
+
 /**
  * Snapshot guardado al iniciar el checkout y consumido en /carrito/resultado
- * para disparar el evento Purchase del Meta Pixel con los datos correctos
- * (los items del carrito ya se limpian al volver de MP). Sobrevive a clearCart
- * a propósito — se borra explícitamente vía clearPendingPurchase().
+ * para disparar Purchase (Meta Pixel + GA4) con los datos correctos — los
+ * items del carrito ya se limpian al volver de MP. Sobrevive a clearCart a
+ * propósito — se borra explícitamente vía clearPendingPurchase().
+ *
+ * Guardamos productName y category aunque Meta Pixel no los use, porque GA4
+ * los necesita para que los reports de Monetization muestren nombres en vez
+ * de IDs.
  */
 export interface PendingPurchase {
   externalRef: string
   value: number
   currency: 'ARS'
-  contentIds: string[]
-  contents: Array<{ id: string; quantity: number; item_price: number }>
+  items: PendingPurchaseItem[]
   numItems: number
 }
 
@@ -188,7 +200,7 @@ export const useCartStore = create<CartState>()(
     }),
     {
       name: 'seismiles-cart',
-      version: 8,
+      version: 9,
       migrate: (persisted, version) => {
         const state = persisted as Record<string, unknown>
         if (version < 4) {
@@ -227,6 +239,15 @@ export const useCartStore = create<CartState>()(
           }
         }
         if (version < 8) {
+          return {
+            ...state,
+            pendingPurchase: null,
+          }
+        }
+        if (version < 9) {
+          // PendingPurchase shape changed: contentIds/contents → items[].
+          // Drop any in-flight snapshot rather than try to backfill productName
+          // from a structure that didn't carry it.
           return {
             ...state,
             pendingPurchase: null,

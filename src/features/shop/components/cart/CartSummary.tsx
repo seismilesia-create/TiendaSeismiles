@@ -9,6 +9,7 @@ import { validateGiftCardCode } from '@/actions/giftcard-redeem'
 import { validateCouponCode } from '@/actions/coupons'
 import { SHIPPING_OPTIONS, type ShippingMethod } from '@/lib/shipping'
 import { trackInitiateCheckout } from '@/features/analytics/lib/fbq'
+import { gtag } from '@/features/analytics/lib/gtag'
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
@@ -225,13 +226,21 @@ export function CartSummary({ userId }: CartSummaryProps) {
     }))
 
     // Snapshot del carrito para los eventos InitiateCheckout/Purchase del
-    // Pixel. content_ids/contents usan productId para que coincidan con el
-    // feed de catálogo cuando se configure.
+    // Pixel y begin_checkout/purchase de GA4. productId va como content_id /
+    // item_id para que coincidan con el feed de catálogo cuando se configure.
     const pixelContentIds = items.map((i) => i.productId)
     const pixelContents = items.map((i) => ({
       id: i.productId,
       quantity: i.cantidad,
       item_price: i.precio,
+    }))
+    const ga4Items = items.map((i, idx) => ({
+      item_id: i.productId,
+      item_name: i.productName,
+      item_category: i.linea,
+      price: i.precio,
+      quantity: i.cantidad,
+      index: idx,
     }))
 
     trackInitiateCheckout({
@@ -240,6 +249,12 @@ export function CartSummary({ userId }: CartSummaryProps) {
       num_items: totalItems,
       value: totalFinal,
       currency: 'ARS',
+    })
+    gtag.trackBeginCheckout({
+      currency: 'ARS',
+      value: totalFinal,
+      items: ga4Items,
+      coupon: appliedCoupon?.code,
     })
 
     const codes = appliedGiftCards.length > 0
@@ -278,15 +293,21 @@ export function CartSummary({ userId }: CartSummaryProps) {
     }
 
     // Persistir snapshot ANTES de clearCart/redirect a MP. /carrito/resultado
-    // lo consume para disparar el evento Purchase con el monto real pagado y
-    // los items, ya que para entonces el carrito está vacío. eventID =
-    // externalRef permite deduplicar con CAPI server-side si se agrega luego.
+    // lo consume para disparar Purchase (Meta Pixel + GA4) con el monto real
+    // pagado y los items, ya que para entonces el carrito está vacío.
+    // eventID = externalRef permite deduplicar con CAPI server-side si se
+    // agrega luego.
     setPendingPurchase({
       externalRef: result.externalRef ?? `gc:${Date.now()}`,
       value: totalFinal,
       currency: 'ARS',
-      contentIds: pixelContentIds,
-      contents: pixelContents,
+      items: items.map((i) => ({
+        productId: i.productId,
+        productName: i.productName,
+        category: i.linea,
+        quantity: i.cantidad,
+        unitPrice: i.precio,
+      })),
       numItems: totalItems,
     })
 

@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { useCartStore } from '@/features/shop/stores/cart-store'
 import { confirmPayment } from '@/actions/checkout'
 import { trackPurchase } from '@/features/analytics/lib/fbq'
+import { gtag } from '@/features/analytics/lib/gtag'
 
 function CheckCircleIcon({ className }: { className?: string }) {
   return (
@@ -64,23 +65,44 @@ export function ResultadoContent({ status, paymentId, externalReference }: Props
         clearCart()
       }
 
-      // Disparar Purchase del Pixel sólo en aprobados, una vez. Si no hay
-      // snapshot (refresh tras vaciar, navegación directa) no se dispara.
-      // Si el estado es final no aprobado, igual limpiamos el snapshot
-      // para no arrastrarlo entre checkouts.
+      // Disparar Purchase (Meta Pixel + GA4) sólo en aprobados, una vez. Si
+      // no hay snapshot (refresh tras vaciar, navegación directa) no se
+      // dispara. Si el estado es final no aprobado, igual limpiamos el
+      // snapshot para no arrastrarlo entre checkouts.
       if (pendingPurchase) {
         if (isApproved) {
+          const transactionId = externalReference || pendingPurchase.externalRef
+
           trackPurchase(
             {
-              content_ids: pendingPurchase.contentIds,
-              contents: pendingPurchase.contents,
+              content_ids: pendingPurchase.items.map((i) => i.productId),
+              contents: pendingPurchase.items.map((i) => ({
+                id: i.productId,
+                quantity: i.quantity,
+                item_price: i.unitPrice,
+              })),
               content_type: 'product',
               num_items: pendingPurchase.numItems,
               value: pendingPurchase.value,
               currency: pendingPurchase.currency,
             },
-            externalReference || pendingPurchase.externalRef,
+            transactionId,
           )
+
+          gtag.trackPurchase({
+            transaction_id: transactionId,
+            currency: pendingPurchase.currency,
+            value: pendingPurchase.value,
+            items: pendingPurchase.items.map((it, idx) => ({
+              item_id: it.productId,
+              item_name: it.productName,
+              item_category: it.category,
+              price: it.unitPrice,
+              quantity: it.quantity,
+              index: idx,
+            })),
+          })
+
           clearPendingPurchase()
         } else if (!isPending) {
           clearPendingPurchase()

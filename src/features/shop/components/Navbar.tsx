@@ -7,6 +7,7 @@ import { useScrolled } from '../hooks/useScrolled'
 import { useCartStore } from '../stores/cart-store'
 import { useCartHydrated } from '../hooks/useCartHydrated'
 import { MobileMenu } from './MobileMenu'
+import { isLimitedEditionLinea } from '../utils/linea'
 import type { ProductLineRow } from '../services/product-lines'
 
 interface NavbarUser {
@@ -28,7 +29,7 @@ interface NavCategory {
 
 const NAV_CATEGORIES: NavCategory[] = [
   { label: 'Remeras', slug: 'remeras', catalogType: 'remeras-lisas' },
-  { label: 'Buzos', slug: 'buzos', catalogType: 'buzos', comingSoon: true },
+  { label: 'Buzos', slug: 'buzos', catalogType: 'buzos' },
 ]
 
 function ShoppingBagIcon({ className }: { className?: string }) {
@@ -129,9 +130,14 @@ export function Navbar({ productLines, user }: NavbarProps) {
                             <Link
                               key={line.slug}
                               href={`/catalogo?type=${cat.catalogType}&linea=${line.slug}`}
-                              className="block px-4 py-2 text-body-sm font-medium text-volcanic-900 border-l-2 border-transparent hover:border-terra-500 hover:bg-terra-100/70 hover:pl-5 hover:text-terra-600 transition-all duration-200"
+                              className="flex items-center justify-between gap-2 px-4 py-2 text-body-sm font-medium text-volcanic-900 border-l-2 border-transparent hover:border-terra-500 hover:bg-terra-100/70 hover:pl-5 hover:text-terra-600 transition-all duration-200"
                             >
-                              {line.name}
+                              <span>{line.name}</span>
+                              {isLimitedEditionLinea(line.slug) && (
+                                <span className="text-[8px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full bg-volcanic-900 text-white whitespace-nowrap shrink-0">
+                                  Edición limitada
+                                </span>
+                              )}
                             </Link>
                           ))}
                           <Link

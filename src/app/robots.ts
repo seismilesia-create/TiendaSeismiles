@@ -18,7 +18,6 @@ export default function robots(): MetadataRoute.Robots {
           '/carrito/resultado',
           '/giftcards/resultado',
           '/newsletter/unsub',
-          '/coming-soon',
           '/update-password',
         ],
       },

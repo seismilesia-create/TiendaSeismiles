@@ -28,7 +28,7 @@ export const shopConfig: ShopConfig = {
 
   marqueeMessages: [
     { text: 'Retiro gratis en Catamarca capital' },
-    { text: 'Cadetería local Valle Central' },
+    { text: 'Nueva colección de buzos · Invierno' },
     { text: 'Calidad de altura' },
     { text: 'Calidad premium garantizada' },
   ],
@@ -40,7 +40,7 @@ export const shopConfig: ShopConfig = {
       href: '/catalogo',
       children: [
         { label: 'Remeras Algodón', href: '/catalogo?type=remeras-lisas' },
-        { label: 'Buzos', href: '/catalogo?type=buzos', comingSoon: true },
+        { label: 'Buzos', href: '/catalogo?type=buzos' },
         { label: 'Todos los productos', href: '/catalogo' },
       ],
     },
@@ -86,7 +86,7 @@ export const shopConfig: ShopConfig = {
           slug: 'linea-arista',
           gradientFrom: '#2C2420',
           gradientTo: '#4A3D35',
-          imageUrl: '/images/Arista.webp',
+          imageUrl: '/images/Arista.png',
         },
         {
           title: 'Línea Pissis',
@@ -94,7 +94,7 @@ export const shopConfig: ShopConfig = {
           slug: 'linea-pissis',
           gradientFrom: '#C75B39',
           gradientTo: '#A04830',
-          imageUrl: '/images/Pissis.webp',
+          imageUrl: '/images/Pissis.png',
         },
         {
           title: 'Línea Origen',
@@ -102,16 +102,50 @@ export const shopConfig: ShopConfig = {
           slug: 'linea-origen',
           gradientFrom: '#8B7355',
           gradientTo: '#6B5B45',
-          imageUrl: '/images/Origen.webp',
+          imageUrl: '/images/Origen.png',
         },
       ],
     },
     {
       id: 'buzos',
       label: 'Buzos',
-      comingSoon: true,
-      comingSoonMessage: 'Estamos preparando nuestra línea de buzos. Suscribite al newsletter y enterate primero cuando estén disponibles.',
-      categories: [],
+      categories: [
+        {
+          title: 'Línea Veladero',
+          subtitle: 'Abrigo y calidez premium',
+          slug: 'linea-veladero',
+          gradientFrom: '#3E4C59',
+          gradientTo: '#2A343D',
+          imageUrl: '/images/Linea Veladero.png',
+        },
+        {
+          title: 'Línea Tres Cruces',
+          subtitle: 'Estructura y presencia',
+          slug: 'linea-tres-cruces',
+          gradientFrom: '#5C5347',
+          gradientTo: '#3A342C',
+          imageUrl: '/images/Linea Tres Cruces.png',
+        },
+        {
+          title: 'Línea Nacimiento',
+          subtitle: 'Suavidad para cada día',
+          slug: 'linea-nacimiento',
+          gradientFrom: '#8B7355',
+          gradientTo: '#6B5B45',
+          imageUrl: '/images/Linea Nacimiento.png',
+        },
+        {
+          title: 'Línea Mística',
+          badge: 'Edición limitada',
+          subtitle: 'Buzo crop de mujer',
+          slug: 'linea-mistica',
+          gradientFrom: '#7A5A6E',
+          gradientTo: '#4A3340',
+          imageUrl: '/images/Flor Buzo Tarjeta.webp',
+          // La prenda quedaba cortada arriba; la bajamos un poco.
+          imageClassName: 'translate-y-[18%]',
+        },
+      ],
     },
   ],
 

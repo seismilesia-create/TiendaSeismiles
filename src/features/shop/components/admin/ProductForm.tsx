@@ -36,6 +36,7 @@ const LINEAS: Record<string, { value: string; label: string }[]> = {
     { value: 'nacimiento', label: 'Linea Nacimiento' },
     { value: 'veladero', label: 'Linea Veladero' },
     { value: 'san-francisco', label: 'Linea San Francisco' },
+    { value: 'mistica', label: 'Linea Mística (mujeres · edición limitada)' },
   ],
 }
 

@@ -101,20 +101,18 @@ export function CategoriesGrid({ defaultTab }: CategoriesGridProps) {
                 key={tab.id}
                 data-tab-id={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`relative z-10 px-4 sm:px-6 py-2.5 rounded-full text-body-sm font-medium transition-colors duration-300 whitespace-nowrap inline-flex items-center gap-2 ${
-                  activeTab === tab.id
-                    ? 'text-white'
-                    : 'text-volcanic-600 hover:text-terra-500'
-                }`}
+                className={`relative z-10 px-4 sm:px-6 py-2.5 rounded-full text-body-sm font-medium transition-colors duration-300 whitespace-nowrap inline-flex items-center gap-2 ${activeTab === tab.id
+                  ? 'text-white'
+                  : 'text-volcanic-600 hover:text-terra-500'
+                  }`}
               >
                 {tab.label}
                 {tab.comingSoon && (
                   <span
-                    className={`text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full transition-colors ${
-                      activeTab === tab.id
-                        ? 'bg-white/25 text-white'
-                        : 'bg-terra-100 text-terra-600'
-                    }`}
+                    className={`text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full transition-colors ${activeTab === tab.id
+                      ? 'bg-white/25 text-white'
+                      : 'bg-terra-100 text-terra-600'
+                      }`}
                   >
                     Pronto
                   </span>
@@ -156,82 +154,88 @@ export function CategoriesGrid({ defaultTab }: CategoriesGridProps) {
             </div>
           </div>
         ) : (
-        /* Grid — re-mounted on tab change to trigger entrance animation */
-        <div
-          key={activeTab}
-          className={`flex flex-wrap justify-center gap-4 lg:gap-6 ${
-            currentTab.categories.length === 1 ? 'max-w-lg mx-auto' : ''
-          }`}
-        >
-          {currentTab.categories.map((category, index) => {
-            const catalogType = TAB_ID_TO_CATALOG_TYPE[currentTab.id] ?? currentTab.id
-            const lineaSlug = category.slug.replace(/^linea-/, '')
-            return (
-            <Link
-              key={category.slug}
-              href={`/catalogo?type=${catalogType}&linea=${lineaSlug}`}
-              data-stagger={index}
-              style={{ animationDelay: `${index * 80}ms` }}
-              className={`group relative aspect-[4/3] sm:aspect-[3/2] rounded-2xl overflow-hidden animate-fade-in-up transition-all duration-500 ease-out hover:-translate-y-1 hover:shadow-warm-lg ${
-                currentTab.categories.length === 1
-                  ? 'w-full'
-                  : 'w-full sm:w-[calc(50%_-_0.5rem)] lg:w-[calc(50%_-_0.75rem)]'
+          /* Grid — re-mounted on tab change to trigger entrance animation */
+          <div
+            key={activeTab}
+            className={`flex flex-wrap justify-center gap-4 lg:gap-6 ${currentTab.categories.length === 1 ? 'max-w-lg mx-auto' : ''
               }`}
-            >
-              {/* Background: image or gradient */}
-              {category.imageUrl ? (
-                <Image
-                  src={category.imageUrl}
-                  alt={category.title}
-                  fill
-                  className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.08]"
-                  sizes="(max-width: 640px) 100vw, 50vw"
-                />
-              ) : (
-                <div
-                  className="absolute inset-0 transition-transform duration-700 ease-out group-hover:scale-[1.08]"
-                  style={{
-                    background: `linear-gradient(135deg, ${category.gradientFrom} 0%, ${category.gradientTo} 100%)`,
-                  }}
-                />
-              )}
+          >
+            {currentTab.categories.map((category, index) => {
+              const catalogType = TAB_ID_TO_CATALOG_TYPE[currentTab.id] ?? currentTab.id
+              const lineaSlug = category.slug.replace(/^linea-/, '')
+              return (
+                <Link
+                  key={category.slug}
+                  href={`/catalogo?type=${catalogType}&linea=${lineaSlug}`}
+                  data-stagger={index}
+                  style={{ animationDelay: `${index * 80}ms` }}
+                  className={`group relative aspect-[4/3] sm:aspect-[3/2] rounded-2xl overflow-hidden animate-fade-in-up transition-all duration-500 ease-out hover:-translate-y-1 hover:shadow-warm-lg ${currentTab.categories.length === 1
+                    ? 'w-full'
+                    : 'w-full sm:w-[calc(50%_-_0.5rem)] lg:w-[calc(50%_-_0.75rem)]'
+                    }`}
+                >
+                  {/* Warm cream backdrop with soft vignette — editorial studio softbox feel */}
+                  <div
+                    className="absolute inset-0"
+                    style={{
+                      background:
+                        'radial-gradient(ellipse at center, #FAF8F4 0%, #EDE5D8 60%, #C8B99F 115%)',
+                    }}
+                  />
 
-              {/* Dark overlay — lighter so the image breathes */}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/15 to-transparent group-hover:from-black/85 transition-all duration-500" />
+                  {/* Sharp foreground image — zoomed in via object-cover, like the original webp */}
+                  {category.imageUrl && (
+                    <Image
+                      src={category.imageUrl}
+                      alt={category.title}
+                      fill
+                      className={`object-contain scale-[1.85] transition-transform duration-700 ease-out group-hover:scale-[2.00] ${category.imageClassName ?? ''}`}
+                      sizes="(max-width: 640px) 100vw, 50vw"
+                    />
+                  )}
 
-              {/* Subtle terra accent line that grows on hover */}
-              <div className="absolute bottom-0 left-0 right-0 h-[3px] bg-terra-500 origin-left scale-x-0 group-hover:scale-x-100 transition-transform duration-700 ease-out" />
+                  {/* Dark overlay at bottom — text readability */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/15 to-transparent group-hover:from-black/85 transition-all duration-500" />
 
-              {/* Content */}
-              <div className="relative h-full flex flex-col justify-between p-6 lg:p-8">
-                <div className="flex justify-between items-start">
-                  <span className="text-white/70 text-body-xs font-mono tracking-wider">
-                    0{index + 1}
-                  </span>
-                  <div className="w-10 h-10 rounded-full bg-white/10 backdrop-blur-sm border border-white/10 flex items-center justify-center group-hover:bg-terra-500 group-hover:border-terra-500 group-hover:scale-110 transition-all duration-500 ease-out">
-                    <ArrowUpRightIcon className="w-4 h-4 text-white group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform duration-500" />
+                  {/* Subtle terra accent line that grows on hover */}
+                  <div className="absolute bottom-0 left-0 right-0 h-[3px] bg-terra-500 origin-left scale-x-0 group-hover:scale-x-100 transition-transform duration-700 ease-out" />
+
+                  {/* Content */}
+                  <div className="relative h-full flex flex-col justify-between p-6 lg:p-8">
+                    <div className="flex justify-between items-start">
+                      <span className="text-white/70 text-body-xs font-mono tracking-wider">
+                        0{index + 1}
+                      </span>
+                      <div className="w-10 h-10 rounded-full bg-white/10 backdrop-blur-sm border border-white/10 flex items-center justify-center group-hover:bg-terra-500 group-hover:border-terra-500 group-hover:scale-110 transition-all duration-500 ease-out">
+                        <ArrowUpRightIcon className="w-4 h-4 text-white group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform duration-500" />
+                      </div>
+                    </div>
+
+                    <div className="flex flex-col">
+                      <h3 className="font-heading text-display-sm lg:text-display-md text-white mb-1 transition-transform duration-500 ease-out group-hover:-translate-y-0.5">
+                        {category.title}
+                      </h3>
+                      <p className="text-body-sm text-white/70 transition-colors duration-300 group-hover:text-white/90">
+                        {category.badge && (
+                          <>
+                            <span className="font-semibold text-terra-300">{category.badge}</span>
+                            <span className="text-white/50"> · </span>
+                          </>
+                        )}
+                        {category.subtitle}
+                      </p>
+
+                      {/* Hidden CTA that slides up on hover */}
+                      <span className="mt-3 inline-flex items-center gap-1.5 text-body-xs uppercase tracking-widest font-semibold text-terra-300 opacity-0 -translate-y-1 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-500 ease-out">
+                        Explorar línea
+                        <ArrowUpRightIcon className="w-3 h-3" />
+                      </span>
+                    </div>
                   </div>
-                </div>
-
-                <div className="flex flex-col">
-                  <h3 className="font-heading text-display-sm lg:text-display-md text-white mb-1 transition-transform duration-500 ease-out group-hover:-translate-y-0.5">
-                    {category.title}
-                  </h3>
-                  <p className="text-body-sm text-white/70 transition-colors duration-300 group-hover:text-white/90">
-                    {category.subtitle}
-                  </p>
-
-                  {/* Hidden CTA that slides up on hover */}
-                  <span className="mt-3 inline-flex items-center gap-1.5 text-body-xs uppercase tracking-widest font-semibold text-terra-300 opacity-0 -translate-y-1 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-500 ease-out">
-                    Explorar línea
-                    <ArrowUpRightIcon className="w-3 h-3" />
-                  </span>
-                </div>
-              </div>
-            </Link>
-            )
-          })}
-        </div>
+                </Link>
+              )
+            })}
+          </div>
         )}
       </div>
     </section>
