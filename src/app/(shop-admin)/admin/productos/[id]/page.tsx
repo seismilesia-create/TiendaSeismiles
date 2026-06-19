@@ -47,6 +47,7 @@ export default async function EditProductPage({ params }: { params: Promise<{ id
           detalles: product.detalles,
           activo: product.activo,
           destacado: product.destacado,
+          proximamente: product.proximamente,
           colores: product.colores.map((c) => ({
             id: c.id,
             nombre: c.nombre,

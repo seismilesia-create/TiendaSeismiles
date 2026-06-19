@@ -13,6 +13,7 @@ export interface Product {
   precio: number
   linea: string
   destacado: boolean
+  proximamente?: boolean
   colores: { nombre: string; hex: string; imagen_url: string | null }[]
 }
 
@@ -27,6 +28,46 @@ export function ProductCard({ product, isFavorited = false, isLoggedIn = false }
   const imageUrl = product.colores[0]?.imagen_url
   const lineLabel = formatLineaLabel(product.linea) || product.linea
   const isLimitedEdition = isLimitedEditionLinea(product.linea)
+
+  // ── Producto "Próximamente": foto difuminada, cartel, NO clickeable ──
+  if (product.proximamente) {
+    return (
+      <div className="group relative bg-white rounded-2xl p-3 shadow-card">
+        <div className="relative aspect-[3/5] overflow-hidden rounded-xl bg-sand-100">
+          {imageUrl ? (
+            <Image
+              src={imageUrl}
+              alt={product.nombre}
+              fill
+              className="object-cover scale-105 blur-sm"
+              sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+            />
+          ) : (
+            <div className="absolute inset-0 bg-gradient-to-br from-volcanic-700 to-volcanic-900" />
+          )}
+          {/* Velo oscuro para resaltar el texto */}
+          <div className="absolute inset-0 bg-volcanic-900/35" />
+          {/* Cartel central */}
+          <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-4">
+            <span className="px-3 py-1.5 rounded-full bg-white/15 backdrop-blur-sm border border-white/25 text-[10px] font-bold uppercase tracking-[0.2em] text-white">
+              Próximamente
+            </span>
+          </div>
+        </div>
+
+        {/* Info: línea + nombre, sin precio */}
+        <div className="mt-4 flex flex-col gap-1.5">
+          <p className="text-body-xs font-semibold uppercase tracking-widest text-volcanic-500">
+            {lineLabel}
+          </p>
+          <h3 className="text-body-md font-medium text-volcanic-900">
+            {product.nombre}
+          </h3>
+          <p className="text-body-sm text-volcanic-400 pt-1">Disponible pronto</p>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div

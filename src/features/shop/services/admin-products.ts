@@ -17,6 +17,7 @@ export interface ProductoRow {
   detalles: string | null
   activo: boolean
   destacado: boolean
+  proximamente: boolean
   created_at: string
   updated_at: string
 }
@@ -69,6 +70,7 @@ export interface CreateProductoDTO {
   detalles?: string
   activo?: boolean
   destacado?: boolean
+  proximamente?: boolean
 }
 
 export interface ColorInput {

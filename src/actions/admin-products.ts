@@ -81,6 +81,7 @@ export async function createProductAction(formData: FormData) {
       detalles: (formData.get('detalles') as string) || undefined,
       activo: formData.get('activo') === 'true',
       destacado,
+      proximamente: formData.get('proximamente') === 'true',
     })
 
     revalidatePath('/admin/productos')
@@ -113,6 +114,7 @@ export async function updateProductAction(productoId: string, formData: FormData
       detalles: (formData.get('detalles') as string) || undefined,
       activo: formData.get('activo') === 'true',
       destacado,
+      proximamente: formData.get('proximamente') === 'true',
     })
 
     revalidatePath('/admin/productos')

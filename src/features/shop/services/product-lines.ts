@@ -47,6 +47,7 @@ export async function getFeaturedProducts(): Promise<FeaturedProductFromDB[]> {
       `)
       .eq('destacado', true)
       .eq('activo', true)
+      .eq('proximamente', false)
       .order('created_at', { ascending: false })
       .limit(FEATURED_PRODUCTS_LIMIT)
 
@@ -85,6 +86,7 @@ export interface CatalogProductFromDB {
   linea: string
   genero: string
   destacado: boolean
+  proximamente: boolean
   created_at: string
   colores: { nombre: string; hex: string; color_base: string | null; color_base_hex: string | null; imagen_url: string | null }[]
   variantes: { talle: string; stock: number }[]
@@ -97,11 +99,12 @@ export async function getMostViewedProducts(excludeId?: string, limit = 4): Prom
     let query = supabase
       .from('productos')
       .select(`
-        id, nombre, slug, precio, categoria, linea, genero, destacado, created_at,
+        id, nombre, slug, precio, categoria, linea, genero, destacado, proximamente, created_at,
         colores(nombre, hex, color_base, color_base_hex, imagen_url),
         variantes(talle, stock)
       `)
       .eq('activo', true)
+      .eq('proximamente', false)
       .order('visualizaciones', { ascending: false })
       .limit(limit + 1)
 
@@ -128,12 +131,13 @@ export async function getAdminFeaturedProducts(limit = FEATURED_PRODUCTS_LIMIT):
     const { data, error } = await supabase
       .from('productos')
       .select(`
-        id, nombre, slug, precio, categoria, linea, genero, destacado, created_at,
+        id, nombre, slug, precio, categoria, linea, genero, destacado, proximamente, created_at,
         colores(nombre, hex, color_base, color_base_hex, imagen_url),
         variantes(talle, stock)
       `)
       .eq('destacado', true)
       .eq('activo', true)
+      .eq('proximamente', false)
       .order('created_at', { ascending: false })
       .limit(limit)
 
@@ -148,11 +152,12 @@ export async function getAdminFeaturedProducts(limit = FEATURED_PRODUCTS_LIMIT):
     let fillerQuery = supabase
       .from('productos')
       .select(`
-        id, nombre, slug, precio, categoria, linea, genero, destacado, created_at,
+        id, nombre, slug, precio, categoria, linea, genero, destacado, proximamente, created_at,
         colores(nombre, hex, color_base, color_base_hex, imagen_url),
         variantes(talle, stock)
       `)
       .eq('activo', true)
+      .eq('proximamente', false)
       .order('visualizaciones', { ascending: false })
       .limit(missing)
 
@@ -176,11 +181,12 @@ export async function getSeasonalFeaturedProducts(season: Season, limit = 4): Pr
     const { data, error } = await supabase
       .from('productos')
       .select(`
-        id, nombre, slug, precio, categoria, linea, genero, destacado, created_at,
+        id, nombre, slug, precio, categoria, linea, genero, destacado, proximamente, created_at,
         colores(nombre, hex, color_base, color_base_hex, imagen_url),
         variantes(talle, stock)
       `)
       .eq('activo', true)
+      .eq('proximamente', false)
       .order('visualizaciones', { ascending: false })
       .limit(limit * 3)
 
@@ -212,7 +218,7 @@ export async function getCatalogProducts(): Promise<CatalogProductFromDB[]> {
     const { data, error } = await supabase
       .from('productos')
       .select(`
-        id, nombre, slug, precio, categoria, linea, genero, destacado, created_at,
+        id, nombre, slug, precio, categoria, linea, genero, destacado, proximamente, created_at,
         colores(nombre, hex, color_base, color_base_hex, imagen_url),
         variantes(talle, stock)
       `)
@@ -262,6 +268,7 @@ export async function getProductBySlug(slug: string): Promise<ProductDetailFromD
       `)
       .eq('slug', slug)
       .eq('activo', true)
+      .eq('proximamente', false)
       .single()
 
     if (error) return null
@@ -440,7 +447,7 @@ export async function getUserFavoriteProducts(userId: string): Promise<CatalogPr
     const { data, error } = await supabase
       .from('productos')
       .select(`
-        id, nombre, slug, precio, categoria, linea, genero, destacado, created_at,
+        id, nombre, slug, precio, categoria, linea, genero, destacado, proximamente, created_at,
         colores(nombre, hex, color_base, color_base_hex, imagen_url),
         variantes(talle, stock)
       `)

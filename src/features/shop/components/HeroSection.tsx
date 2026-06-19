@@ -210,7 +210,7 @@ export function HeroSection() {
         {/* Tríptico: arriba en mobile, mitad derecha en desktop. Línea fina clara entre fotos. */}
         <div className="absolute inset-x-0 top-0 h-[40vh] lg:inset-y-0 lg:right-0 lg:left-auto lg:h-auto lg:w-[56%]">
           <div className="flex h-full w-full">
-            {['Hero.webp', 'Hero 1.webp', 'Hero 2.webp'].map((src, i) => (
+            {['Hero 2.0.webp', 'Hero 1.webp', 'Hero 2.webp'].map((src, i) => (
               <div
                 key={src}
                 className={`relative flex-1 overflow-hidden ${i > 0 ? 'border-l border-white/30' : ''}`}

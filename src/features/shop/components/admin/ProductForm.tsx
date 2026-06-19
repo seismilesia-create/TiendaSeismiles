@@ -98,6 +98,7 @@ interface ExistingProduct {
   detalles: string | null
   activo: boolean
   destacado: boolean
+  proximamente: boolean
   colores: ExistingColor[]
   variantes: ExistingVariante[]
 }
@@ -150,6 +151,7 @@ export function ProductForm({ product, featuredCount, featuredLimit }: ProductFo
   const [categoria, setCategoria] = useState(product?.categoria ?? '')
   const [linea, setLinea] = useState(product?.linea ?? '')
   const [destacado, setDestacado] = useState(product?.destacado ?? false)
+  const [proximamente, setProximamente] = useState(product?.proximamente ?? false)
 
   // Slot accounting: if this product is already destacado, it's part of the count.
   const wasFeatured = product?.destacado ?? false
@@ -262,6 +264,7 @@ export function ProductForm({ product, featuredCount, featuredLimit }: ProductFo
     formData.set('linea', linea)
     formData.set('activo', formData.has('activo') ? 'true' : 'false')
     formData.set('destacado', formData.has('destacado') ? 'true' : 'false')
+    formData.set('proximamente', proximamente ? 'true' : 'false')
 
     let currentProductId = productId
     let currentColorId = colorId
@@ -449,7 +452,23 @@ export function ProductForm({ product, featuredCount, featuredLimit }: ProductFo
                   {slotsTaken} / {featuredLimit}
                 </span>
               </label>
+              <label className="flex items-center gap-2.5 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={proximamente}
+                  onChange={(e) => setProximamente(e.target.checked)}
+                  className="w-4 h-4 rounded border-sand-300 text-terra-500 focus:ring-terra-500"
+                />
+                <span className="text-body-sm text-volcanic-700">
+                  Próximamente (foto difuminada, sin precio ni carrito)
+                </span>
+              </label>
             </div>
+            {proximamente && (
+              <p className="text-body-xs text-volcanic-500 ml-6">
+                El producto se muestra en el catálogo con la foto borrosa y un cartel &quot;Próximamente&quot;, sin poder clickearlo ni comprarlo. Subí la foto normal: el sitio la difumina solo. Cuando lo lances, destildá esta opción.
+              </p>
+            )}
             {!canToggleFeatured && (
               <p className="text-body-xs text-volcanic-500 ml-6">
                 Límite de {featuredLimit} destacados alcanzado. Para añadir éste, primero quitá uno desde la <a href="/admin/productos" className="text-terra-500 hover:underline">lista de productos</a>.
