@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
 import { mpPreference, mpPayment } from '@/lib/mercadopago'
+import * as gocuotas from '@/lib/gocuotas'
 import { sendOrderConfirmationEmails } from '@/lib/email/send-order-confirmation'
 import { markAbandonedCartConverted } from '@/actions/abandoned-cart'
 import { SHIPPING_OPTIONS, isValidShippingMethod, type ShippingMethod } from '@/lib/shipping'
@@ -28,6 +29,13 @@ export interface CheckoutShipping {
   method: ShippingMethod
   address?: string
 }
+
+/**
+ * Which external payment provider to use for the remaining (post coupon + GC)
+ * amount. Defaults to 'mercadopago' everywhere so the existing flow is never
+ * affected. 'gocuotas' mirrors the same create→redirect→webhook pattern.
+ */
+export type PaymentProvider = 'mercadopago' | 'gocuotas'
 
 interface CheckoutResult {
   initPoint?: string
@@ -171,12 +179,13 @@ export async function createCheckout(
   giftCardCodes?: string[],
   couponCode?: string,
   shipping?: CheckoutShipping,
+  provider: PaymentProvider = 'mercadopago',
 ): Promise<CheckoutResult> {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { error: 'Debés iniciar sesión para comprar' }
 
-  return runCheckout(user.id, items, giftCardCodes, couponCode, shipping)
+  return runCheckout(user.id, items, giftCardCodes, couponCode, shipping, provider, user.email)
 }
 
 /**
@@ -193,6 +202,8 @@ async function runCheckout(
   giftCardCodes?: string[],
   couponCode?: string,
   shipping?: CheckoutShipping,
+  provider: PaymentProvider = 'mercadopago',
+  customerEmail?: string | null,
 ): Promise<CheckoutResult> {
   if (!items.length) return { error: 'El carrito está vacío' }
 
@@ -504,8 +515,49 @@ async function runCheckout(
     return { directConfirm: true }
   }
 
-  // 3b. Create Mercado Pago preference (remaining after coupon + GC discounts)
+  // 3b. Create the external payment (remaining after coupon + GC discounts).
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
+
+  // ── GoCuotas branch ───────────────────────────────────────────────────
+  // Mirrors the MP path: create a hosted checkout, leave the orders in
+  // pendiente_pago, and return the redirect URL. The amount is sent in CENTS
+  // and stored (gocuotas_amount_in_cents) so the unsigned webhook can verify
+  // it against GET /orders. Any throw bubbles to the outer catch → full
+  // rollback, exactly like MP. MP code below is untouched.
+  if (provider === 'gocuotas') {
+    const amountInCents = Math.round(totalAPagar * 100)
+
+    const { urlInit } = await gocuotas.createCheckout({
+      amountInCents,
+      urlSuccess: `${siteUrl}/carrito/resultado?provider=gocuotas&result=success`,
+      urlFailure: `${siteUrl}/carrito/resultado?provider=gocuotas&result=failure`,
+      orderReferenceId: externalRef,
+      webhookUrl: `${siteUrl}/api/gocuotas/webhook`,
+      email: customerEmail ?? undefined,
+    })
+
+    let metodoPago = 'gocuotas'
+    if (gcList.length > 0 && cuponId) metodoPago = 'cupon+gift_card+gocuotas'
+    else if (gcList.length > 0) metodoPago = 'gift_card+gocuotas'
+    else if (cuponId) metodoPago = 'cupon+gocuotas'
+
+    await service
+      .from('compras')
+      .update({
+        estado: 'pendiente_pago',
+        metodo_pago: metodoPago,
+        gocuotas_order_ref: externalRef,
+        gocuotas_amount_in_cents: amountInCents,
+        ...(gcList.length > 0 ? { gift_cards_applied: gcList } : {}),
+      })
+      .in('numero_pedido', orderNumbers)
+
+    revalidatePath('/catalogo')
+    revalidatePath('/admin/inventario')
+    revalidatePath('/perfil')
+
+    return { initPoint: urlInit, externalRef }
+  }
 
   let preferenceId: string
   let initPoint: string
@@ -600,6 +652,7 @@ interface GuestCheckoutInput {
   giftCardCodes?: string[]
   couponCode?: string
   shipping?: CheckoutShipping
+  provider?: PaymentProvider
 }
 
 interface GuestCheckoutResult extends CheckoutResult {
@@ -695,7 +748,101 @@ export async function createGuestCheckout(
     input.giftCardCodes,
     input.couponCode,
     input.shipping,
+    input.provider ?? 'mercadopago',
+    email,
   )
+}
+
+/* ─── Shared order state transitions (provider-agnostic) ─── */
+
+interface ConfirmResult {
+  confirmed: boolean
+  error?: string
+}
+
+/**
+ * Idempotent transition to 'confirmado'. The atomic UPDATE … .neq('estado',
+ * 'confirmado') gates the side effects: whichever caller (webhook or return
+ * page, MP or GoCuotas) wins the UPDATE sends the email; the loser sees 0
+ * affected rows and returns success so the UI agrees. `paymentPatch` carries
+ * the provider-specific id column (mp_payment_id / gocuotas_order_id).
+ */
+async function applyConfirmedTransition(
+  service: ReturnType<typeof createServiceClient>,
+  orderNumbers: string[],
+  paymentPatch: Record<string, string>,
+): Promise<ConfirmResult> {
+  const { data: transitioned } = await service
+    .from('compras')
+    .update({ estado: 'confirmado', ...paymentPatch })
+    .in('numero_pedido', orderNumbers)
+    .neq('estado', 'confirmado')
+    .select('numero_pedido, user_id')
+
+  if (!transitioned || transitioned.length === 0) {
+    // Another caller already confirmed. Report success so UI agrees.
+    return { confirmed: true }
+  }
+
+  await sendOrderConfirmationEmails(orderNumbers)
+  const buyerId = transitioned[0]?.user_id
+  if (buyerId) await markAbandonedCartConverted(buyerId)
+
+  revalidatePath('/perfil')
+  revalidatePath('/catalogo')
+  revalidatePath('/admin/inventario')
+  return { confirmed: true }
+}
+
+/**
+ * Idempotent transition to 'cancelada'. Only rows actually moving from
+ * pendiente_pago get rolled back (stock → GC balance → coupon usage), so a
+ * second caller finding them already cancelada is a no-op.
+ */
+async function applyCancelledTransition(
+  service: ReturnType<typeof createServiceClient>,
+  orderNumbers: string[],
+  paymentPatch: Record<string, string>,
+): Promise<ConfirmResult> {
+  const { data: transitioned } = await service
+    .from('compras')
+    .update({ estado: 'cancelada', ...paymentPatch })
+    .in('numero_pedido', orderNumbers)
+    .eq('estado', 'pendiente_pago')
+    .select('numero_pedido, variante_id, cantidad, cupon_id, gift_cards_applied')
+
+  if (transitioned && transitioned.length > 0) {
+    // Restore stock.
+    for (const order of transitioned) {
+      if (!order.variante_id) continue
+      const { data: variant } = await service
+        .from('variantes')
+        .select('stock')
+        .eq('id', order.variante_id)
+        .single()
+      if (variant) {
+        await service
+          .from('variantes')
+          .update({ stock: variant.stock + order.cantidad })
+          .eq('id', order.variante_id)
+      }
+    }
+
+    // Refund GCs + release coupon reservations tied to these orders.
+    await releaseOrderReservations(
+      service,
+      transitioned as Array<{
+        numero_pedido: string
+        cupon_id: string | null
+        gift_cards_applied: GcApplied[] | null
+      }>,
+    )
+  }
+
+  revalidatePath('/perfil')
+  revalidatePath('/catalogo')
+  revalidatePath('/admin/inventario')
+  return { confirmed: false }
 }
 
 /* ─── Verify payment when user returns from MP ─── */
@@ -709,11 +856,6 @@ const STATUS_MAP: Record<string, string> = {
   cancelled: 'cancelada',
   refunded: 'reembolsada',
   charged_back: 'reembolsada',
-}
-
-interface ConfirmResult {
-  confirmed: boolean
-  error?: string
 }
 
 export async function confirmPayment(paymentId: string, externalReference: string): Promise<ConfirmResult> {
@@ -769,75 +911,19 @@ export async function confirmPayment(paymentId: string, externalReference: strin
     // effects already happened in createCheckout, so confirmation just
     // flips the state and notifies the user.
     if (newEstado === 'confirmado') {
-      const { data: transitioned } = await service
-        .from('compras')
-        .update({ estado: 'confirmado', mp_payment_id: String(paymentId) })
-        .in('numero_pedido', orderNumbers)
-        .neq('estado', 'confirmado')
-        .select('numero_pedido, user_id')
-
-      if (!transitioned || transitioned.length === 0) {
-        // Another caller already confirmed. Report success so UI agrees.
-        return { confirmed: true }
-      }
-
-      await sendOrderConfirmationEmails(orderNumbers)
-      const buyerId = transitioned[0]?.user_id
-      if (buyerId) await markAbandonedCartConverted(buyerId)
-
-      revalidatePath('/perfil')
-      revalidatePath('/catalogo')
-      revalidatePath('/admin/inventario')
-      return { confirmed: true }
+      return applyConfirmedTransition(service, orderNumbers, {
+        mp_payment_id: String(paymentId),
+      })
     }
 
     // ── Cancellation path (idempotent) ────────────────────────────────
-    // Only roll back reservations for rows actually transitioning from
-    // pendiente_pago to cancelada. A second caller finding the rows
-    // already cancelada returns 0 affected rows and skips.
-    //
-    // Roll back order: stock → GC balance → coupon usage. The atomic
-    // transition gate above guarantees this runs exactly once per order.
+    // Roll back reservations only for rows actually moving from
+    // pendiente_pago to cancelada (stock → GC balance → coupon usage). A
+    // second caller finding them already cancelada is a no-op.
     if (newEstado === 'cancelada') {
-      const { data: transitioned } = await service
-        .from('compras')
-        .update({ estado: 'cancelada', mp_payment_id: String(paymentId) })
-        .in('numero_pedido', orderNumbers)
-        .eq('estado', 'pendiente_pago')
-        .select('numero_pedido, variante_id, cantidad, cupon_id, gift_cards_applied')
-
-      if (transitioned && transitioned.length > 0) {
-        // Restore stock.
-        for (const order of transitioned) {
-          if (!order.variante_id) continue
-          const { data: variant } = await service
-            .from('variantes')
-            .select('stock')
-            .eq('id', order.variante_id)
-            .single()
-          if (variant) {
-            await service
-              .from('variantes')
-              .update({ stock: variant.stock + order.cantidad })
-              .eq('id', order.variante_id)
-          }
-        }
-
-        // Refund GCs + release coupon reservations tied to these orders.
-        await releaseOrderReservations(
-          service,
-          transitioned as Array<{
-            numero_pedido: string
-            cupon_id: string | null
-            gift_cards_applied: GcApplied[] | null
-          }>,
-        )
-      }
-
-      revalidatePath('/perfil')
-      revalidatePath('/catalogo')
-      revalidatePath('/admin/inventario')
-      return { confirmed: false }
+      return applyCancelledTransition(service, orderNumbers, {
+        mp_payment_id: String(paymentId),
+      })
     }
 
     // ── Intermediate states (pending / in_process / reembolsada) ──────
@@ -883,5 +969,100 @@ export async function verifyPendingOrders(externalRef: string): Promise<ConfirmR
   } catch (err) {
     console.error('verifyPendingOrders error:', err)
     return { confirmed: false }
+  }
+}
+
+/* ─── Confirm a GoCuotas payment (driven by webhook re-query) ─── */
+
+/**
+ * Confirm or cancel a GoCuotas order by OUR reference (= externalRef =
+ * order_reference_id = the comma-joined numero_pedido list).
+ *
+ * The GoCuotas webhook has NO signature, so we NEVER trust its body. This
+ * function is the only authority: it re-queries GoCuotas server-side with our
+ * API key and acts solely on what GoCuotas reports.
+ *
+ * Security gates, all required to confirm:
+ *   1. The order fetched from GoCuotas must carry order_reference_id === ref
+ *      (so a forged webhook pointing an attacker's order id at our ref can't
+ *      confirm — the ref on the real order won't match).
+ *   2. status must be exactly 'approved'.
+ *   3. amount_in_cents must equal the gocuotas_amount_in_cents we stored at
+ *      checkout time (defends against a confirmed-but-tampered amount).
+ *   4. Cohesion: every order named in ref must exist AND share the same
+ *      gocuotas_order_ref (mirrors the mp_preference_id check).
+ *
+ * Idempotent via the shared transition helpers. `orderId` (from the webhook
+ * body, if present) is only an optimization for the GET — the ref match above
+ * is what actually authenticates.
+ */
+export async function confirmGocuotasPayment(
+  ref: string,
+  orderId?: string,
+): Promise<ConfirmResult> {
+  if (!ref) return { confirmed: false, error: 'Referencia vacía' }
+
+  try {
+    const orderNumbers = ref.split(',').map((n) => n.trim()).filter(Boolean)
+    if (orderNumbers.length === 0) {
+      return { confirmed: false, error: 'Referencia externa vacía' }
+    }
+
+    const service = createServiceClient()
+
+    // Cohesion check: every order in ref must exist and share the same
+    // gocuotas_order_ref. Also pulls the stored expected amount.
+    const { data: cohesion } = await service
+      .from('compras')
+      .select('gocuotas_order_ref, gocuotas_amount_in_cents')
+      .in('numero_pedido', orderNumbers)
+
+    if (!cohesion || cohesion.length !== orderNumbers.length) {
+      console.error('[confirmGocuotas] unknown orders in ref:', orderNumbers)
+      return { confirmed: false, error: 'Órdenes no encontradas' }
+    }
+    const refs = new Set(cohesion.map((o) => o.gocuotas_order_ref).filter(Boolean))
+    if (refs.size !== 1 || !refs.has(ref)) {
+      console.error('[confirmGocuotas] inconsistent gocuotas_order_ref:', Array.from(refs))
+      return { confirmed: false, error: 'Órdenes inconsistentes' }
+    }
+    const expectedAmount = cohesion[0]?.gocuotas_amount_in_cents ?? null
+
+    // Re-query GoCuotas server-side — the ONLY trusted source of truth.
+    const order = orderId
+      ? await gocuotas.getOrder(orderId)
+      : await gocuotas.getOrderByRef(ref)
+
+    // Either we found nothing, or the fetched order belongs to a different
+    // reference than ours — do not act.
+    if (!order || order.order_reference_id !== ref) {
+      console.warn('[confirmGocuotas] no matching GoCuotas order for ref:', ref)
+      return { confirmed: false }
+    }
+
+    const paymentPatch = { gocuotas_order_id: String(order.id) }
+
+    if (order.status === 'approved') {
+      // Amount must match what we charged.
+      if (expectedAmount != null && Number(order.amount_in_cents) !== Number(expectedAmount)) {
+        console.error(
+          '[confirmGocuotas] amount mismatch:',
+          { expected: expectedAmount, got: order.amount_in_cents, ref },
+        )
+        return { confirmed: false, error: 'Monto no coincide' }
+      }
+      return applyConfirmedTransition(service, orderNumbers, paymentPatch)
+    }
+
+    if (order.status === 'denied') {
+      // Verified denial → release stock + reservations (idempotent).
+      return applyCancelledTransition(service, orderNumbers, paymentPatch)
+    }
+
+    // status 'undefined' (or anything else): still pending, do nothing.
+    return { confirmed: false }
+  } catch (err) {
+    console.error('confirmGocuotasPayment error:', err)
+    return { confirmed: false, error: 'Error al verificar el pago' }
   }
 }

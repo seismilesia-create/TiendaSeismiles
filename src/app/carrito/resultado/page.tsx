@@ -18,9 +18,21 @@ export default async function ResultadoPage({
     payment_id?: string
     collection_id?: string
     external_reference?: string
+    provider?: string
+    result?: string
   }>
 }) {
   const params = await searchParams
+
+  // GoCuotas returns to url_success/url_failure with provider=gocuotas and our
+  // own result=success|failure marker. The DEFINITIVE state always comes from
+  // the webhook + GET re-query; this page is only UX. There is no MP payment_id
+  // to verify here, so we just map the outcome to the shared UI status and let
+  // the order get confirmed asynchronously by the webhook.
+  if (params.provider === 'gocuotas') {
+    const status = params.result === 'success' ? 'approved' : 'failure'
+    return <ResultadoContent status={status} provider="gocuotas" />
+  }
 
   // MP sends status in both 'status' and 'collection_status'
   const status = params.collection_status || params.status

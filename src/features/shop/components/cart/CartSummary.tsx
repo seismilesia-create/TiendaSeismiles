@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import Image from 'next/image'
 import { useCartStore } from '@/features/shop/stores/cart-store'
 import { createCheckout, createGuestCheckout } from '@/actions/checkout'
 import { validateGiftCardCode } from '@/actions/giftcard-redeem'
@@ -79,6 +80,9 @@ export function CartSummary({ userId }: CartSummaryProps) {
 
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  // Which external provider handles the remaining (post coupon + GC) amount.
+  // Only relevant when totalFinal > 0; fully-covered orders confirm directly.
+  const [paymentProvider, setPaymentProvider] = useState<'mercadopago' | 'gocuotas'>('mercadopago')
   const [emailExists, setEmailExists] = useState(false)
   const [gcCode, setGcCode] = useState('')
   const [gcLoading, setGcLoading] = useState(false)
@@ -267,7 +271,7 @@ export function CartSummary({ userId }: CartSummaryProps) {
     }
 
     const result = userId
-      ? await createCheckout(checkoutItems, codes, appliedCoupon?.code, shipping)
+      ? await createCheckout(checkoutItems, codes, appliedCoupon?.code, shipping, paymentProvider)
       : await createGuestCheckout({
         email: emailTrimmed,
         fullName: nameTrimmed,
@@ -275,6 +279,7 @@ export function CartSummary({ userId }: CartSummaryProps) {
         giftCardCodes: codes,
         couponCode: appliedCoupon?.code,
         shipping,
+        provider: paymentProvider,
       })
 
     // Email already registered: cart persists in localStorage, so sending
@@ -657,6 +662,63 @@ export function CartSummary({ userId }: CartSummaryProps) {
         </div>
       )}
 
+      {/* ─── Payment method selector (only when there's an amount to pay) ─── */}
+      {totalFinal > 0 && (
+        <>
+          <div className="border-t border-sand-200 my-4" />
+          <p className="text-body-xs font-medium text-volcanic-600 mb-2">Medio de pago</p>
+          <div className="space-y-2">
+            <label
+              className={`flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-colors ${paymentProvider === 'mercadopago'
+                ? 'border-terra-500 bg-terra-50'
+                : 'border-sand-200 hover:border-sand-300 bg-white'
+                }`}
+            >
+              <input
+                type="radio"
+                name="payment-provider"
+                value="mercadopago"
+                checked={paymentProvider === 'mercadopago'}
+                onChange={() => setPaymentProvider('mercadopago')}
+                className="accent-terra-500"
+              />
+              <Image
+                src="/images/payment/mercadopago.svg"
+                alt="Mercado Pago"
+                width={90}
+                height={24}
+                className="h-6 w-auto shrink-0"
+              />
+              <span className="text-body-xs text-volcanic-500">Tarjeta, débito y más</span>
+            </label>
+
+            <label
+              className={`flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-colors ${paymentProvider === 'gocuotas'
+                ? 'border-terra-500 bg-terra-50'
+                : 'border-sand-200 hover:border-sand-300 bg-white'
+                }`}
+            >
+              <input
+                type="radio"
+                name="payment-provider"
+                value="gocuotas"
+                checked={paymentProvider === 'gocuotas'}
+                onChange={() => setPaymentProvider('gocuotas')}
+                className="accent-terra-500"
+              />
+              <Image
+                src="/images/payment/gocuotas.png"
+                alt="GoCuotas"
+                width={62}
+                height={24}
+                className="h-6 w-auto shrink-0"
+              />
+              <span className="text-body-xs text-volcanic-500">Cuotas sin interés con débito</span>
+            </label>
+          </div>
+        </>
+      )}
+
       {error && (
         <div className="mb-4 mt-4 p-3 bg-red-50 border border-red-200 rounded-xl">
           <p className="text-body-sm text-red-700">{error}</p>
@@ -681,7 +743,9 @@ export function CartSummary({ userId }: CartSummaryProps) {
             {totalFinal > 0 ? (
               <>
                 <CreditCardIcon className="w-5 h-5" />
-                {userId ? 'Pagar con Mercado Pago' : 'Pagar como invitado'}
+                {paymentProvider === 'gocuotas'
+                  ? 'Pagar con GoCuotas'
+                  : userId ? 'Pagar con Mercado Pago' : 'Pagar como invitado'}
               </>
             ) : (
               <>

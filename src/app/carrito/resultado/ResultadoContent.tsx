@@ -39,9 +39,12 @@ interface Props {
   status?: string
   paymentId?: string
   externalReference?: string
+  /** Set to 'gocuotas' when returning from GoCuotas. There is no payment_id to
+   * verify client-side; the order is confirmed asynchronously by the webhook. */
+  provider?: 'mercadopago' | 'gocuotas'
 }
 
-export function ResultadoContent({ status, paymentId, externalReference }: Props) {
+export function ResultadoContent({ status, paymentId, externalReference, provider }: Props) {
   const clearCart = useCartStore((s) => s.clearCart)
   const pendingPurchase = useCartStore((s) => s.pendingPurchase)
   const clearPendingPurchase = useCartStore((s) => s.clearPendingPurchase)
@@ -124,7 +127,9 @@ export function ResultadoContent({ status, paymentId, externalReference }: Props
             ¡Pago confirmado!
           </h1>
           <p className="text-body-md text-volcanic-500 mb-8">
-            Tu pedido fue procesado correctamente. Podés ver el estado en tu perfil.
+            {provider === 'gocuotas'
+              ? 'Recibimos tu pago con GoCuotas. Apenas se acredite te enviamos la confirmación por mail. Podés ver el estado en tu perfil.'
+              : 'Tu pedido fue procesado correctamente. Podés ver el estado en tu perfil.'}
           </p>
           <Link
             href="/perfil"
