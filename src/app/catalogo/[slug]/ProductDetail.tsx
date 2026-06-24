@@ -17,6 +17,8 @@ import { ProductGallery } from './ProductGallery'
 import { ImageLightbox } from './ImageLightbox'
 import { StockNotifyModal } from './StockNotifyModal'
 import { formatLineaLabel, isLimitedEditionLinea } from '@/features/shop/utils/linea'
+import { cuotasLabel } from '@/features/shop/utils/cuotas'
+import { descuentoPct, formatPrecio } from '@/features/shop/utils/precio'
 import type { ProductDetailFromDB, CatalogProductFromDB, ReviewFromDB, ReviewSummary } from '@/features/shop/services/product-lines'
 
 // ── Constants ──
@@ -148,6 +150,7 @@ export function ProductDetail({ product, mostViewedProducts, reviews, reviewSumm
   const selectedColor = product.colores.find((c) => c.id === selectedColorId)
   const lineLabel = formatLineaLabel(product.linea) || product.linea
   const isLimitedEdition = isLimitedEditionLinea(product.linea)
+  const off = descuentoPct(product.precio, product.precio_lista)
 
   // Derive gallery images: use imagenes table, fallback to imagen_url
   const colorImages = selectedColor?.imagenes?.length
@@ -307,9 +310,31 @@ export function ProductDetail({ product, mostViewedProducts, reviews, reviewSumm
               </button>
             )}
             <div className="mb-8">
-              <span className="text-display-xs font-semibold text-volcanic-900">
-                ${product.precio.toLocaleString('es-AR')}
-              </span>
+              <div className="flex items-center gap-3 flex-wrap">
+                <span className="text-display-xs font-bold text-volcanic-900">
+                  {formatPrecio(product.precio)}
+                </span>
+                {off && (
+                  <>
+                    <span className="text-body-lg text-volcanic-600 line-through">
+                      {formatPrecio(product.precio_lista!)}
+                    </span>
+                    <span className="text-body-sm font-extrabold text-white bg-gradient-to-br from-terra-400 to-terra-600 px-2.5 py-1 rounded-md shadow-sm ring-1 ring-white/15">
+                      {off}% OFF
+                    </span>
+                  </>
+                )}
+              </div>
+              {off && (
+                <p className="mt-2 text-body-sm font-bold text-terra-600">
+                  Ahorrás {formatPrecio(product.precio_lista! - product.precio)} con el precio de lanzamiento
+                </p>
+              )}
+              {cuotasLabel(product.precio) && (
+                <p className="mt-1 text-body-sm font-medium text-terra-600">
+                  {cuotasLabel(product.precio)}
+                </p>
+              )}
             </div>
 
             {/* Color selector */}

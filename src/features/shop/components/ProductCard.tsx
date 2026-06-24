@@ -5,16 +5,31 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { HeartButton } from './HeartButton'
 import { formatLineaLabel, isLimitedEditionLinea } from '../utils/linea'
+import { cuotasLabel } from '../utils/cuotas'
+import { descuentoPct, formatPrecio } from '../utils/precio'
 
 export interface Product {
   id: string
   nombre: string
   slug: string
   precio: number
+  precio_lista?: number | null
   linea: string
   destacado: boolean
   proximamente?: boolean
   colores: { nombre: string; hex: string; imagen_url: string | null }[]
+  variantes?: { talle: string; stock: number }[]
+}
+
+/** Umbral de "pocas unidades" para el aviso de urgencia en la card. */
+const LOW_STOCK_CARD = 5
+
+function FlameIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" className={className}>
+      <path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5Z" />
+    </svg>
+  )
 }
 
 interface ProductCardProps {
@@ -28,6 +43,11 @@ export function ProductCard({ product, isFavorited = false, isLoggedIn = false }
   const imageUrl = product.colores[0]?.imagen_url
   const lineLabel = formatLineaLabel(product.linea) || product.linea
   const isLimitedEdition = isLimitedEditionLinea(product.linea)
+  const off = descuentoPct(product.precio, product.precio_lista)
+  const totalStock = (product.variantes ?? []).reduce((sum, v) => sum + (v.stock || 0), 0)
+  const hasStockData = !!product.variantes && product.variantes.length > 0
+  const lowStock = hasStockData && totalStock > 0 && totalStock <= LOW_STOCK_CARD
+  const outOfStock = hasStockData && totalStock === 0
 
   // ── Producto "Próximamente": foto difuminada, cartel, NO clickeable ──
   if (product.proximamente) {
@@ -97,7 +117,12 @@ export function ProductCard({ product, isFavorited = false, isLoggedIn = false }
           )}
 
           {/* Tags */}
-          <div className="absolute left-2 top-2 sm:left-3 sm:top-3 flex flex-col gap-1.5">
+          <div className="absolute left-2 top-2 sm:left-3 sm:top-3 flex flex-col items-start gap-1.5">
+            {off && (
+              <span className="bg-gradient-to-br from-terra-400 to-terra-600 px-2.5 py-1 text-[11px] font-extrabold uppercase tracking-wide text-white rounded-md shadow-md ring-1 ring-white/15">
+                {off}% OFF
+              </span>
+            )}
             {isLimitedEdition && (
               <span className="bg-volcanic-900 px-2.5 py-1 text-[9px] font-bold uppercase tracking-widest text-white rounded-md">
                 Edición limitada
@@ -129,26 +154,42 @@ export function ProductCard({ product, isFavorited = false, isLoggedIn = false }
             {product.nombre}
           </h3>
 
-          {/* Colors */}
-          {product.colores.length > 0 && (
+          {/* Stock / urgencia — o, si hay stock normal, el nombre del color */}
+          {lowStock ? (
+            <p className="flex items-center gap-1 pt-0.5 text-body-xs font-semibold text-terra-600">
+              <FlameIcon className="h-3.5 w-3.5 shrink-0" />
+              {totalStock === 1 ? '¡Última unidad!' : `¡Últimas ${totalStock} unidades!`}
+            </p>
+          ) : outOfStock ? (
+            <p className="pt-0.5 text-body-xs font-medium text-volcanic-400">Sin stock</p>
+          ) : product.colores[0]?.nombre ? (
             <div className="flex items-center gap-1.5 pt-0.5">
-              {product.colores.map((color) => (
-                <span
-                  key={color.hex}
-                  className="h-3 w-3 rounded-full border border-sand-300"
-                  style={{ backgroundColor: color.hex }}
-                  aria-label={color.nombre}
-                />
-              ))}
+              <span
+                className="h-2.5 w-2.5 rounded-full border border-sand-300 shrink-0"
+                style={{ backgroundColor: product.colores[0].hex }}
+              />
+              <span className="text-body-xs text-volcanic-500">
+                {product.colores[0].nombre}
+              </span>
             </div>
-          )}
+          ) : null}
 
           {/* Price */}
-          <div className="flex items-baseline gap-2 pt-1">
-            <span className="text-body-lg font-semibold text-volcanic-900">
-              {`$${product.precio.toLocaleString('es-AR')}`}
+          <div className="flex items-baseline gap-2 pt-1 flex-wrap">
+            <span className="text-body-lg font-bold text-volcanic-900">
+              {formatPrecio(product.precio)}
             </span>
+            {off && (
+              <span className="text-body-xs text-volcanic-600 line-through">
+                {formatPrecio(product.precio_lista!)}
+              </span>
+            )}
           </div>
+          {cuotasLabel(product.precio) && (
+            <p className="text-body-xs font-medium text-terra-600">
+              {cuotasLabel(product.precio)}
+            </p>
+          )}
         </div>
       </Link>
 

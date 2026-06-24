@@ -82,6 +82,7 @@ export interface CatalogProductFromDB {
   nombre: string
   slug: string
   precio: number
+  precio_lista: number | null
   categoria: string
   linea: string
   genero: string
@@ -99,7 +100,7 @@ export async function getMostViewedProducts(excludeId?: string, limit = 4): Prom
     let query = supabase
       .from('productos')
       .select(`
-        id, nombre, slug, precio, categoria, linea, genero, destacado, proximamente, created_at,
+        id, nombre, slug, precio, precio_lista, categoria, linea, genero, destacado, proximamente, created_at,
         colores(nombre, hex, color_base, color_base_hex, imagen_url),
         variantes(talle, stock)
       `)
@@ -131,7 +132,7 @@ export async function getAdminFeaturedProducts(limit = FEATURED_PRODUCTS_LIMIT):
     const { data, error } = await supabase
       .from('productos')
       .select(`
-        id, nombre, slug, precio, categoria, linea, genero, destacado, proximamente, created_at,
+        id, nombre, slug, precio, precio_lista, categoria, linea, genero, destacado, proximamente, created_at,
         colores(nombre, hex, color_base, color_base_hex, imagen_url),
         variantes(talle, stock)
       `)
@@ -152,7 +153,7 @@ export async function getAdminFeaturedProducts(limit = FEATURED_PRODUCTS_LIMIT):
     let fillerQuery = supabase
       .from('productos')
       .select(`
-        id, nombre, slug, precio, categoria, linea, genero, destacado, proximamente, created_at,
+        id, nombre, slug, precio, precio_lista, categoria, linea, genero, destacado, proximamente, created_at,
         colores(nombre, hex, color_base, color_base_hex, imagen_url),
         variantes(talle, stock)
       `)
@@ -181,7 +182,7 @@ export async function getSeasonalFeaturedProducts(season: Season, limit = 4): Pr
     const { data, error } = await supabase
       .from('productos')
       .select(`
-        id, nombre, slug, precio, categoria, linea, genero, destacado, proximamente, created_at,
+        id, nombre, slug, precio, precio_lista, categoria, linea, genero, destacado, proximamente, created_at,
         colores(nombre, hex, color_base, color_base_hex, imagen_url),
         variantes(talle, stock)
       `)
@@ -218,7 +219,7 @@ export async function getCatalogProducts(): Promise<CatalogProductFromDB[]> {
     const { data, error } = await supabase
       .from('productos')
       .select(`
-        id, nombre, slug, precio, categoria, linea, genero, destacado, proximamente, created_at,
+        id, nombre, slug, precio, precio_lista, categoria, linea, genero, destacado, proximamente, created_at,
         colores(nombre, hex, color_base, color_base_hex, imagen_url),
         variantes(talle, stock)
       `)
@@ -240,6 +241,7 @@ export interface ProductDetailFromDB {
   slug: string
   descripcion: string | null
   precio: number
+  precio_lista: number | null
   categoria: string
   linea: string
   genero: string
@@ -261,7 +263,7 @@ export async function getProductBySlug(slug: string): Promise<ProductDetailFromD
     const { data, error } = await supabase
       .from('productos')
       .select(`
-        id, nombre, slug, descripcion, precio, categoria, linea, genero,
+        id, nombre, slug, descripcion, precio, precio_lista, categoria, linea, genero,
         cuidado, detalles, destacado, created_at,
         colores(id, nombre, hex, imagen_url, orden, imagenes(id, url, orden)),
         variantes(id, color_id, talle, stock)
@@ -447,7 +449,7 @@ export async function getUserFavoriteProducts(userId: string): Promise<CatalogPr
     const { data, error } = await supabase
       .from('productos')
       .select(`
-        id, nombre, slug, precio, categoria, linea, genero, destacado, proximamente, created_at,
+        id, nombre, slug, precio, precio_lista, categoria, linea, genero, destacado, proximamente, created_at,
         colores(nombre, hex, color_base, color_base_hex, imagen_url),
         variantes(talle, stock)
       `)

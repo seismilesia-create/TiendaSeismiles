@@ -10,6 +10,7 @@ export interface ProductoRow {
   slug: string
   descripcion: string | null
   precio: number
+  precio_lista: number | null
   categoria: string
   linea: string
   genero: string
@@ -63,6 +64,7 @@ export interface CreateProductoDTO {
   slug: string
   descripcion?: string
   precio: number
+  precio_lista?: number | null
   categoria: string
   linea: string
   genero: string
@@ -142,6 +144,7 @@ export async function duplicateProduct(sourceId: string): Promise<string> {
       slug: `${source.slug}-copia-${Date.now()}`,
       descripcion: source.descripcion,
       precio: source.precio,
+      precio_lista: source.precio_lista,
       categoria: source.categoria,
       linea: source.linea,
       genero: source.genero,

@@ -10,7 +10,7 @@ type MediaItem =
   | { type: 'photo'; src: string; alt: string }
 
 const photos = [
-  { src: '/images/Idea.jpg', alt: 'Remera naranja en la montaña', color: 'Naranja Volcánico' },
+  { src: '/images/seccion-lookbook.jpeg', alt: 'Buzos verde cactus en la calle', color: 'Verde Cactus' },
   { src: '/images/Idea 2.jpg', alt: 'Remera blanca urbana', color: 'Blanco Salina' },
   { src: '/images/Idea 6.jpg', alt: 'Remera petroleo en el parque', color: 'Petróleo' },
   { src: '/images/Idea 3.jpg', alt: 'Remera borgoña en la calle', color: 'Borgoña Andino' },

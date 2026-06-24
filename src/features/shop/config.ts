@@ -27,6 +27,7 @@ export const shopConfig: ShopConfig = {
   },
 
   marqueeMessages: [
+    { text: 'Precios de lanzamiento · hasta 17% OFF · por tiempo limitado' },
     { text: 'Retiro gratis en Catamarca capital' },
     { text: 'Nueva colección de buzos · Invierno' },
     { text: 'Calidad de altura' },

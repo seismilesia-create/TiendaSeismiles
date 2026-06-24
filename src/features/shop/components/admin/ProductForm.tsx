@@ -91,6 +91,7 @@ interface ExistingProduct {
   slug: string
   descripcion: string | null
   precio: number
+  precio_lista: number | null
   categoria: string
   linea: string
   genero: string
@@ -372,10 +373,19 @@ export function ProductForm({ product, featuredCount, featuredLimit }: ProductFo
           </div>
 
           <div>
-            <label htmlFor="precio" className="block text-body-sm font-medium text-volcanic-700 mb-1.5">Precio (ARS) *</label>
+            <label htmlFor="precio" className="block text-body-sm font-medium text-volcanic-700 mb-1.5">Precio de lanzamiento (ARS) *</label>
             <input id="precio" name="precio" type="number" step="0.01" min="0" required defaultValue={product?.precio}
               className="w-full px-4 py-3 rounded-xl bg-white border border-sand-200 text-volcanic-900 text-body-md focus:outline-none focus:border-terra-500 transition-all"
               placeholder="18500" />
+            <p className="mt-1 text-body-xs text-volcanic-400">Es lo que paga el cliente. Se muestra grande.</p>
+          </div>
+
+          <div>
+            <label htmlFor="precio_lista" className="block text-body-sm font-medium text-volcanic-700 mb-1.5">Precio de lista (tachado)</label>
+            <input id="precio_lista" name="precio_lista" type="number" step="0.01" min="0" defaultValue={product?.precio_lista ?? ''}
+              className="w-full px-4 py-3 rounded-xl bg-white border border-sand-200 text-volcanic-900 text-body-md focus:outline-none focus:border-terra-500 transition-all"
+              placeholder="Opcional, ej: 24660" />
+            <p className="mt-1 text-body-xs text-volcanic-400">Opcional. Si es mayor al de lanzamiento, se muestra tachado con el % OFF. Dejalo vacío para no mostrar descuento.</p>
           </div>
 
           <div>

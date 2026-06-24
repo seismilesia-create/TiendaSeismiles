@@ -2,6 +2,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { shopConfig } from '../config'
 import { MagneticButton } from './MagneticButton'
+import { descuentoPct, formatPrecio } from '../utils/precio'
 import type { CatalogProductFromDB } from '../services/product-lines'
 
 function ArrowRightIcon({ className }: { className?: string }) {
@@ -23,6 +24,8 @@ interface DisplayProduct {
   name: string
   line: string
   price: string
+  priceList?: string
+  off?: number | null
   tag?: string
   colors?: ProductColor[]
 }
@@ -38,6 +41,8 @@ function mapDBProducts(dbProducts: CatalogProductFromDB[]): DisplayProduct[] {
         nombre: c.nombre,
       }))
 
+    const off = descuentoPct(p.precio, p.precio_lista)
+
     return {
       slug: p.slug,
       href: `/catalogo/${p.slug}`,
@@ -45,7 +50,9 @@ function mapDBProducts(dbProducts: CatalogProductFromDB[]): DisplayProduct[] {
       imageUrlSecondary: secondImage ?? undefined,
       name: p.nombre,
       line: p.linea,
-      price: `$${p.precio.toLocaleString('es-AR')}`,
+      price: formatPrecio(p.precio),
+      priceList: off ? formatPrecio(p.precio_lista!) : undefined,
+      off,
       colors,
     }
   })
@@ -138,12 +145,16 @@ export function FeaturedProducts({ dbProducts, seasonSubtitle }: FeaturedProduct
                   0{index + 1}
                 </span>
 
-                {/* Tag top-left */}
-                {product.tag && (
+                {/* OFF badge / Tag top-left */}
+                {product.off ? (
+                  <span className="absolute top-3 left-3 px-3 py-1 bg-gradient-to-br from-terra-400 to-terra-600 text-white text-[11px] font-extrabold uppercase tracking-wider rounded-full z-10 shadow-md ring-1 ring-white/15">
+                    {product.off}% OFF
+                  </span>
+                ) : product.tag ? (
                   <span className="absolute top-3 left-3 px-3 py-1 bg-terra-500 text-white text-[11px] font-semibold uppercase tracking-wider rounded-full z-10 shadow-sm">
                     {product.tag}
                   </span>
-                )}
+                ) : null}
 
                 {/* Hover overlay + CTA pill */}
                 <div className="absolute inset-0 bg-gradient-to-t from-volcanic-900/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
@@ -169,9 +180,16 @@ export function FeaturedProducts({ dbProducts, seasonSubtitle }: FeaturedProduct
 
                 {/* Price + color swatches */}
                 <div className="flex items-center justify-between gap-2 mt-1">
-                  <span className="text-body-md font-semibold text-volcanic-800">
-                    {product.price}
-                  </span>
+                  <div className="flex items-baseline gap-1.5 flex-wrap">
+                    <span className="text-body-md font-bold text-volcanic-800">
+                      {product.price}
+                    </span>
+                    {product.off && product.priceList && (
+                      <span className="text-body-xs text-volcanic-600 line-through">
+                        {product.priceList}
+                      </span>
+                    )}
+                  </div>
                   {product.colors && product.colors.length > 0 && (
                     <div className="flex items-center gap-[3px]">
                       {product.colors.slice(0, 5).map((c, i) => (

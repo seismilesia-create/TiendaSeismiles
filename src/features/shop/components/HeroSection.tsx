@@ -71,7 +71,7 @@ export function HeroSection() {
   const rafRef = useRef<number>(0)
   const startRef = useRef(Date.now())
 
-  const SLIDES_COUNT = 5
+  const SLIDES_COUNT = 6
 
   const next = useCallback(() => {
     setActive((prev) => (prev + 1) % SLIDES_COUNT)
@@ -132,11 +132,85 @@ export function HeroSection() {
       onTouchEnd={onTouchEnd}
     >
 
-      {/* ── SLIDE 0: Buzos (nueva línea) — split layout, image left, dark theme ── */}
+      {/* ── SLIDE 0: Precios de lanzamiento (anuncio tipográfico) ── */}
       <div
         className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${active === 0 ? 'opacity-100' : 'opacity-0 pointer-events-none'
           }`}
         aria-hidden={active !== 0}
+      >
+        {/* Degradado tipo lava */}
+        <div className="absolute inset-0 bg-gradient-to-br from-volcanic-950 via-[#5e2814] to-[#C75B39]" />
+        <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(ellipse_at_30%_15%,_rgba(244,160,104,0.4),_transparent_55%)]" />
+        <div
+          className="absolute inset-0 pointer-events-none opacity-[0.06]"
+          style={{
+            backgroundImage:
+              'radial-gradient(circle at 20% 30%, white 1px, transparent 1.5px), radial-gradient(circle at 70% 65%, white 1px, transparent 1.5px)',
+            backgroundSize: '90px 90px, 120px 120px',
+          }}
+        />
+
+        {/* "17%" gigante de fondo (marca de agua) */}
+        <div className="absolute inset-0 flex items-center justify-center overflow-hidden pointer-events-none">
+          <span className="font-display font-bold leading-none text-white/[0.05] text-[15rem] sm:text-[24rem] lg:text-[34rem] -rotate-6 select-none">
+            17%
+          </span>
+        </div>
+
+        {/* Marco fino decorativo */}
+        <div className="absolute inset-4 sm:inset-6 lg:inset-8 border border-white/10 rounded-2xl pointer-events-none" />
+
+        <div className="relative z-10 flex items-center justify-center min-h-[90vh] lg:min-h-screen px-6 pt-20 pb-28 lg:py-0">
+          <div className="max-w-3xl text-center">
+            {/* Badge con líneas a los costados */}
+            <div className="flex items-center justify-center gap-3 mb-5 lg:mb-7">
+              <span className="hidden sm:block h-px w-10 bg-white/30" />
+              <span className="inline-flex items-center gap-2 px-3 py-1.5 lg:px-4 lg:py-2 rounded-full bg-white/10 backdrop-blur-sm border border-white/25">
+                <SparkleIcon className="w-3.5 h-3.5 text-terra-200" />
+                <span className="text-body-xs uppercase tracking-widest font-semibold text-white/85">
+                  Apertura · Por tiempo limitado
+                </span>
+              </span>
+              <span className="hidden sm:block h-px w-10 bg-white/30" />
+            </div>
+
+            <h1 className="font-display text-[2.5rem] sm:text-[4rem] lg:text-[5.5rem] leading-[0.92] tracking-[0.03em] uppercase text-white mb-5 lg:mb-7 drop-shadow-lg">
+              Precios de<br />lanzamiento
+            </h1>
+
+            <div className="inline-flex items-center gap-3 sm:gap-4 mb-7 lg:mb-10">
+              <span className="font-display text-[1.75rem] sm:text-[2.5rem] lg:text-[3.25rem] leading-none uppercase text-white/90">
+                Hasta
+              </span>
+              <span className="font-display text-[2.5rem] sm:text-[3.75rem] lg:text-[5rem] leading-none uppercase text-white bg-gradient-to-br from-terra-400 to-terra-600 px-4 lg:px-6 py-1 lg:py-2 rounded-2xl shadow-warm-lg ring-1 ring-white/20">
+                17% OFF
+              </span>
+            </div>
+
+            <p className="text-body-md lg:text-xl leading-relaxed text-white/70 max-w-xl mx-auto mb-8 lg:mb-10">
+              Estrenamos tienda online con precios especiales de apertura en toda la web. Aprovechá el momento.
+            </p>
+
+            <div className="flex justify-center">
+              <MagneticButton>
+                <Link
+                  href="/catalogo"
+                  className="group flex items-center gap-2 px-6 py-3 lg:px-8 lg:py-4 text-body-sm lg:text-body-md font-semibold rounded-xl bg-white hover:bg-sand-100 text-volcanic-900 transition-all duration-300 hover:shadow-warm-lg"
+                >
+                  Ver colección
+                  <ArrowRightIcon className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-300" />
+                </Link>
+              </MagneticButton>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* ── SLIDE 1: Buzos (nueva línea) — split layout, image left, dark theme ── */}
+      <div
+        className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${active === 1 ? 'opacity-100' : 'opacity-0 pointer-events-none'
+          }`}
+        aria-hidden={active !== 1}
       >
         <div className="absolute inset-0 bg-gradient-to-br from-[#243443] via-[#1A2430] to-[#0F161E]" />
         <div className="absolute inset-x-0 top-0 h-[38vh] lg:inset-y-0 lg:left-0 lg:h-auto lg:w-1/2">
@@ -196,11 +270,11 @@ export function HeroSection() {
         </div>
       </div>
 
-      {/* ── SLIDE 1: Línea Mística (mujeres · edición limitada) — tríptico de 3 fotos ── */}
+      {/* ── SLIDE 2: Línea Mística (mujeres · edición limitada) — tríptico de 3 fotos ── */}
       <div
-        className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${active === 1 ? 'opacity-100' : 'opacity-0 pointer-events-none'
+        className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${active === 2 ? 'opacity-100' : 'opacity-0 pointer-events-none'
           }`}
-        aria-hidden={active !== 1}
+        aria-hidden={active !== 2}
       >
         {/* Negro elegante con un sutil brillo mauve/rosa arriba */}
         <div className="absolute inset-0 bg-[#150E12]" />
@@ -265,11 +339,11 @@ export function HeroSection() {
         </div>
       </div>
 
-      {/* ── SLIDE 3: Split layout (dark theme) — Línea Origen ── */}
+      {/* ── SLIDE 4: Split layout (dark theme) — Línea Origen ── */}
       <div
-        className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${active === 3 ? 'opacity-100' : 'opacity-0 pointer-events-none'
+        className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${active === 4 ? 'opacity-100' : 'opacity-0 pointer-events-none'
           }`}
-        aria-hidden={active !== 3}
+        aria-hidden={active !== 4}
       >
         <div className="absolute inset-0 bg-volcanic-900" />
         <div className="absolute inset-x-0 top-0 h-[35vh] lg:inset-y-0 lg:left-0 lg:h-auto lg:w-1/2">
@@ -315,11 +389,11 @@ export function HeroSection() {
         </div>
       </div>
 
-      {/* ── SLIDE 2: Línea Arista — split layout, image right ── */}
+      {/* ── SLIDE 3: Línea Arista — split layout, image right ── */}
       <div
-        className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${active === 2 ? 'opacity-100' : 'opacity-0 pointer-events-none'
+        className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${active === 3 ? 'opacity-100' : 'opacity-0 pointer-events-none'
           }`}
-        aria-hidden={active !== 2}
+        aria-hidden={active !== 3}
       >
         <div className="absolute inset-0 bg-volcanic-900" />
         <div className="absolute inset-x-0 top-0 h-[42vh] lg:inset-y-0 lg:right-0 lg:left-auto lg:h-auto lg:w-1/2">
@@ -365,11 +439,11 @@ export function HeroSection() {
         </div>
       </div>
 
-      {/* ── SLIDE 4: Fullscreen landscape (light theme) ── */}
+      {/* ── SLIDE 5: Fullscreen landscape (light theme) ── */}
       <div
-        className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${active === 4 ? 'opacity-100' : 'opacity-0 pointer-events-none'
+        className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${active === 5 ? 'opacity-100' : 'opacity-0 pointer-events-none'
           }`}
-        aria-hidden={active !== 4}
+        aria-hidden={active !== 5}
       >
         <Image
           src="/images/Hero section.png"
@@ -420,8 +494,8 @@ export function HeroSection() {
       </div>
 
       {/* ── Arrow navigation (left/right) ── */}
-      <NavButton side="left" onClick={prev} label="Slide anterior" light={active === 4} />
-      <NavButton side="right" onClick={next} label="Slide siguiente" light={active === 4} />
+      <NavButton side="left" onClick={prev} label="Slide anterior" light={active === 5} />
+      <NavButton side="right" onClick={next} label="Slide siguiente" light={active === 5} />
 
       {/* ── Progress bars (fixed at bottom of hero) ── */}
       <div className="absolute bottom-6 lg:bottom-8 left-1/2 -translate-x-1/2 z-20 flex items-center gap-3">
@@ -432,10 +506,10 @@ export function HeroSection() {
             className="group relative h-[3px] w-[60px] cursor-pointer"
             aria-label={`Slide ${i + 1}`}
           >
-            <div className={`absolute inset-0 rounded-full transition-colors duration-700 ${active === 4 ? 'bg-volcanic-900/20' : 'bg-white/25'
+            <div className={`absolute inset-0 rounded-full transition-colors duration-700 ${active === 5 ? 'bg-volcanic-900/20' : 'bg-white/25'
               }`} />
             <div
-              className={`absolute inset-y-0 left-0 rounded-full transition-colors duration-700 ${active === 4 ? 'bg-volcanic-900' : 'bg-white'
+              className={`absolute inset-y-0 left-0 rounded-full transition-colors duration-700 ${active === 5 ? 'bg-volcanic-900' : 'bg-white'
                 }`}
               style={{
                 width: i === active ? `${progress * 100}%` : i < active ? '100%' : '0%',
