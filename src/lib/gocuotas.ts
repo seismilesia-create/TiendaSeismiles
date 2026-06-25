@@ -120,20 +120,19 @@ export async function getOrder(id: string | number): Promise<GocuotasOrder | nul
 }
 
 /**
- * GET /orders?order_reference_id=... — look up an order by OUR reference. The
- * API requires a delivered date range, so we pass a wide window (last 90 days
- * → tomorrow, UTC). Returns the matching order or null.
+ * GET /orders?order_reference_id=... — look up an order by OUR reference within
+ * a delivered date range. Returns the matching order or null.
  *
- * This is the security-critical read: the GoCuotas webhook has no signature,
- * so confirmation is driven by re-querying here, never by the webhook body.
+ * IMPORTANT: this endpoint only lists orders that GoCuotas has already
+ * delivered/settled — a freshly-paid order returns `[]` here (confirmed in
+ * production). So this is NOT used to confirm a fresh payment; that goes through
+ * getOrder(order_id) with the order_id from the webhook. Use this only for
+ * historical reconciliation of orders old enough to be settled.
  */
 export async function getOrderByRef(ref: string): Promise<GocuotasOrder | null> {
   const now = new Date()
-  // Wide window in BOTH directions: a freshly-paid order may carry a future
-  // "delivered" date (the installment schedule runs months ahead), so a
-  // now+1day end would exclude it.
   const start = new Date(now.getTime() - 400 * 24 * 60 * 60 * 1000)
-  const end = new Date(now.getTime() + 400 * 24 * 60 * 60 * 1000)
+  const end = new Date(now.getTime() + 24 * 60 * 60 * 1000)
 
   const qs = new URLSearchParams({
     order_reference_id: ref,
@@ -146,20 +145,14 @@ export async function getOrderByRef(ref: string): Promise<GocuotasOrder | null> 
     headers: { Authorization: authHeader(), Accept: 'application/json' },
     cache: 'no-store',
   })
-
-  const rawText = await res.text().catch(() => '')
   if (!res.ok) {
-    throw new Error(`GoCuotas GET /orders failed: ${res.status} ${rawText}`)
+    const text = await res.text().catch(() => '')
+    throw new Error(`GoCuotas GET /orders failed: ${res.status} ${text}`)
   }
 
   // The endpoint may return an array of orders or a single object. Normalize
   // and pick the order whose order_reference_id matches exactly.
-  let data: unknown = null
-  try {
-    data = rawText ? JSON.parse(rawText) : null
-  } catch {
-    data = null
-  }
+  const data = (await res.json()) as unknown
   const list: GocuotasOrder[] = Array.isArray(data)
     ? (data as GocuotasOrder[])
     : Array.isArray((data as { orders?: GocuotasOrder[] })?.orders)
@@ -167,22 +160,6 @@ export async function getOrderByRef(ref: string): Promise<GocuotasOrder | null> 
       : data
         ? [data as GocuotasOrder]
         : []
-
-  // TEMP diagnostic: shows exactly what GoCuotas returns for a ref, so we can
-  // tell "empty result" from "returned but not approved" from "different shape".
-  console.log('[gocuotas.getOrderByRef]', JSON.stringify({
-    ref,
-    httpStatus: res.status,
-    rawLen: rawText.length,
-    rawHead: rawText.slice(0, 500),
-    parsedCount: list.length,
-    summary: list.map((o) => ({
-      id: o.id,
-      order_reference_id: o.order_reference_id,
-      status: o.status,
-      amount_in_cents: o.amount_in_cents,
-    })),
-  }))
 
   return list.find((o) => o.order_reference_id === ref) ?? null
 }

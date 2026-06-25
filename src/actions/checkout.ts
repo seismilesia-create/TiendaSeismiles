@@ -992,9 +992,14 @@ export async function verifyPendingOrders(externalRef: string): Promise<ConfirmR
  *   4. Cohesion: every order named in ref must exist AND share the same
  *      gocuotas_order_ref (mirrors the mp_preference_id check).
  *
- * Idempotent via the shared transition helpers. `orderId` (from the webhook
- * body, if present) is only an optimization for the GET — the ref match above
- * is what actually authenticates.
+ * Idempotent via the shared transition helpers.
+ *
+ * `orderId` is GoCuotas's `order_id` from the webhook body. It is the RELIABLE
+ * verification path: getOrder(order_id) returns a freshly-paid order, whereas
+ * getOrderByRef returns [] until the order is settled. So the webhook (which
+ * always carries order_id on approved/denied) drives confirmation; the
+ * ref-only fallback is for historical reconciliation of already-settled orders.
+ * The ref match (gate 1) still authenticates regardless of which path fetched.
  */
 export async function confirmGocuotasPayment(
   ref: string,
