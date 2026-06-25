@@ -129,8 +129,11 @@ export async function getOrder(id: string | number): Promise<GocuotasOrder | nul
  */
 export async function getOrderByRef(ref: string): Promise<GocuotasOrder | null> {
   const now = new Date()
-  const start = new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000)
-  const end = new Date(now.getTime() + 24 * 60 * 60 * 1000)
+  // Wide window in BOTH directions: a freshly-paid order may carry a future
+  // "delivered" date (the installment schedule runs months ahead), so a
+  // now+1day end would exclude it.
+  const start = new Date(now.getTime() - 400 * 24 * 60 * 60 * 1000)
+  const end = new Date(now.getTime() + 400 * 24 * 60 * 60 * 1000)
 
   const qs = new URLSearchParams({
     order_reference_id: ref,
@@ -143,14 +146,20 @@ export async function getOrderByRef(ref: string): Promise<GocuotasOrder | null> 
     headers: { Authorization: authHeader(), Accept: 'application/json' },
     cache: 'no-store',
   })
+
+  const rawText = await res.text().catch(() => '')
   if (!res.ok) {
-    const text = await res.text().catch(() => '')
-    throw new Error(`GoCuotas GET /orders failed: ${res.status} ${text}`)
+    throw new Error(`GoCuotas GET /orders failed: ${res.status} ${rawText}`)
   }
 
   // The endpoint may return an array of orders or a single object. Normalize
   // and pick the order whose order_reference_id matches exactly.
-  const data = (await res.json()) as unknown
+  let data: unknown = null
+  try {
+    data = rawText ? JSON.parse(rawText) : null
+  } catch {
+    data = null
+  }
   const list: GocuotasOrder[] = Array.isArray(data)
     ? (data as GocuotasOrder[])
     : Array.isArray((data as { orders?: GocuotasOrder[] })?.orders)
@@ -158,6 +167,22 @@ export async function getOrderByRef(ref: string): Promise<GocuotasOrder | null> 
       : data
         ? [data as GocuotasOrder]
         : []
+
+  // TEMP diagnostic: shows exactly what GoCuotas returns for a ref, so we can
+  // tell "empty result" from "returned but not approved" from "different shape".
+  console.log('[gocuotas.getOrderByRef]', JSON.stringify({
+    ref,
+    httpStatus: res.status,
+    rawLen: rawText.length,
+    rawHead: rawText.slice(0, 500),
+    parsedCount: list.length,
+    summary: list.map((o) => ({
+      id: o.id,
+      order_reference_id: o.order_reference_id,
+      status: o.status,
+      amount_in_cents: o.amount_in_cents,
+    })),
+  }))
 
   return list.find((o) => o.order_reference_id === ref) ?? null
 }
