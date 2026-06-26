@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import {
   MarqueeBanner, Navbar, HeroSection, FeaturedProducts,
   LookbookSection, CategoriesGrid, QualitySection, BenefitsBar,
-  NewsletterSection, Footer, ScrollReveal, WelcomeDiscountModal,
+  NewsletterSection, Footer, ScrollReveal, WelcomeDiscountModal, LaunchGate,
 } from '@/features/shop/components'
 // LineShowcase + SHOWCASE_LINES: sección interactiva oculta temporalmente.
 // Para reactivar: descomentar estos imports y el bloque <ScrollReveal> de abajo.
@@ -38,7 +38,7 @@ export default async function HomePage() {
   }
 
   return (
-    <>
+    <LaunchGate>
       <MarqueeBanner />
       <Navbar productLines={productLines} user={navUser} />
 
@@ -73,6 +73,6 @@ export default async function HomePage() {
 
       <Footer productLines={productLines} />
       <WelcomeDiscountModal />
-    </>
+    </LaunchGate>
   )
 }
