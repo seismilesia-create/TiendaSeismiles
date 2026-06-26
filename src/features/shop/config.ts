@@ -30,7 +30,7 @@ export const shopConfig: ShopConfig = {
     { text: 'Precios de lanzamiento · hasta 17% OFF · por tiempo limitado' },
     { text: 'Retiro gratis en Catamarca capital' },
     { text: 'Nueva colección de buzos · Invierno' },
-    { text: 'Calidad de altura' },
+    { text: '¡Hasta 3 cuotas sin interés!' },
     { text: 'Calidad premium garantizada' },
   ],
 

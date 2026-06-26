@@ -138,67 +138,136 @@ export function HeroSection() {
           }`}
         aria-hidden={active !== 0}
       >
-        {/* Degradado tipo lava */}
-        <div className="absolute inset-0 bg-gradient-to-br from-volcanic-950 via-[#5e2814] to-[#C75B39]" />
-        <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(ellipse_at_30%_15%,_rgba(244,160,104,0.4),_transparent_55%)]" />
+        {/* Degradado volcánico (5 stops) */}
         <div
-          className="absolute inset-0 pointer-events-none opacity-[0.06]"
+          className="absolute inset-0"
+          style={{ background: 'linear-gradient(135deg,#1A1614 0%,#3E1C13 34%,#5E2814 62%,#A04830 86%,#C75B39 100%)' }}
+        />
+        {/* Glows radiales para dar profundidad */}
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{ background: 'radial-gradient(58% 75% at 10% 14%, rgba(244,160,104,.42) 0%, rgba(244,160,104,.12) 38%, transparent 64%)' }}
+        />
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{ background: 'radial-gradient(50% 80% at 96% 108%, rgba(220,138,108,.55) 0%, transparent 60%)' }}
+        />
+        {/* Textura de puntos con máscara diagonal */}
+        <div
+          className="absolute inset-0 pointer-events-none"
           style={{
-            backgroundImage:
-              'radial-gradient(circle at 20% 30%, white 1px, transparent 1.5px), radial-gradient(circle at 70% 65%, white 1px, transparent 1.5px)',
-            backgroundSize: '90px 90px, 120px 120px',
+            backgroundImage: 'radial-gradient(rgba(255,255,255,.07) 1.1px, transparent 1.1px)',
+            backgroundSize: '24px 24px',
+            WebkitMaskImage: 'linear-gradient(105deg, transparent 30%, rgba(0,0,0,.9) 100%)',
+            maskImage: 'linear-gradient(105deg, transparent 30%, rgba(0,0,0,.9) 100%)',
           }}
         />
 
-        {/* "17%" gigante de fondo (marca de agua) */}
-        <div className="absolute inset-0 flex items-center justify-center overflow-hidden pointer-events-none">
-          <span className="font-display font-bold leading-none text-white/[0.05] text-[15rem] sm:text-[24rem] lg:text-[34rem] -rotate-6 select-none">
-            17%
-          </span>
-        </div>
+        {/* "%" gigante de fondo (marca de agua) */}
+        <span
+          className="absolute right-[-2vw] top-1/2 -translate-y-1/2 rotate-[-6deg] font-display leading-[0.8] text-white/[0.05] select-none pointer-events-none text-[clamp(320px,42vw,760px)]"
+          aria-hidden="true"
+        >
+          %
+        </span>
+
+        {/* Silueta de montañas (abajo a la derecha) */}
+        <svg
+          className="absolute right-0 bottom-0 w-[min(760px,55vw)] h-auto opacity-50 pointer-events-none hidden md:block"
+          viewBox="0 0 760 540"
+          preserveAspectRatio="none"
+          aria-hidden="true"
+        >
+          <polyline points="0,540 150,300 250,420 420,150 520,330 640,210 760,360 760,540" fill="none" stroke="rgba(255,255,255,.16)" strokeWidth={1.5} />
+          <polyline points="0,540 200,380 340,470 500,260 620,400 760,300" fill="none" stroke="rgba(255,255,255,.10)" strokeWidth={1.5} />
+        </svg>
 
         {/* Marco fino decorativo */}
-        <div className="absolute inset-4 sm:inset-6 lg:inset-8 border border-white/10 rounded-2xl pointer-events-none" />
+        <div
+          className="absolute border border-white/10 rounded-[3px] pointer-events-none"
+          style={{ inset: 'clamp(14px,1.6vw,24px)' }}
+        />
 
-        <div className="relative z-10 flex items-center justify-center min-h-[90vh] lg:min-h-screen px-6 pt-20 pb-28 lg:py-0">
-          <div className="max-w-3xl text-center">
-            {/* Badge con líneas a los costados */}
-            <div className="flex items-center justify-center gap-3 mb-5 lg:mb-7">
-              <span className="hidden sm:block h-px w-10 bg-white/30" />
-              <span className="inline-flex items-center gap-2 px-3 py-1.5 lg:px-4 lg:py-2 rounded-full bg-white/10 backdrop-blur-sm border border-white/25">
-                <SparkleIcon className="w-3.5 h-3.5 text-terra-200" />
-                <span className="text-body-xs uppercase tracking-widest font-semibold text-white/85">
-                  Apertura · Por tiempo limitado
-                </span>
+        <div className="relative z-10 flex items-center min-h-[90vh] lg:min-h-screen">
+          <div
+            className="w-full flex flex-col items-start"
+            style={{ padding: 'clamp(40px,5vw,72px) clamp(28px,6vw,116px)' }}
+          >
+            {/* Badge + línea */}
+            <div className="flex items-center gap-[18px] mb-[clamp(22px,2.6vw,34px)]">
+              <span className="inline-flex items-center gap-[11px] px-5 py-[9px] rounded-full border border-white/25 bg-white/[0.07] font-medium uppercase tracking-[0.28em] text-white/90 whitespace-nowrap text-[clamp(11px,1vw,12.5px)]">
+                <SparkleIcon className="w-[15px] h-[15px] text-[#F4A068]" />
+                Apertura · Por tiempo limitado
               </span>
-              <span className="hidden sm:block h-px w-10 bg-white/30" />
+              <span
+                className="hidden md:block h-px w-[180px]"
+                style={{ background: 'linear-gradient(90deg,rgba(255,255,255,.4),rgba(255,255,255,0))' }}
+              />
             </div>
 
-            <h1 className="font-display text-[2.5rem] sm:text-[4rem] lg:text-[5.5rem] leading-[0.92] tracking-[0.03em] uppercase text-white mb-5 lg:mb-7 drop-shadow-lg">
-              Precios de<br />lanzamiento
+            {/* Titular */}
+            <h1
+              className="font-display font-normal text-white tracking-[0.012em] leading-[0.86] text-[clamp(64px,9vw,152px)]"
+              style={{ textShadow: '0 4px 40px rgba(0,0,0,.25)' }}
+            >
+              Precios de<br />Lanzamiento
             </h1>
 
-            <div className="inline-flex items-center gap-3 sm:gap-4 mb-7 lg:mb-10">
-              <span className="font-display text-[1.75rem] sm:text-[2.5rem] lg:text-[3.25rem] leading-none uppercase text-white/90">
-                Hasta
-              </span>
-              <span className="font-display text-[2.5rem] sm:text-[3.75rem] lg:text-[5rem] leading-none uppercase text-white bg-gradient-to-br from-terra-400 to-terra-600 px-4 lg:px-6 py-1 lg:py-2 rounded-2xl shadow-warm-lg ring-1 ring-white/20">
-                17% OFF
-              </span>
+            {/* Combo de dos cápsulas gemelas */}
+            <div className="flex flex-col items-stretch w-full sm:w-auto sm:flex-row sm:items-center gap-3 sm:gap-[18px] mt-[clamp(28px,3vw,38px)]">
+              {/* Cápsula A — Descuento */}
+              <div
+                className="flex items-center justify-center gap-[15px] sm:gap-[18px] w-full sm:w-auto max-w-full h-20 sm:h-[98px] px-[22px] sm:px-8 rounded-[20px]"
+                style={{
+                  background: 'linear-gradient(135deg,#C75B39 0%,#DC8A6C 100%)',
+                  boxShadow: '0 22px 48px -16px rgba(199,91,57,.7), inset 0 1px 0 rgba(255,255,255,.25)',
+                  outline: '1px solid rgba(255,255,255,.30)',
+                  outlineOffset: '-1px',
+                }}
+              >
+                <span className="flex-none w-[52px] h-[52px] rounded-full bg-white/[0.16] border border-white/40 flex items-center justify-center">
+                  <svg width="25" height="25" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth={1.7} strokeLinecap="round" strokeLinejoin="round"><path d="M3 11.5 11.5 3H20a1 1 0 0 1 1 1v8.5L12.5 21a1.5 1.5 0 0 1-2.1 0L3 13.6a1.5 1.5 0 0 1 0-2.1Z" /><circle cx="16" cy="8" r="1.3" /></svg>
+                </span>
+                <span className="flex flex-col gap-1">
+                  <small className="font-sans font-semibold uppercase tracking-[0.26em] text-white/85 text-[10.5px]">Descuento</small>
+                  <b className="font-display font-normal leading-[0.9] tracking-[0.025em] text-white whitespace-nowrap text-[32px] sm:text-[40px]">Hasta 17% OFF</b>
+                </span>
+              </div>
+
+              <span className="self-center sm:self-auto flex-none w-9 h-9 sm:w-[46px] sm:h-[46px] rounded-full border-[1.5px] border-white/40 bg-white/10 flex items-center justify-center font-display text-white/90 text-[24px] sm:text-[30px]">+</span>
+
+              {/* Cápsula B — Financiación */}
+              <div
+                className="flex items-center justify-center gap-[15px] sm:gap-[18px] w-full sm:w-auto max-w-full h-20 sm:h-[98px] px-[22px] sm:px-8 rounded-[20px]"
+                style={{
+                  background: 'linear-gradient(135deg,#C75B39 0%,#DC8A6C 100%)',
+                  boxShadow: '0 22px 48px -16px rgba(199,91,57,.7), inset 0 1px 0 rgba(255,255,255,.25)',
+                  outline: '1px solid rgba(255,255,255,.30)',
+                  outlineOffset: '-1px',
+                }}
+              >
+                <span className="flex-none w-[52px] h-[52px] rounded-full bg-white/[0.16] border border-white/40 flex items-center justify-center">
+                  <svg width="25" height="25" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth={1.7} strokeLinecap="round" strokeLinejoin="round"><rect x="2.5" y="5" width="19" height="14" rx="2.5" /><path d="M2.5 9.5h19" /><path d="M6 14.5h4" /></svg>
+                </span>
+                <span className="flex flex-col gap-1">
+                  <small className="font-sans font-semibold uppercase tracking-[0.26em] text-white/85 text-[10.5px]">Financiación</small>
+                  <b className="font-display font-normal leading-[0.9] tracking-[0.025em] text-white whitespace-nowrap text-[32px] sm:text-[40px]">3 Cuotas sin interés</b>
+                </span>
+              </div>
             </div>
 
-            <p className="text-body-md lg:text-xl leading-relaxed text-white/70 max-w-xl mx-auto mb-8 lg:mb-10">
+            <p className="mt-[clamp(26px,2.6vw,34px)] max-w-[560px] leading-[1.62] text-white/[0.72] text-[clamp(15px,1.3vw,18px)]">
               Estrenamos tienda online con precios especiales de apertura en toda la web. Aprovechá el momento.
             </p>
 
-            <div className="flex justify-center">
+            <div className="mt-[clamp(24px,2.4vw,30px)]">
               <MagneticButton>
                 <Link
                   href="/catalogo"
-                  className="group flex items-center gap-2 px-6 py-3 lg:px-8 lg:py-4 text-body-sm lg:text-body-md font-semibold rounded-xl bg-white hover:bg-sand-100 text-volcanic-900 transition-all duration-300 hover:shadow-warm-lg"
+                  className="group inline-flex items-center gap-3 px-[38px] py-[18px] rounded-full bg-[#FDFCFA] text-volcanic-900 font-semibold tracking-[0.01em] text-[16px] shadow-[0_18px_40px_-14px_rgba(0,0,0,.5)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_24px_48px_-14px_rgba(0,0,0,.55)]"
                 >
                   Ver colección
-                  <ArrowRightIcon className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-300" />
+                  <ArrowRightIcon className="w-[18px] h-[18px] group-hover:translate-x-1 transition-transform duration-300" />
                 </Link>
               </MagneticButton>
             </div>

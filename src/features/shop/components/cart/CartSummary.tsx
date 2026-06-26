@@ -682,20 +682,24 @@ export function CartSummary({ userId }: CartSummaryProps) {
                 onChange={() => setPaymentProvider('mercadopago')}
                 className="accent-terra-500"
               />
-              <Image
-                src="/images/payment/mercadopago.svg"
-                alt="Mercado Pago"
-                width={90}
-                height={24}
-                className="h-6 w-auto shrink-0"
-              />
+              {/* El logo de MP es 100% blanco, así que va sobre un chip con su
+                  azul de marca para que no se transparente con el fondo. */}
+              <span className="flex items-center justify-center h-7 px-2.5 rounded-lg bg-[#009ee3] shrink-0">
+                <Image
+                  src="/images/payment/mercadopago.svg"
+                  alt="Mercado Pago"
+                  width={75}
+                  height={20}
+                  className="h-5 w-auto"
+                />
+              </span>
               <span className="text-body-xs text-volcanic-500">Tarjeta, débito y más</span>
             </label>
 
             <label
-              className={`flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-colors ${paymentProvider === 'gocuotas'
-                ? 'border-terra-500 bg-terra-50'
-                : 'border-sand-200 hover:border-sand-300 bg-white'
+              className={`relative flex items-center gap-3 p-3 rounded-xl border-2 cursor-pointer transition-colors ${paymentProvider === 'gocuotas'
+                ? 'border-[#e6007e] bg-[#e6007e]/[0.06]'
+                : 'border-[#e6007e]/30 hover:border-[#e6007e]/60 bg-white'
                 }`}
             >
               <input
@@ -704,16 +708,26 @@ export function CartSummary({ userId }: CartSummaryProps) {
                 value="gocuotas"
                 checked={paymentProvider === 'gocuotas'}
                 onChange={() => setPaymentProvider('gocuotas')}
-                className="accent-terra-500"
+                className="accent-[#e6007e]"
               />
               <Image
                 src="/images/payment/gocuotas.png"
                 alt="GoCuotas"
-                width={62}
-                height={24}
-                className="h-6 w-auto shrink-0"
+                width={72}
+                height={28}
+                className="h-7 w-auto shrink-0"
               />
-              <span className="text-body-xs text-volcanic-500">Cuotas sin interés con débito</span>
+              <div className="min-w-0 flex-1">
+                <span className="block text-body-sm font-bold text-[#c7006c] leading-tight">
+                  Cuotas sin interés
+                </span>
+                <span className="block text-body-xs text-volcanic-500">
+                  Con tu tarjeta de débito
+                </span>
+              </div>
+              <span className="shrink-0 px-2 py-0.5 rounded-full bg-[#e6007e] text-white text-[10px] font-bold uppercase tracking-wide">
+                0% interés
+              </span>
             </label>
           </div>
         </>

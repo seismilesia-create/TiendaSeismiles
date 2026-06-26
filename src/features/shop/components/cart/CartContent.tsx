@@ -64,21 +64,29 @@ export function CartContent({ allProducts, userId }: CartContentProps) {
   const hydrated = useCartHydrated()
   const { suggestion } = useCrossSell(items, allProducts)
 
+  // Recomendaciones: buzos de distintas líneas. Mostramos un buzo por línea
+  // primero (para que se vea variedad) y recién después completamos con el
+  // resto si quedan slots libres.
   const recommendations = useMemo(() => {
-    if (items.length === 0) return allProducts.filter((p) => p.destacado).slice(0, 4)
-
     const cartProductIds = new Set(items.map((i) => i.productId))
-    const cartLineas = new Set(
-      items
-        .map((i) => allProducts.find((p) => p.id === i.productId)?.linea)
-        .filter(Boolean)
+
+    const buzos = allProducts.filter(
+      (p) => p.categoria === 'buzos' && !p.proximamente && !cartProductIds.has(p.id),
     )
 
-    const available = allProducts.filter((p) => !cartProductIds.has(p.id))
-    const sameLinea = available.filter((p) => cartLineas.has(p.linea))
-    const rest = available.filter((p) => !cartLineas.has(p.linea))
+    const seenLineas = new Set<string>()
+    const oneacross: CatalogProductFromDB[] = []
+    const rest: CatalogProductFromDB[] = []
+    for (const p of buzos) {
+      if (p.linea && !seenLineas.has(p.linea)) {
+        seenLineas.add(p.linea)
+        oneacross.push(p)
+      } else {
+        rest.push(p)
+      }
+    }
 
-    return [...sameLinea, ...rest].slice(0, 4)
+    return [...oneacross, ...rest].slice(0, 4)
   }, [items, allProducts])
 
   return (
@@ -90,36 +98,57 @@ export function CartContent({ allProducts, userId }: CartContentProps) {
       {!hydrated ? (
         <CartSkeleton />
       ) : items.length === 0 ? (
-        <EmptyCart />
+        <>
+          <EmptyCart />
+          {/* Carrito vacío: recomendaciones a todo el ancho, en grilla de 4. */}
+          {recommendations.length > 0 && (
+            <section className="mt-16 lg:mt-24">
+              <h2 className="font-heading text-display-xs text-volcanic-900 mb-8">
+                También te podría interesar
+              </h2>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
+                {recommendations.map((p) => (
+                  <ProductCard key={p.id} product={p} />
+                ))}
+              </div>
+            </section>
+          )}
+        </>
       ) : (
-        <div className="lg:grid lg:grid-cols-[1fr_380px] lg:gap-10">
-          {/* Items list */}
-          <div className="space-y-4">
+        // Orden del DOM (= orden en mobile): prendas → resumen/pago →
+        // recomendaciones. En desktop el grid recoloca: prendas y buzos
+        // apilados en la columna izquierda, y el resumen como panel propio a
+        // la derecha. Ese panel es sticky con altura máxima = viewport y
+        // scroll interno, así se desliza SOLO el resumen para llegar a pagar
+        // sin mover toda la página.
+        <div className="lg:grid lg:grid-cols-[1fr_380px] lg:gap-x-10 lg:items-start">
+          {/* Prendas — col izq, fila 1 */}
+          <div className="space-y-4 lg:col-start-1 lg:row-start-1">
             {items.map((item) => (
               <CartItemCard key={item.variantId} item={item} />
             ))}
             {suggestion && <UpsellBanner suggestion={suggestion} />}
           </div>
 
-          {/* Summary sidebar */}
-          <div className="mt-8 lg:mt-0 lg:sticky lg:top-24 lg:self-start">
+          {/* Resumen — col der, panel deslizable (sticky + scroll interno) */}
+          <div className="mt-8 lg:mt-0 lg:col-start-2 lg:row-start-1 lg:row-span-2 lg:sticky lg:top-24 lg:self-start lg:max-h-[calc(100vh-7rem)] lg:overflow-y-auto lg:overscroll-contain">
             <CartSummary userId={userId} />
           </div>
-        </div>
-      )}
 
-      {/* Recommendations */}
-      {hydrated && recommendations.length > 0 && (
-        <section className="mt-16 lg:mt-24">
-          <h2 className="font-heading text-display-xs text-volcanic-900 mb-8">
-            También te podría interesar
-          </h2>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
-            {recommendations.map((p) => (
-              <ProductCard key={p.id} product={p} />
-            ))}
-          </div>
-        </section>
+          {/* Recomendaciones — col izq, fila 2 (debajo del pedido) */}
+          {recommendations.length > 0 && (
+            <section className="mt-12 lg:mt-10 lg:col-start-1 lg:row-start-2">
+              <h2 className="font-heading text-display-xs text-volcanic-900 mb-6">
+                También te podría interesar
+              </h2>
+              <div className="grid grid-cols-2 gap-4 sm:gap-6">
+                {recommendations.map((p) => (
+                  <ProductCard key={p.id} product={p} />
+                ))}
+              </div>
+            </section>
+          )}
+        </div>
       )}
     </div>
   )
