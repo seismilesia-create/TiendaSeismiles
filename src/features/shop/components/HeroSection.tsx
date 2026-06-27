@@ -288,7 +288,7 @@ export function HeroSection() {
             alt="Buzos canguro SEISMILES"
             fill
             priority
-            className="object-cover object-[50%_44%] lg:object-[50%_60%]"
+            className="object-cover object-[50%_66%] lg:object-[50%_60%]"
           />
           {/* Cool wintry wash over the photo */}
           <div className="absolute inset-0 bg-gradient-to-br from-[#3A6B8C]/25 via-transparent to-[#1A2430]/30 mix-blend-multiply" />
@@ -470,7 +470,7 @@ export function HeroSection() {
             src="/images/Hero.jpg"
             alt="Ropa de temporada — línea Arista"
             fill
-            className="object-cover object-[50%_42%] lg:object-center"
+            className="object-cover object-[50%_58%] lg:object-center"
           />
           <div className="hidden lg:block absolute inset-y-0 left-0 w-32 bg-gradient-to-r from-volcanic-900 to-transparent" />
           <div className="lg:hidden absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-volcanic-900 to-transparent" />
