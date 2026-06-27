@@ -207,14 +207,14 @@ export function HeroSection() {
 
             {/* Titular */}
             <h1
-              className="font-display font-normal text-white tracking-[0.012em] leading-[0.86] text-[clamp(64px,9vw,152px)]"
+              className="font-display font-normal text-white tracking-[0.012em] leading-[0.86] text-[clamp(52px,9vw,152px)]"
               style={{ textShadow: '0 4px 40px rgba(0,0,0,.25)' }}
             >
               Precios de<br />Lanzamiento
             </h1>
 
             {/* Combo de dos cápsulas gemelas */}
-            <div className="flex flex-col items-stretch w-full sm:w-auto sm:flex-row sm:items-center gap-3 sm:gap-[18px] mt-[clamp(28px,3vw,38px)]">
+            <div className="flex flex-col items-stretch w-full sm:w-auto sm:flex-row sm:items-center gap-3 sm:gap-[18px] mt-6 sm:mt-[clamp(28px,3vw,38px)]">
               {/* Cápsula A — Descuento */}
               <div
                 className="flex items-center justify-center gap-3 sm:gap-[18px] w-full sm:w-auto max-w-full h-[72px] sm:h-[98px] px-[18px] sm:px-8 rounded-[20px]"
@@ -256,11 +256,11 @@ export function HeroSection() {
               </div>
             </div>
 
-            <p className="mt-[clamp(26px,2.6vw,34px)] max-w-[560px] leading-[1.62] text-white/[0.72] text-[clamp(15px,1.3vw,18px)]">
+            <p className="mt-5 sm:mt-[clamp(26px,2.6vw,34px)] max-w-[560px] leading-[1.62] text-white/[0.72] text-[clamp(15px,1.3vw,18px)]">
               Estrenamos tienda online con precios especiales de apertura en toda la web. Aprovechá el momento.
             </p>
 
-            <div className="mt-[clamp(24px,2.4vw,30px)]">
+            <div className="mt-6 sm:mt-[clamp(24px,2.4vw,30px)]">
               <MagneticButton>
                 <Link
                   href="/catalogo"
@@ -282,7 +282,7 @@ export function HeroSection() {
         aria-hidden={active !== 1}
       >
         <div className="absolute inset-0 bg-gradient-to-br from-[#243443] via-[#1A2430] to-[#0F161E]" />
-        <div className="absolute inset-x-0 top-0 h-[44vh] lg:inset-y-0 lg:left-0 lg:h-auto lg:w-1/2">
+        <div className="absolute inset-x-0 top-0 h-[38vh] lg:inset-y-0 lg:left-0 lg:h-auto lg:w-1/2">
           <Image
             src="/images/Hero Buzos 1.jpg"
             alt="Buzos canguro SEISMILES"
@@ -308,7 +308,7 @@ export function HeroSection() {
         />
 
         <div className="relative z-10 flex min-h-[90vh] lg:min-h-screen flex-col lg:flex-row">
-          <div className="w-full lg:w-1/2 h-[44vh] lg:h-auto lg:min-h-0" />
+          <div className="w-full lg:w-1/2 h-[38vh] lg:h-auto lg:min-h-0" />
           <div className="flex items-center w-full lg:w-1/2 px-6 sm:px-10 lg:px-16 xl:px-20 pt-6 pb-32 lg:py-0">
             <div className="max-w-xl">
               <div className="inline-flex items-center gap-2 px-3 py-1.5 lg:px-4 lg:py-2 rounded-full bg-[#8FC2E0]/10 backdrop-blur-sm border border-[#8FC2E0]/25 mb-5 lg:mb-8">
@@ -415,7 +415,7 @@ export function HeroSection() {
         aria-hidden={active !== 4}
       >
         <div className="absolute inset-0 bg-volcanic-900" />
-        <div className="absolute inset-x-0 top-0 h-[46vh] lg:inset-y-0 lg:left-0 lg:h-auto lg:w-1/2">
+        <div className="absolute inset-x-0 top-0 h-[36vh] lg:inset-y-0 lg:left-0 lg:h-auto lg:w-1/2">
           <Image
             src="/images/Idea 7.jpg"
             alt="SEISMILES streetwear"
@@ -427,7 +427,7 @@ export function HeroSection() {
         </div>
 
         <div className="relative z-10 flex min-h-[90vh] lg:min-h-screen flex-col lg:flex-row">
-          <div className="w-full lg:w-1/2 h-[46vh] lg:h-auto lg:min-h-0" />
+          <div className="w-full lg:w-1/2 h-[36vh] lg:h-auto lg:min-h-0" />
           <div className="flex items-center w-full lg:w-1/2 px-6 sm:px-10 lg:px-16 xl:px-20 pt-6 pb-28 lg:py-0">
             <div className="max-w-xl">
               <div className="inline-flex items-center gap-2 px-3 py-1.5 lg:px-4 lg:py-2 rounded-full bg-white/10 backdrop-blur-sm border border-white/10 mb-5 lg:mb-8">
@@ -465,7 +465,7 @@ export function HeroSection() {
         aria-hidden={active !== 3}
       >
         <div className="absolute inset-0 bg-volcanic-900" />
-        <div className="absolute inset-x-0 top-0 h-[46vh] lg:inset-y-0 lg:right-0 lg:left-auto lg:h-auto lg:w-1/2">
+        <div className="absolute inset-x-0 top-0 h-[38vh] lg:inset-y-0 lg:right-0 lg:left-auto lg:h-auto lg:w-1/2">
           <Image
             src="/images/Hero.jpg"
             alt="Ropa de temporada — línea Arista"
@@ -477,7 +477,7 @@ export function HeroSection() {
         </div>
 
         <div className="relative z-10 flex min-h-[90vh] lg:min-h-screen flex-col lg:flex-row-reverse">
-          <div className="w-full lg:w-1/2 h-[46vh] lg:h-auto lg:min-h-0" />
+          <div className="w-full lg:w-1/2 h-[38vh] lg:h-auto lg:min-h-0" />
           <div className="flex items-center w-full lg:w-1/2 px-6 sm:px-10 lg:px-16 xl:px-20 pt-6 pb-28 lg:py-0">
             <div className="max-w-xl">
               <div className="inline-flex items-center gap-2 px-3 py-1.5 lg:px-4 lg:py-2 rounded-full bg-white/10 backdrop-blur-sm border border-white/10 mb-5 lg:mb-8">
