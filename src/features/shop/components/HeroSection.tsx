@@ -189,10 +189,10 @@ export function HeroSection() {
         />
 
         <div className="relative z-10 flex items-center min-h-[90vh] lg:min-h-screen">
-          <div
-            className="w-full flex flex-col items-start"
-            style={{ padding: 'clamp(40px,5vw,72px) clamp(28px,6vw,116px)' }}
-          >
+          {/* En mobile: poco padding arriba y mucho abajo para que, al estar
+              centrado, el contenido se levante y el CTA no choque con las
+              barras de progreso. En desktop vuelve el padding parejo. */}
+          <div className="w-full flex flex-col items-start px-[clamp(28px,6vw,116px)] pt-6 pb-28 lg:py-[clamp(40px,5vw,72px)]">
             {/* Badge + línea */}
             <div className="flex items-center gap-[18px] mb-[clamp(22px,2.6vw,34px)]">
               <span className="inline-flex items-center gap-[11px] px-5 py-[9px] rounded-full border border-white/25 bg-white/[0.07] font-medium uppercase tracking-[0.28em] text-white/90 whitespace-nowrap text-[clamp(11px,1vw,12.5px)]">
@@ -217,7 +217,7 @@ export function HeroSection() {
             <div className="flex flex-col items-stretch w-full sm:w-auto sm:flex-row sm:items-center gap-3 sm:gap-[18px] mt-[clamp(28px,3vw,38px)]">
               {/* Cápsula A — Descuento */}
               <div
-                className="flex items-center justify-center gap-[15px] sm:gap-[18px] w-full sm:w-auto max-w-full h-20 sm:h-[98px] px-[22px] sm:px-8 rounded-[20px]"
+                className="flex items-center justify-center gap-3 sm:gap-[18px] w-full sm:w-auto max-w-full h-[72px] sm:h-[98px] px-[18px] sm:px-8 rounded-[20px]"
                 style={{
                   background: 'linear-gradient(135deg,#C75B39 0%,#DC8A6C 100%)',
                   boxShadow: '0 22px 48px -16px rgba(199,91,57,.7), inset 0 1px 0 rgba(255,255,255,.25)',
@@ -225,12 +225,12 @@ export function HeroSection() {
                   outlineOffset: '-1px',
                 }}
               >
-                <span className="flex-none w-[52px] h-[52px] rounded-full bg-white/[0.16] border border-white/40 flex items-center justify-center">
+                <span className="flex-none w-11 h-11 sm:w-[52px] sm:h-[52px] rounded-full bg-white/[0.16] border border-white/40 flex items-center justify-center">
                   <svg width="25" height="25" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth={1.7} strokeLinecap="round" strokeLinejoin="round"><path d="M3 11.5 11.5 3H20a1 1 0 0 1 1 1v8.5L12.5 21a1.5 1.5 0 0 1-2.1 0L3 13.6a1.5 1.5 0 0 1 0-2.1Z" /><circle cx="16" cy="8" r="1.3" /></svg>
                 </span>
                 <span className="flex flex-col gap-1">
                   <small className="font-sans font-semibold uppercase tracking-[0.26em] text-white/85 text-[10.5px]">Descuento</small>
-                  <b className="font-display font-normal leading-[0.9] tracking-[0.025em] text-white whitespace-nowrap text-[32px] sm:text-[40px]">Hasta 17% OFF</b>
+                  <b className="font-display font-normal leading-[0.9] tracking-[0.025em] text-white whitespace-nowrap text-[27px] sm:text-[40px]">Hasta 17% OFF</b>
                 </span>
               </div>
 
@@ -238,7 +238,7 @@ export function HeroSection() {
 
               {/* Cápsula B — Financiación */}
               <div
-                className="flex items-center justify-center gap-[15px] sm:gap-[18px] w-full sm:w-auto max-w-full h-20 sm:h-[98px] px-[22px] sm:px-8 rounded-[20px]"
+                className="flex items-center justify-center gap-3 sm:gap-[18px] w-full sm:w-auto max-w-full h-[72px] sm:h-[98px] px-[18px] sm:px-8 rounded-[20px]"
                 style={{
                   background: 'linear-gradient(135deg,#C75B39 0%,#DC8A6C 100%)',
                   boxShadow: '0 22px 48px -16px rgba(199,91,57,.7), inset 0 1px 0 rgba(255,255,255,.25)',
@@ -246,12 +246,12 @@ export function HeroSection() {
                   outlineOffset: '-1px',
                 }}
               >
-                <span className="flex-none w-[52px] h-[52px] rounded-full bg-white/[0.16] border border-white/40 flex items-center justify-center">
+                <span className="flex-none w-11 h-11 sm:w-[52px] sm:h-[52px] rounded-full bg-white/[0.16] border border-white/40 flex items-center justify-center">
                   <svg width="25" height="25" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth={1.7} strokeLinecap="round" strokeLinejoin="round"><rect x="2.5" y="5" width="19" height="14" rx="2.5" /><path d="M2.5 9.5h19" /><path d="M6 14.5h4" /></svg>
                 </span>
                 <span className="flex flex-col gap-1">
                   <small className="font-sans font-semibold uppercase tracking-[0.26em] text-white/85 text-[10.5px]">Financiación</small>
-                  <b className="font-display font-normal leading-[0.9] tracking-[0.025em] text-white whitespace-nowrap text-[32px] sm:text-[40px]">3 Cuotas sin interés</b>
+                  <b className="font-display font-normal leading-[0.9] tracking-[0.025em] text-white whitespace-nowrap text-[27px] sm:text-[40px]">3 Cuotas sin interés</b>
                 </span>
               </div>
             </div>
@@ -282,13 +282,13 @@ export function HeroSection() {
         aria-hidden={active !== 1}
       >
         <div className="absolute inset-0 bg-gradient-to-br from-[#243443] via-[#1A2430] to-[#0F161E]" />
-        <div className="absolute inset-x-0 top-0 h-[38vh] lg:inset-y-0 lg:left-0 lg:h-auto lg:w-1/2">
+        <div className="absolute inset-x-0 top-0 h-[44vh] lg:inset-y-0 lg:left-0 lg:h-auto lg:w-1/2">
           <Image
             src="/images/Hero Buzos 1.jpg"
             alt="Buzos canguro SEISMILES"
             fill
             priority
-            className="object-cover object-[50%_50%] lg:object-[50%_60%]"
+            className="object-cover object-[50%_34%] lg:object-[50%_60%]"
           />
           {/* Cool wintry wash over the photo */}
           <div className="absolute inset-0 bg-gradient-to-br from-[#3A6B8C]/25 via-transparent to-[#1A2430]/30 mix-blend-multiply" />
@@ -308,7 +308,7 @@ export function HeroSection() {
         />
 
         <div className="relative z-10 flex min-h-[90vh] lg:min-h-screen flex-col lg:flex-row">
-          <div className="w-full lg:w-1/2 h-[38vh] lg:h-auto lg:min-h-0" />
+          <div className="w-full lg:w-1/2 h-[44vh] lg:h-auto lg:min-h-0" />
           <div className="flex items-center w-full lg:w-1/2 px-6 sm:px-10 lg:px-16 xl:px-20 pt-6 pb-32 lg:py-0">
             <div className="max-w-xl">
               <div className="inline-flex items-center gap-2 px-3 py-1.5 lg:px-4 lg:py-2 rounded-full bg-[#8FC2E0]/10 backdrop-blur-sm border border-[#8FC2E0]/25 mb-5 lg:mb-8">
@@ -415,19 +415,19 @@ export function HeroSection() {
         aria-hidden={active !== 4}
       >
         <div className="absolute inset-0 bg-volcanic-900" />
-        <div className="absolute inset-x-0 top-0 h-[35vh] lg:inset-y-0 lg:left-0 lg:h-auto lg:w-1/2">
+        <div className="absolute inset-x-0 top-0 h-[46vh] lg:inset-y-0 lg:left-0 lg:h-auto lg:w-1/2">
           <Image
             src="/images/Idea 7.jpg"
             alt="SEISMILES streetwear"
             fill
-            className="object-cover"
+            className="object-cover object-[50%_66%] lg:object-center"
           />
           <div className="hidden lg:block absolute inset-y-0 right-0 w-32 bg-gradient-to-l from-volcanic-900 to-transparent" />
           <div className="lg:hidden absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-volcanic-900 to-transparent" />
         </div>
 
         <div className="relative z-10 flex min-h-[90vh] lg:min-h-screen flex-col lg:flex-row">
-          <div className="w-full lg:w-1/2 h-[35vh] lg:h-auto lg:min-h-0" />
+          <div className="w-full lg:w-1/2 h-[46vh] lg:h-auto lg:min-h-0" />
           <div className="flex items-center w-full lg:w-1/2 px-6 sm:px-10 lg:px-16 xl:px-20 pt-6 pb-28 lg:py-0">
             <div className="max-w-xl">
               <div className="inline-flex items-center gap-2 px-3 py-1.5 lg:px-4 lg:py-2 rounded-full bg-white/10 backdrop-blur-sm border border-white/10 mb-5 lg:mb-8">
@@ -465,19 +465,19 @@ export function HeroSection() {
         aria-hidden={active !== 3}
       >
         <div className="absolute inset-0 bg-volcanic-900" />
-        <div className="absolute inset-x-0 top-0 h-[42vh] lg:inset-y-0 lg:right-0 lg:left-auto lg:h-auto lg:w-1/2">
+        <div className="absolute inset-x-0 top-0 h-[46vh] lg:inset-y-0 lg:right-0 lg:left-auto lg:h-auto lg:w-1/2">
           <Image
             src="/images/Hero.jpg"
             alt="Ropa de temporada — línea Arista"
             fill
-            className="object-cover object-[50%_30%] lg:object-center"
+            className="object-cover object-[50%_42%] lg:object-center"
           />
           <div className="hidden lg:block absolute inset-y-0 left-0 w-32 bg-gradient-to-r from-volcanic-900 to-transparent" />
           <div className="lg:hidden absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-volcanic-900 to-transparent" />
         </div>
 
         <div className="relative z-10 flex min-h-[90vh] lg:min-h-screen flex-col lg:flex-row-reverse">
-          <div className="w-full lg:w-1/2 h-[42vh] lg:h-auto lg:min-h-0" />
+          <div className="w-full lg:w-1/2 h-[46vh] lg:h-auto lg:min-h-0" />
           <div className="flex items-center w-full lg:w-1/2 px-6 sm:px-10 lg:px-16 xl:px-20 pt-6 pb-28 lg:py-0">
             <div className="max-w-xl">
               <div className="inline-flex items-center gap-2 px-3 py-1.5 lg:px-4 lg:py-2 rounded-full bg-white/10 backdrop-blur-sm border border-white/10 mb-5 lg:mb-8">

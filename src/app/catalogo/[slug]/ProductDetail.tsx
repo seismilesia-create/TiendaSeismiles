@@ -375,7 +375,6 @@ export function ProductDetail({ product, mostViewedProducts, reviews, reviewSumm
                     const stock = selectedColorId ? getStock(selectedColorId, talle) : 0
                     const isSelected = selectedSize === talle
                     const isAvailable = stock > 0
-                    const isLowStock = isAvailable && stock < LOW_STOCK_THRESHOLD
                     return (
                       <div key={talle} className="relative">
                         <button
@@ -401,14 +400,6 @@ export function ProductDetail({ product, mostViewedProducts, reviews, reviewSumm
                               <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" />
                               <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" />
                             </svg>
-                          </span>
-                        )}
-                        {isLowStock && (
-                          <span
-                            title={`Quedan ${stock} en talle ${talle}`}
-                            className="absolute -top-1.5 -right-1.5 min-w-5 h-5 px-1 rounded-full bg-terra-500 ring-2 ring-white flex items-center justify-center pointer-events-none text-[10px] font-bold text-white leading-none"
-                          >
-                            {stock}
                           </span>
                         )}
                       </div>
