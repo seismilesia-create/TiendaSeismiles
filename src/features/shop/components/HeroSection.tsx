@@ -288,7 +288,7 @@ export function HeroSection() {
             alt="Buzos canguro SEISMILES"
             fill
             priority
-            className="object-cover object-[50%_66%] lg:object-[50%_60%]"
+            className="object-cover object-[50%_61%] lg:object-[50%_60%]"
           />
           {/* Cool wintry wash over the photo */}
           <div className="absolute inset-0 bg-gradient-to-br from-[#3A6B8C]/25 via-transparent to-[#1A2430]/30 mix-blend-multiply" />
