@@ -208,12 +208,6 @@ export function ResultadoContent({ status, paymentId, externalReference, provide
                       <dd className="font-semibold text-volcanic-900 text-right break-all">{OFFLINE_PAYMENT_INFO.bank.cbu}</dd>
                     </div>
                   )}
-                  {OFFLINE_PAYMENT_INFO.bank.titular && (
-                    <div className="flex justify-between gap-3">
-                      <dt className="text-volcanic-500">Titular</dt>
-                      <dd className="font-semibold text-volcanic-900 text-right">{OFFLINE_PAYMENT_INFO.bank.titular}</dd>
-                    </div>
-                  )}
                 </dl>
                 <p className="mt-3 text-body-xs text-volcanic-500">
                   Cuando hagas la transferencia, enviános el comprobante por WhatsApp y confirmamos tu pedido. También te mandamos estos datos por email.

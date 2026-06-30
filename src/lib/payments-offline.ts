@@ -14,12 +14,10 @@ export const OFFLINE_PAYMENT_INFO = {
   whatsapp: 'https://wa.me/5493834243614',
   whatsappDisplay: '+54 9 3834 24-3614',
 
-  /** Datos para transferencia bancaria. COMPLETAR con los reales. */
+  /** Datos para transferencia bancaria. Solo alias y CBU (sin titular/banco). */
   bank: {
-    alias: 'tienda.seismiles', // TODO: alias real de la cuenta
-    cbu: '0000003100045524331210', // TODO: CBU/CVU real (dejar '' para ocultarlo en el email)
-    titular: 'Maria Pilar David Rojo', // TODO: titular de la cuenta
-    banco: 'Mercado Pago', // TODO: nombre del banco (opcional)
+    alias: 'tienda.seismiles',
+    cbu: '0000003100045524331210',
   },
 
   /** Info para retiro en el local con pago en efectivo. */

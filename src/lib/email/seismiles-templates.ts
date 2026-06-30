@@ -537,8 +537,6 @@ export function orderPendingPaymentEmail(data: OrderConfirmationData): string {
   const bankRows = [
     bank.alias ? ['Alias', bank.alias] : null,
     bank.cbu ? ['CBU / CVU', bank.cbu] : null,
-    bank.titular ? ['Titular', bank.titular] : null,
-    bank.banco ? ['Banco', bank.banco] : null,
   ].filter(Boolean) as [string, string][]
 
   const instructions = isTransfer
