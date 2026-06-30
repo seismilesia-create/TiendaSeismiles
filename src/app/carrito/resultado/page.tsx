@@ -20,9 +20,17 @@ export default async function ResultadoPage({
     external_reference?: string
     provider?: string
     result?: string
+    metodo?: string
   }>
 }) {
   const params = await searchParams
+
+  // Offline methods (efectivo / transferencia): no provider redirect, no
+  // payment to verify. The order is reserved in pendiente_pago and we just
+  // show the payment instructions screen.
+  if (params.metodo === 'efectivo' || params.metodo === 'transferencia') {
+    return <ResultadoContent status="offline" provider={params.metodo} />
+  }
 
   // GoCuotas returns to url_success/url_failure with provider=gocuotas and our
   // own result=success|failure marker. The DEFINITIVE state always comes from

@@ -5,6 +5,7 @@ import { requireAdmin } from '@/lib/auth/admin'
 import { createServiceClient } from '@/lib/supabase/server'
 import { getResend, EMAIL_CONFIG } from '@/lib/email/resend'
 import { orderStatusUpdateEmail } from '@/lib/email/seismiles-templates'
+import { sendOrderConfirmationEmails } from '@/lib/email/send-order-confirmation'
 
 const VALID_STATUSES = [
   'pendiente_pago',
@@ -49,7 +50,7 @@ export async function updateOrderStatusAction(
   // Get current order with product and user info for email
   const { data: order, error: fetchErr } = await service
     .from('compras')
-    .select('id, estado, variante_id, cantidad, numero_pedido, producto_id, user_id, cupon_id, gift_cards_applied, productos(nombre), profiles(email, full_name)')
+    .select('id, estado, variante_id, cantidad, numero_pedido, compra_grupo, producto_id, user_id, cupon_id, gift_cards_applied, productos(nombre), profiles(email, full_name)')
     .eq('id', orderId)
     .single()
 
@@ -110,6 +111,32 @@ export async function updateOrderStatusAction(
     .eq('id', orderId)
 
   if (error) return { error: 'Error al actualizar el estado' }
+
+  // Manual confirmation of a pending order (typically offline payments —
+  // efectivo/transferencia — that an admin verifies by hand). The MP/GoCuotas
+  // flow normally confirms via webhook before reaching the admin, so this only
+  // really fires for offline orders. sendOrderConfirmationEmails expands to the
+  // whole purchase group and sends ONE email with every product, so we gate it:
+  // only the FIRST product row of the purchase to be confirmed sends it.
+  // Otherwise confirming each of N product rows would email the customer N times.
+  if (newStatus === 'confirmado' && oldStatus === 'pendiente_pago') {
+    const grupo = order.compra_grupo
+    let alreadyEmailed = false
+    if (grupo) {
+      // This row was just set to 'confirmado' above; if a SIBLING is already
+      // confirmado, another call already (or will) send the email.
+      const { count } = await service
+        .from('compras')
+        .select('id', { count: 'exact', head: true })
+        .eq('compra_grupo', grupo)
+        .eq('estado', 'confirmado')
+        .neq('id', orderId)
+      alreadyEmailed = (count ?? 0) > 0
+    }
+    if (!alreadyEmailed) {
+      await sendOrderConfirmationEmails([order.numero_pedido])
+    }
+  }
 
   // Send email notification (fire-and-forget)
   if (STATUSES_WITH_EMAIL.has(newStatus) && oldStatus !== newStatus) {

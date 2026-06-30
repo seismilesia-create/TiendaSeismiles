@@ -1,5 +1,6 @@
 'use server'
 
+import { randomUUID } from 'node:crypto'
 import { revalidatePath } from 'next/cache'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
 import { mpPreference, mpPayment } from '@/lib/mercadopago'
@@ -31,16 +32,26 @@ export interface CheckoutShipping {
 }
 
 /**
- * Which external payment provider to use for the remaining (post coupon + GC)
- * amount. Defaults to 'mercadopago' everywhere so the existing flow is never
- * affected. 'gocuotas' mirrors the same create→redirect→webhook pattern.
+ * Which payment method handles the remaining (post coupon + GC) amount.
+ * Defaults to 'mercadopago' everywhere so the existing flow is never affected.
+ *
+ *  - 'mercadopago' / 'gocuotas': external providers (create→redirect→webhook).
+ *  - 'efectivo' / 'transferencia': offline methods — no provider, no redirect,
+ *    no webhook. The order stays in 'pendiente_pago' until an admin confirms
+ *    it by hand (cash received at pickup, or transfer receipt verified).
+ *    'efectivo' is only valid together with 'retiro' shipping.
  */
-export type PaymentProvider = 'mercadopago' | 'gocuotas'
+export type PaymentProvider = 'mercadopago' | 'gocuotas' | 'efectivo' | 'transferencia'
 
 interface CheckoutResult {
   initPoint?: string
   externalRef?: string
   directConfirm?: boolean
+  /** True for offline methods (efectivo/transferencia): the client should NOT
+   * redirect to a provider — it lands on the "pedido registrado" screen with
+   * payment instructions. `paymentMethod` says which one. */
+  offline?: boolean
+  paymentMethod?: 'efectivo' | 'transferencia'
   error?: string
 }
 
@@ -220,6 +231,13 @@ async function runCheckout(
   }
   const costoEnvio = shippingOption.cost
 
+  // Efectivo is pickup-only: you can only pay cash if you come to the local.
+  // Reject early — before place_order touches stock — so there's nothing to
+  // roll back. (The UI also disables the option, this is the server guard.)
+  if (provider === 'efectivo' && shipping.method !== 'retiro') {
+    return { error: 'El pago en efectivo solo está disponible con retiro en el local' }
+  }
+
   // Cleanup of abandoned checkouts. DELETE … RETURNING claims the rows
   // atomically, so two concurrent createCheckout calls by the same user
   // can't both "release" the same reservations.
@@ -360,6 +378,12 @@ async function runCheckout(
 
   const externalRef = orderNumbers.join(',')
 
+  // Shared purchase code for every row of this checkout. place_order generates
+  // one numero_pedido per product; compra_grupo ties them together so we can
+  // send a single confirmation email per purchase and show one purchase number
+  // to the customer. Stored on all rows in the shipping update below.
+  const compraGrupo = `SMC-${randomUUID().replace(/-/g, '').slice(0, 8).toUpperCase()}`
+
   // 1c. Overwrite precio_unitario/total on compras rows that got a cross-sell
   // discount. place_order writes full DB price by design; the discount has to
   // be applied AFTER, per-variant. Without this, the UI would show the order
@@ -480,6 +504,7 @@ async function runCheckout(
       metodo_envio: shipping.method,
       costo_envio: costoEnvio,
       direccion_envio: shippingOption.requiresAddress ? direccionEnvio : null,
+      compra_grupo: compraGrupo,
     }
     if (cuponId) {
       update.cupon_id = cuponId
@@ -557,6 +582,40 @@ async function runCheckout(
     revalidatePath('/perfil')
 
     return { initPoint: urlInit, externalRef }
+  }
+
+  // ── Offline branch (efectivo / transferencia) ─────────────────────────
+  // No external provider: no redirect, no webhook. Leave the orders in
+  // pendiente_pago (stock already reserved by place_order, exactly like the
+  // MP/GoCuotas pending path) and notify the customer with payment
+  // instructions. An admin later moves the order to 'confirmado' from
+  // /admin/pedidos once cash is received / transfer is verified, which fires
+  // the real confirmation email. If the order is never paid, the admin
+  // cancels it and the GC/coupon reservations get refunded there.
+  if (provider === 'efectivo' || provider === 'transferencia') {
+    let metodoPago: string = provider
+    if (gcList.length > 0 && cuponId) metodoPago = `cupon+gift_card+${provider}`
+    else if (gcList.length > 0) metodoPago = `gift_card+${provider}`
+    else if (cuponId) metodoPago = `cupon+${provider}`
+
+    await service
+      .from('compras')
+      .update({
+        estado: 'pendiente_pago',
+        metodo_pago: metodoPago,
+        ...(gcList.length > 0 ? { gift_cards_applied: gcList } : {}),
+      })
+      .in('numero_pedido', orderNumbers)
+
+    // Instructions email (bank details / pickup info). Never throws.
+    await sendOrderConfirmationEmails(orderNumbers, { pending: true })
+    await markAbandonedCartConverted(userId)
+
+    revalidatePath('/catalogo')
+    revalidatePath('/admin/inventario')
+    revalidatePath('/perfil')
+
+    return { offline: true, paymentMethod: provider, externalRef }
   }
 
   let preferenceId: string

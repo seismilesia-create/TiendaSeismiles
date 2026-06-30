@@ -14,10 +14,13 @@ const STATUS_OPTIONS = [
   { value: 'reembolsada', label: 'Reembolsada', className: 'bg-violet-100 text-violet-600' },
 ]
 
-const PAYMENT_LABELS: Record<string, string> = {
+// Tokens de método de pago. metodo_pago puede ser compuesto
+// ('cupon+gift_card+transferencia'), así que mapeamos cada parte y unimos.
+const PAYMENT_TOKENS: Record<string, string> = {
   mercadopago: 'Mercado Pago',
+  gocuotas: 'GoCuotas',
   gift_card: 'Gift Card',
-  'gift_card+mercadopago': 'Gift Card + MP',
+  cupon: 'Cupón',
   tarjeta: 'Tarjeta',
   transferencia: 'Transferencia',
   efectivo: 'Efectivo',
@@ -28,7 +31,10 @@ function getStatusStyle(estado: string) {
 }
 
 function getPaymentLabel(metodo: string) {
-  return PAYMENT_LABELS[metodo] ?? metodo
+  return metodo
+    .split('+')
+    .map((part) => PAYMENT_TOKENS[part] ?? part)
+    .join(' + ')
 }
 
 interface Props {

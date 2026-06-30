@@ -1,11 +1,11 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
 import { useCartStore } from '@/features/shop/stores/cart-store'
-import { createCheckout, createGuestCheckout } from '@/actions/checkout'
+import { createCheckout, createGuestCheckout, type PaymentProvider } from '@/actions/checkout'
 import { validateGiftCardCode } from '@/actions/giftcard-redeem'
 import { validateCouponCode } from '@/actions/coupons'
 import { SHIPPING_OPTIONS, type ShippingMethod } from '@/lib/shipping'
@@ -80,9 +80,10 @@ export function CartSummary({ userId }: CartSummaryProps) {
 
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  // Which external provider handles the remaining (post coupon + GC) amount.
-  // Only relevant when totalFinal > 0; fully-covered orders confirm directly.
-  const [paymentProvider, setPaymentProvider] = useState<'mercadopago' | 'gocuotas'>('mercadopago')
+  // Which method handles the remaining (post coupon + GC) amount. Only
+  // relevant when totalFinal > 0; fully-covered orders confirm directly.
+  // 'efectivo' is pickup-only — see the effect below that resets it.
+  const [paymentProvider, setPaymentProvider] = useState<PaymentProvider>('mercadopago')
   const [emailExists, setEmailExists] = useState(false)
   const [gcCode, setGcCode] = useState('')
   const [gcLoading, setGcLoading] = useState(false)
@@ -131,6 +132,16 @@ export function CartSummary({ userId }: CartSummaryProps) {
   // 3. Shipping cost is added AFTER discounts — never discounted.
   const costoEnvio = shippingMethod ? SHIPPING_OPTIONS[shippingMethod].cost : 0
   const totalFinal = subtotalDespuesCupon - descuentoGcTotal + costoEnvio
+
+  // Efectivo is only valid with "retiro". If the user had it selected and then
+  // switched to cadetería, fall back to Mercado Pago so we never submit an
+  // invalid combo (the server rejects it too).
+  const efectivoAvailable = shippingMethod === 'retiro'
+  useEffect(() => {
+    if (paymentProvider === 'efectivo' && !efectivoAvailable) {
+      setPaymentProvider('mercadopago')
+    }
+  }, [paymentProvider, efectivoAvailable])
 
   async function handleApplyCoupon() {
     const code = couponCode.trim().toUpperCase()
@@ -294,6 +305,15 @@ export function CartSummary({ userId }: CartSummaryProps) {
     if (result.error) {
       setError(result.error)
       setLoading(false)
+      return
+    }
+
+    // Offline (efectivo/transferencia): el pedido quedó reservado, no hay pago
+    // todavía, así que NO disparamos Purchase. Vaciamos el carrito y mandamos
+    // al cliente a la pantalla de instrucciones de pago.
+    if (result.offline) {
+      clearCart()
+      router.push(`/carrito/resultado?metodo=${result.paymentMethod}`)
       return
     }
 
@@ -729,6 +749,72 @@ export function CartSummary({ userId }: CartSummaryProps) {
                 0% interés
               </span>
             </label>
+
+            {/* Transferencia bancaria */}
+            <label
+              className={`flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-colors ${paymentProvider === 'transferencia'
+                ? 'border-terra-500 bg-terra-50'
+                : 'border-sand-200 hover:border-sand-300 bg-white'
+                }`}
+            >
+              <input
+                type="radio"
+                name="payment-provider"
+                value="transferencia"
+                checked={paymentProvider === 'transferencia'}
+                onChange={() => setPaymentProvider('transferencia')}
+                className="accent-terra-500"
+              />
+              <span className="flex items-center justify-center h-7 w-7 rounded-lg bg-volcanic-900 text-white shrink-0">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4">
+                  <path d="M3 21h18" /><path d="M3 10h18" /><path d="M5 6l7-3 7 3" /><path d="M4 10v11" /><path d="M20 10v11" /><path d="M8 14v3" /><path d="M12 14v3" /><path d="M16 14v3" />
+                </svg>
+              </span>
+              <div className="min-w-0 flex-1">
+                <span className="block text-body-sm font-semibold text-volcanic-900 leading-tight">
+                  Transferencia bancaria
+                </span>
+                <span className="block text-body-xs text-volcanic-500">
+                  Te pasamos los datos y enviás el comprobante
+                </span>
+              </div>
+            </label>
+
+            {/* Efectivo — solo con retiro en el local. Se muestra siempre, pero
+                queda deshabilitado si el envío no es "retiro". */}
+            <label
+              className={`flex items-center gap-3 p-3 rounded-xl border transition-colors ${!efectivoAvailable
+                ? 'border-sand-200 bg-sand-50 opacity-60 cursor-not-allowed'
+                : paymentProvider === 'efectivo'
+                  ? 'border-terra-500 bg-terra-50 cursor-pointer'
+                  : 'border-sand-200 hover:border-sand-300 bg-white cursor-pointer'
+                }`}
+            >
+              <input
+                type="radio"
+                name="payment-provider"
+                value="efectivo"
+                checked={paymentProvider === 'efectivo'}
+                disabled={!efectivoAvailable}
+                onChange={() => setPaymentProvider('efectivo')}
+                className="accent-terra-500"
+              />
+              <span className="flex items-center justify-center h-7 w-7 rounded-lg bg-emerald-600 text-white shrink-0">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4">
+                  <rect x="2" y="6" width="20" height="12" rx="2" /><circle cx="12" cy="12" r="2.5" /><path d="M6 12h.01M18 12h.01" />
+                </svg>
+              </span>
+              <div className="min-w-0 flex-1">
+                <span className="block text-body-sm font-semibold text-volcanic-900 leading-tight">
+                  Efectivo
+                </span>
+                <span className="block text-body-xs text-volcanic-500">
+                  {efectivoAvailable
+                    ? 'Pagás al retirar en el local'
+                    : 'Disponible solo con retiro en el local'}
+                </span>
+              </div>
+            </label>
           </div>
         </>
       )}
@@ -759,7 +845,11 @@ export function CartSummary({ userId }: CartSummaryProps) {
                 <CreditCardIcon className="w-5 h-5" />
                 {paymentProvider === 'gocuotas'
                   ? 'Pagar con GoCuotas'
-                  : userId ? 'Pagar con Mercado Pago' : 'Pagar como invitado'}
+                  : paymentProvider === 'transferencia'
+                    ? 'Confirmar pedido (transferencia)'
+                    : paymentProvider === 'efectivo'
+                      ? 'Confirmar pedido (efectivo)'
+                      : userId ? 'Pagar con Mercado Pago' : 'Pagar como invitado'}
               </>
             ) : (
               <>

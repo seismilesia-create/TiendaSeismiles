@@ -6,6 +6,7 @@ import { useCartStore } from '@/features/shop/stores/cart-store'
 import { confirmPayment } from '@/actions/checkout'
 import { trackPurchase } from '@/features/analytics/lib/fbq'
 import { gtag } from '@/features/analytics/lib/gtag'
+import { OFFLINE_PAYMENT_INFO } from '@/lib/payments-offline'
 
 function CheckCircleIcon({ className }: { className?: string }) {
   return (
@@ -40,8 +41,10 @@ interface Props {
   paymentId?: string
   externalReference?: string
   /** Set to 'gocuotas' when returning from GoCuotas. There is no payment_id to
-   * verify client-side; the order is confirmed asynchronously by the webhook. */
-  provider?: 'mercadopago' | 'gocuotas'
+   * verify client-side; the order is confirmed asynchronously by the webhook.
+   * For 'efectivo'/'transferencia' (status='offline') the order is reserved in
+   * pendiente_pago and confirmed by an admin once the payment arrives. */
+  provider?: 'mercadopago' | 'gocuotas' | 'efectivo' | 'transferencia'
 }
 
 export function ResultadoContent({ status, paymentId, externalReference, provider }: Props) {
@@ -52,12 +55,22 @@ export function ResultadoContent({ status, paymentId, externalReference, provide
 
   const isApproved = status === 'approved'
   const isPending = status === 'pending'
+  const isOffline = status === 'offline'
 
   useEffect(() => {
     if (didRun.current) return
     didRun.current = true
 
     async function processPayment() {
+      // Offline (efectivo/transferencia): nothing to verify or track — the
+      // payment hasn't happened yet. Just make sure the cart/snapshot are
+      // cleared (also covers a direct navigation / refresh of this URL).
+      if (isOffline) {
+        clearCart()
+        clearPendingPurchase()
+        return
+      }
+
       // Verify payment with MP API and update order status in DB
       if (paymentId && externalReference) {
         await confirmPayment(paymentId, externalReference)
@@ -114,7 +127,9 @@ export function ResultadoContent({ status, paymentId, externalReference, provide
     }
 
     processPayment()
-  }, [status, paymentId, externalReference, isApproved, isPending, clearCart, pendingPurchase, clearPendingPurchase])
+  }, [status, paymentId, externalReference, isApproved, isPending, isOffline, clearCart, pendingPurchase, clearPendingPurchase])
+
+  const isTransfer = provider === 'transferencia'
 
   return (
     <div className="max-w-lg mx-auto px-4 py-16 text-center">
@@ -160,7 +175,79 @@ export function ResultadoContent({ status, paymentId, externalReference, provide
         </>
       )}
 
-      {!isApproved && !isPending && (
+      {isOffline && (
+        <>
+          <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-emerald-100 flex items-center justify-center">
+            <CheckCircleIcon className="w-10 h-10 text-emerald-600" />
+          </div>
+          <h1 className="font-heading text-display-sm text-volcanic-900 mb-3">
+            ¡Pedido registrado!
+          </h1>
+          <p className="text-body-md text-volcanic-500 mb-6">
+            {isTransfer
+              ? 'Reservamos tu pedido. Para confirmarlo, transferí el total y enviános el comprobante.'
+              : 'Reservamos tu pedido. Pagás en efectivo al retirarlo en el local.'}
+          </p>
+
+          <div className="text-left bg-sand-50 border border-sand-200 rounded-2xl p-5 mb-6">
+            {isTransfer ? (
+              <>
+                <p className="text-body-xs font-semibold uppercase tracking-wide text-terra-600 mb-3">
+                  Datos para transferir
+                </p>
+                <dl className="space-y-1.5 text-body-sm">
+                  {OFFLINE_PAYMENT_INFO.bank.alias && (
+                    <div className="flex justify-between gap-3">
+                      <dt className="text-volcanic-500">Alias</dt>
+                      <dd className="font-semibold text-volcanic-900 text-right">{OFFLINE_PAYMENT_INFO.bank.alias}</dd>
+                    </div>
+                  )}
+                  {OFFLINE_PAYMENT_INFO.bank.cbu && (
+                    <div className="flex justify-between gap-3">
+                      <dt className="text-volcanic-500">CBU/CVU</dt>
+                      <dd className="font-semibold text-volcanic-900 text-right break-all">{OFFLINE_PAYMENT_INFO.bank.cbu}</dd>
+                    </div>
+                  )}
+                  {OFFLINE_PAYMENT_INFO.bank.titular && (
+                    <div className="flex justify-between gap-3">
+                      <dt className="text-volcanic-500">Titular</dt>
+                      <dd className="font-semibold text-volcanic-900 text-right">{OFFLINE_PAYMENT_INFO.bank.titular}</dd>
+                    </div>
+                  )}
+                </dl>
+                <p className="mt-3 text-body-xs text-volcanic-500">
+                  Cuando hagas la transferencia, enviános el comprobante por WhatsApp y confirmamos tu pedido. También te mandamos estos datos por email.
+                </p>
+              </>
+            ) : (
+              <>
+                <p className="text-body-xs font-semibold uppercase tracking-wide text-terra-600 mb-2">
+                  Pago en efectivo al retirar
+                </p>
+                <p className="text-body-sm text-volcanic-600">
+                  Coordinamos el día y horario del retiro en {OFFLINE_PAYMENT_INFO.pickup.zona} por WhatsApp. Tu pedido queda reservado mientras tanto.
+                </p>
+              </>
+            )}
+          </div>
+
+          <a
+            href={OFFLINE_PAYMENT_INFO.whatsapp}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex px-8 py-3.5 bg-volcanic-900 hover:bg-volcanic-800 text-white font-semibold rounded-xl transition-colors"
+          >
+            {isTransfer ? 'Enviar comprobante por WhatsApp' : 'Coordinar retiro por WhatsApp'}
+          </a>
+          <div className="mt-4">
+            <Link href="/perfil" className="text-body-sm text-volcanic-500 hover:text-terra-500 transition-colors">
+              Ver mis pedidos
+            </Link>
+          </div>
+        </>
+      )}
+
+      {!isApproved && !isPending && !isOffline && (
         <>
           <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-red-100 flex items-center justify-center">
             <XCircleIcon className="w-10 h-10 text-red-600" />

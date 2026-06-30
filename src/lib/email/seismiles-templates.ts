@@ -6,6 +6,7 @@
 // these templates is INSIDE the function — callers can pass user input freely.
 
 import { escapeHtml } from './escape'
+import { OFFLINE_PAYMENT_INFO } from '@/lib/payments-offline'
 
 /**
  * Returns a CSS color value only if it looks like a hex color (#RGB, #RRGGBB
@@ -344,15 +345,31 @@ export function faqReplyEmail(data: FaqReplyData): string {
 
 // ── Order confirmation email to customer ──
 
-interface OrderConfirmationData {
-  customerName: string | null
-  numeroPedido: string
+export interface OrderEmailItem {
   productName: string
   talle: string | null
   colorName: string | null
   colorHex: string | null
   cantidad: number
   precioUnitario: number
+  /** Line total: precioUnitario * cantidad (con descuento cross-sell si aplicó). */
+  total: number
+}
+
+interface OrderConfirmationData {
+  customerName: string | null
+  /** Código de compra agrupado (compra_grupo) o, para compras legacy sin
+   * grupo, el numero_pedido de la única fila. */
+  numeroCompra: string
+  /** Todos los productos de la compra. */
+  items: OrderEmailItem[]
+  /** Suma de los line totals (productos, antes de cupón/GC y envío). */
+  subtotalProductos: number
+  /** Descuentos aplicados (cupón + gift cards), siempre >= 0. */
+  descuentos: number
+  /** Costo de envío (nunca descontado). */
+  costoEnvio: number
+  /** Monto realmente pagado = subtotalProductos - descuentos + costoEnvio. */
   total: number
   metodoPago: string
   siteUrl: string
@@ -362,20 +379,102 @@ interface OrderConfirmationData {
   magicLink?: string | null
 }
 
+/** Renders the product card listing every item of the purchase. */
+function renderItemsCard(items: OrderEmailItem[]): string {
+  const rows = items
+    .map((item, idx) => {
+      const productName = escapeHtml(item.productName)
+      const talle = item.talle ? escapeHtml(item.talle) : null
+      const colorName = item.colorName ? escapeHtml(item.colorName) : null
+      const colorHex = safeColor(item.colorHex)
+      const meta = [
+        talle ? `Talle ${talle}` : null,
+        colorName ? `Color ${colorName}` : null,
+        `x${item.cantidad}`,
+      ]
+        .filter(Boolean)
+        .join(' · ')
+      const divider = idx > 0 ? `border-top:1px solid ${BRAND.sandDark};` : ''
+      const colorDot = colorName && item.colorHex
+        ? `<span style="display:inline-block;width:12px;height:12px;border-radius:50%;background-color:${colorHex};border:1px solid ${BRAND.sandDark};vertical-align:middle;margin-right:6px;"></span>`
+        : ''
+      return `<tr>
+        <td style="padding:${idx > 0 ? '14px' : '0'} 0 0;${divider}">
+          <table width="100%" cellpadding="0" cellspacing="0"><tr>
+            <td style="padding-top:${idx > 0 ? '14px' : '0'};">
+              <p style="margin:0 0 4px;font-size:15px;font-weight:700;color:${BRAND.textPrimary};">${productName}</p>
+              <p style="margin:0;font-size:12px;color:${BRAND.textSecondary};">${colorDot}${meta}</p>
+            </td>
+            <td style="padding-top:${idx > 0 ? '14px' : '0'};text-align:right;vertical-align:top;white-space:nowrap;">
+              <span style="font-size:14px;font-weight:700;color:${BRAND.textPrimary};">$${item.total.toLocaleString('es-AR')}</span>
+            </td>
+          </tr></table>
+        </td>
+      </tr>`
+    })
+    .join('')
+
+  return `<table width="100%" cellpadding="0" cellspacing="0" style="background-color:${BRAND.sand};border-radius:12px;padding:20px 24px;margin-bottom:16px;">
+    <tr><td>
+      <p style="margin:0 0 12px;font-size:11px;color:${BRAND.terra};text-transform:uppercase;letter-spacing:0.1em;font-weight:600;">
+        ${items.length === 1 ? 'Producto' : `Productos (${items.length})`}
+      </p>
+      <table width="100%" cellpadding="0" cellspacing="0">${rows}</table>
+    </td></tr>
+  </table>`
+}
+
+/** Renders the totals summary (subtotal, descuentos, envío, total, método). */
+function renderSummaryCard(data: OrderConfirmationData): string {
+  const paymentLabel = escapeHtml(formatPaymentMethod(data.metodoPago))
+  const envioLabel = data.costoEnvio > 0 ? `$${data.costoEnvio.toLocaleString('es-AR')}` : 'Gratis'
+  const row = (label: string, value: string, strong = false) => `<tr>
+    <td style="padding:6px 0;font-size:13px;color:${BRAND.textSecondary};">${label}</td>
+    <td style="padding:6px 0;font-size:13px;color:${BRAND.textPrimary};text-align:right;font-weight:${strong ? '700' : '600'};">${value}</td>
+  </tr>`
+  return `<table width="100%" cellpadding="0" cellspacing="0" style="background-color:${BRAND.sand};border-radius:12px;padding:20px 24px;margin-bottom:28px;">
+    <tr><td>
+      <p style="margin:0 0 12px;font-size:11px;color:${BRAND.terra};text-transform:uppercase;letter-spacing:0.1em;font-weight:600;">Resumen</p>
+      <table width="100%" cellpadding="0" cellspacing="0">
+        ${row('Subtotal productos', `$${data.subtotalProductos.toLocaleString('es-AR')}`)}
+        ${data.descuentos > 0 ? row('Descuentos', `-$${data.descuentos.toLocaleString('es-AR')}`) : ''}
+        ${row('Envío', envioLabel)}
+        ${row('Método de pago', paymentLabel)}
+        <tr><td colspan="2" style="padding:8px 0 0;border-top:1px solid ${BRAND.sandDark};"></td></tr>
+        <tr>
+          <td style="padding:6px 0;font-size:15px;font-weight:700;color:${BRAND.textPrimary};">Total</td>
+          <td style="padding:6px 0;font-size:15px;font-weight:700;color:${BRAND.textPrimary};text-align:right;">$${data.total.toLocaleString('es-AR')}</td>
+        </tr>
+      </table>
+    </td></tr>
+  </table>`
+}
+
+// Individual payment-method tokens. metodo_pago can be a composite like
+// 'cupon+gift_card+efectivo' (discounts that partially covered the order plus
+// the method used for the rest), so we map each token and join them.
 const PAYMENT_DISPLAY: Record<string, string> = {
   tarjeta: 'Tarjeta de crédito/débito',
   transferencia: 'Transferencia bancaria',
   mercadopago: 'Mercado Pago',
-  efectivo: 'Efectivo',
+  gocuotas: 'GoCuotas',
+  efectivo: 'Efectivo (retiro en el local)',
+  cupon: 'Cupón',
+  gift_card: 'Gift Card',
+}
+
+/** Turns a (possibly composite) metodo_pago into a human label, e.g.
+ * 'cupon+efectivo' → 'Cupón + Efectivo (retiro en el local)'. */
+function formatPaymentMethod(metodoPago: string): string {
+  return metodoPago
+    .split('+')
+    .map((part) => PAYMENT_DISPLAY[part] ?? part)
+    .join(' + ')
 }
 
 export function orderConfirmationEmail(data: OrderConfirmationData): string {
   const customerName = data.customerName ? escapeHtml(data.customerName) : null
-  const numeroPedido = escapeHtml(data.numeroPedido)
-  const productName = escapeHtml(data.productName)
-  const talle = data.talle ? escapeHtml(data.talle) : null
-  const colorName = data.colorName ? escapeHtml(data.colorName) : null
-  const colorHex = safeColor(data.colorHex)
+  const numeroCompra = escapeHtml(data.numeroCompra)
   const perfilUrl = `${data.siteUrl}/perfil`
   // Guest checkouts get a magic-link CTA instead of the perfil button. The
   // link is generated server-side and is safe to drop into HTML as-is — the
@@ -386,32 +485,6 @@ export function orderConfirmationEmail(data: OrderConfirmationData): string {
   const ctaHelperText = magicLink
     ? 'Hacé click en el botón para acceder con un solo click. El link expira pronto, así que no tardes.'
     : 'Podés seguir el estado de tu pedido desde tu perfil.'
-  const paymentLabel = escapeHtml(PAYMENT_DISPLAY[data.metodoPago] ?? data.metodoPago)
-
-  const colorBlock = colorName && data.colorHex
-    ? `<td>
-        <p style="margin:0 0 4px;font-size:11px;color:${BRAND.textSecondary};text-transform:uppercase;letter-spacing:0.08em;">Color</p>
-        <table cellpadding="0" cellspacing="0">
-          <tr>
-            <td style="vertical-align:middle;padding-right:8px;">
-              <span style="display:inline-block;width:20px;height:20px;border-radius:50%;background-color:${colorHex};border:1px solid ${BRAND.sandDark};"></span>
-            </td>
-            <td style="vertical-align:middle;">
-              <span style="font-size:13px;font-weight:600;color:${BRAND.textPrimary};">${colorName}</span>
-            </td>
-          </tr>
-        </table>
-      </td>`
-    : ''
-
-  const talleBlock = talle
-    ? `<td style="padding-right:20px;">
-        <p style="margin:0 0 4px;font-size:11px;color:${BRAND.textSecondary};text-transform:uppercase;letter-spacing:0.08em;">Talle</p>
-        <span style="display:inline-block;background-color:${BRAND.volcanic};color:white;font-size:13px;font-weight:700;padding:6px 14px;border-radius:8px;">
-          ${talle}
-        </span>
-      </td>`
-    : ''
 
   const content = `
     <p style="margin:0 0 4px;font-size:11px;color:${BRAND.terra};text-transform:uppercase;letter-spacing:0.1em;font-weight:600;">
@@ -421,61 +494,12 @@ export function orderConfirmationEmail(data: OrderConfirmationData): string {
       ¡Gracias por tu compra${customerName ? `, ${customerName}` : ''}!
     </h1>
     <p style="margin:0 0 28px;font-size:14px;color:${BRAND.textSecondary};line-height:1.6;">
-      Tu pedido <strong style="color:${BRAND.textPrimary};">${numeroPedido}</strong> fue confirmado con éxito.
-      Te avisaremos cuando este en camino.
+      Tu compra <strong style="color:${BRAND.textPrimary};">${numeroCompra}</strong> fue confirmada con éxito.
+      Te avisaremos cuando esté en camino.
     </p>
 
-    <!-- Product card -->
-    <table width="100%" cellpadding="0" cellspacing="0" style="background-color:${BRAND.sand};border-radius:12px;padding:20px 24px;margin-bottom:16px;">
-      <tr>
-        <td>
-          <p style="margin:0 0 4px;font-size:11px;color:${BRAND.terra};text-transform:uppercase;letter-spacing:0.1em;font-weight:600;">
-            Producto
-          </p>
-          <p style="margin:0 0 16px;font-size:16px;font-weight:700;color:${BRAND.textPrimary};">
-            ${productName}
-          </p>
-          <table cellpadding="0" cellspacing="0">
-            <tr>
-              ${talleBlock}
-              ${colorBlock}
-            </tr>
-          </table>
-        </td>
-      </tr>
-    </table>
-
-    <!-- Order summary -->
-    <table width="100%" cellpadding="0" cellspacing="0" style="background-color:${BRAND.sand};border-radius:12px;padding:20px 24px;margin-bottom:28px;">
-      <tr>
-        <td>
-          <p style="margin:0 0 12px;font-size:11px;color:${BRAND.terra};text-transform:uppercase;letter-spacing:0.1em;font-weight:600;">
-            Resumen
-          </p>
-          <table width="100%" cellpadding="0" cellspacing="0">
-            <tr>
-              <td style="padding:6px 0;font-size:13px;color:${BRAND.textSecondary};">Cantidad</td>
-              <td style="padding:6px 0;font-size:13px;color:${BRAND.textPrimary};text-align:right;font-weight:600;">${data.cantidad}</td>
-            </tr>
-            <tr>
-              <td style="padding:6px 0;font-size:13px;color:${BRAND.textSecondary};">Precio unitario</td>
-              <td style="padding:6px 0;font-size:13px;color:${BRAND.textPrimary};text-align:right;font-weight:600;">$${data.precioUnitario.toLocaleString('es-AR')}</td>
-            </tr>
-            <tr>
-              <td style="padding:6px 0;font-size:13px;color:${BRAND.textSecondary};">Metodo de pago</td>
-              <td style="padding:6px 0;font-size:13px;color:${BRAND.textPrimary};text-align:right;font-weight:600;">${paymentLabel}</td>
-            </tr>
-            <tr>
-              <td colspan="2" style="padding:8px 0 0;border-top:1px solid ${BRAND.sandDark};"></td>
-            </tr>
-            <tr>
-              <td style="padding:6px 0;font-size:15px;font-weight:700;color:${BRAND.textPrimary};">Total</td>
-              <td style="padding:6px 0;font-size:15px;font-weight:700;color:${BRAND.textPrimary};text-align:right;">$${data.total.toLocaleString('es-AR')}</td>
-            </tr>
-          </table>
-        </td>
-      </tr>
-    </table>
+    ${renderItemsCard(data.items)}
+    ${renderSummaryCard(data)}
 
     <!-- CTA Button -->
     <table width="100%" cellpadding="0" cellspacing="0">
@@ -493,6 +517,97 @@ export function orderConfirmationEmail(data: OrderConfirmationData): string {
     </p>
   `
   return baseLayout(content, 'Recibís este email porque realizaste una compra en SEISMILES.')
+}
+
+// ── Pending-payment email (efectivo / transferencia) ──
+// Sent at checkout for offline methods: the order is RESERVED but not yet
+// confirmed. Tells the customer how to complete the payment. An admin
+// confirms the order by hand once cash/transfer arrives, which then fires the
+// regular orderConfirmationEmail above.
+export function orderPendingPaymentEmail(data: OrderConfirmationData): string {
+  const customerName = data.customerName ? escapeHtml(data.customerName) : null
+  const numeroCompra = escapeHtml(data.numeroCompra)
+  const paymentLabel = escapeHtml(formatPaymentMethod(data.metodoPago))
+
+  const isTransfer = data.metodoPago.includes('transferencia')
+  const wa = OFFLINE_PAYMENT_INFO.whatsapp
+  const bank = OFFLINE_PAYMENT_INFO.bank
+
+  // Method-specific instruction panel.
+  const bankRows = [
+    bank.alias ? ['Alias', bank.alias] : null,
+    bank.cbu ? ['CBU / CVU', bank.cbu] : null,
+    bank.titular ? ['Titular', bank.titular] : null,
+    bank.banco ? ['Banco', bank.banco] : null,
+  ].filter(Boolean) as [string, string][]
+
+  const instructions = isTransfer
+    ? `
+      <p style="margin:0 0 12px;font-size:13px;color:${BRAND.textSecondary};line-height:1.6;">
+        Para completar tu compra, transferí <strong style="color:${BRAND.textPrimary};">$${data.total.toLocaleString('es-AR')}</strong> a esta cuenta:
+      </p>
+      <table width="100%" cellpadding="0" cellspacing="0">
+        ${bankRows
+          .map(
+            ([k, v]) => `<tr>
+              <td style="padding:5px 0;font-size:13px;color:${BRAND.textSecondary};">${escapeHtml(k)}</td>
+              <td style="padding:5px 0;font-size:13px;color:${BRAND.textPrimary};text-align:right;font-weight:700;">${escapeHtml(v)}</td>
+            </tr>`,
+          )
+          .join('')}
+      </table>
+      <p style="margin:14px 0 0;font-size:13px;color:${BRAND.textSecondary};line-height:1.6;">
+        Cuando la hagas, <strong style="color:${BRAND.textPrimary};">enviános el comprobante por WhatsApp</strong> y confirmamos tu pedido.
+      </p>`
+    : `
+      <p style="margin:0 0 8px;font-size:13px;color:${BRAND.textSecondary};line-height:1.6;">
+        Vas a pagar <strong style="color:${BRAND.textPrimary};">$${data.total.toLocaleString('es-AR')} en efectivo al retirar</strong> tu pedido
+        en ${escapeHtml(OFFLINE_PAYMENT_INFO.pickup.zona)}.
+      </p>
+      <p style="margin:0;font-size:13px;color:${BRAND.textSecondary};line-height:1.6;">
+        Coordinamos el día y horario del retiro por WhatsApp. Guardamos tu pedido reservado mientras tanto.
+      </p>`
+
+  const content = `
+    <p style="margin:0 0 4px;font-size:11px;color:${BRAND.terra};text-transform:uppercase;letter-spacing:0.1em;font-weight:600;">
+      Pedido registrado
+    </p>
+    <h1 style="margin:0 0 8px;font-size:20px;font-weight:700;color:${BRAND.textPrimary};">
+      ¡Casi listo${customerName ? `, ${customerName}` : ''}!
+    </h1>
+    <p style="margin:0 0 24px;font-size:14px;color:${BRAND.textSecondary};line-height:1.6;">
+      Reservamos tu compra <strong style="color:${BRAND.textPrimary};">${numeroCompra}</strong>.
+      Falta un paso para confirmarla: el pago.
+    </p>
+
+    <!-- Instructions panel -->
+    <table width="100%" cellpadding="0" cellspacing="0" style="background-color:${BRAND.sand};border-radius:12px;padding:20px 24px;margin-bottom:16px;">
+      <tr><td>
+        <p style="margin:0 0 12px;font-size:11px;color:${BRAND.terra};text-transform:uppercase;letter-spacing:0.1em;font-weight:600;">
+          Cómo pagar — ${paymentLabel}
+        </p>
+        ${instructions}
+      </td></tr>
+    </table>
+
+    ${renderItemsCard(data.items)}
+    ${renderSummaryCard(data)}
+
+    <!-- WhatsApp CTA -->
+    <table width="100%" cellpadding="0" cellspacing="0">
+      <tr><td align="center">
+        <a href="${wa}" style="display:inline-block;background-color:${BRAND.volcanic};color:white;font-size:13px;font-weight:700;text-decoration:none;padding:14px 32px;border-radius:12px;letter-spacing:0.05em;text-transform:uppercase;">
+          ${isTransfer ? 'Enviar comprobante por WhatsApp' : 'Coordinar retiro por WhatsApp'}
+        </a>
+      </td></tr>
+    </table>
+
+    <p style="margin:20px 0 0;font-size:13px;color:${BRAND.textSecondary};line-height:1.6;text-align:center;">
+      Apenas confirmemos el pago te avisamos por mail. Podés seguir el estado desde
+      <a href="${data.siteUrl}/perfil" style="color:${BRAND.terra};text-decoration:none;font-weight:600;">tu perfil</a>.
+    </p>
+  `
+  return baseLayout(content, 'Recibís este email porque registraste un pedido en SEISMILES.')
 }
 
 // ── Gift card delivery email ──
