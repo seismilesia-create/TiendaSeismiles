@@ -1,20 +1,6 @@
 import type { ShopConfig } from './types'
 
 // ============================================================
-// LANZAMIENTO — Pantalla "coming soon" con cuenta regresiva
-// ------------------------------------------------------------
-// Mientras LAUNCH_ENABLED sea true y la fecha actual sea
-// anterior a LAUNCH_DATE, la home se bloquea en una pantalla
-// completa con cuenta regresiva. Al llegar la fecha se desbloquea
-// sola. Para apagar el modo lanzamiento: poné LAUNCH_ENABLED en false.
-// ============================================================
-
-export const LAUNCH_ENABLED = true
-
-// Fecha/hora exacta del lanzamiento (Argentina, UTC-3).
-export const LAUNCH_DATE = new Date('2026-06-27T10:00:00-03:00')
-
-// ============================================================
 // SHOP CONFIG - SEISMILES
 // Indumentaria urbana premium con alma de montaña
 // ============================================================
